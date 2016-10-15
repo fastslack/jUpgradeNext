@@ -1,0 +1,43 @@
+{
+    "name": "matware/jupgradenext",
+    "type": "joomla-package",
+    "description": "jUpgradeNext Package",
+    "keywords": ["migration", "framework", "upgrade"],
+    "homepage": "https://github.com/fastslack",
+    "license": "GPL-2.0+",
+    "require": {
+        "php": "^5.3.10|~7.0",
+        "joomla/oauth2": "^1.1.4",
+        "joomla/input": "~1.0",
+        "joomla/http": "~1.0",
+        "joomla/uri": "~1.0",
+				"joomla/di": "~1.3",
+				"joomla/database": "~1.0",
+        "monolog/monolog": "1.*@stable",
+        "joomla/event": "2.*@dev",
+        "joomla/language": "~1.0",
+        "joomla/model": "~1.0",
+        "joomla/filesystem": "~1.0",
+        "joomla/date": "2.0.x-dev",
+        "joomla/string": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "jUpgradeNext\\": "src/",
+            "JUpgradeNext\\Access\\": "src/Access",
+            "JUpgradeNext\\Drivers\\": "src/Drivers",
+            "JUpgradeNext\\Event\\": "src/Event",
+            "Providers\\": "src/Providers",
+            "JUpgradeNext\\Models\\": "src/Models",
+            "JUpgradeNext\\Schemas\\v15\\": "src/Schemas/v15",
+            "JUpgradeNext\\Steps\\": "src/Steps",
+            "JUpgradeNext\\Table\\": "src/Table",
+            "JUpgradeNext\\Upgrade\\": "src/Upgrade"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "jUpgradeNext\\Tests\\": "Tests/"
+        }
+    }
+}
