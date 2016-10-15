@@ -94,38 +94,6 @@ class UpgradeHelper
 	 */
 	public static function getTotal(\Joomla\DI\Container $container)
 	{
-		$db = $container->get('db');
-		$steps = $container->get('steps');
-/*
-		$query = $db->getQuery(true);
-		$query->select('total');
-		$query->from("`#__jupgradepro_steps`");
-		$query->where("name = '{$steps->get('name')}'");
-		$query->limit(1);
-		$db->setQuery($query);
-
-		try {
-			$total = $db->loadResult();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
-		}
-
-		if (is_null($total))
-		{
-			$query = $db->getQuery(true);
-			$query->select('total');
-			$query->from("`#__jupgradepro_extensions_tables`");
-			$query->where("name = '{$steps->get('name')}'");
-			$query->limit(1);
-			$db->setQuery($query);
-
-			try {
-				$total = $db->loadResult();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
-			}
-		}
-*/
 		$driver = \JUpgradeNext\Drivers\Drivers::getInstance($container);
 		return $driver->getTotal();
 	}

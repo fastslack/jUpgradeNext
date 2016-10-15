@@ -104,7 +104,6 @@ class DriversDatabase extends Drivers
 		$this->_db_old->setQuery( $query, $cid, $chunk_limit );
 
 		//echo "\nQUERY: {$query->__toString()}\n";
-		$rows = $this->_db_old->loadAssocList();
 
 		try
 		{
@@ -136,8 +135,6 @@ class DriversDatabase extends Drivers
 		$this->_db_old->setQuery( $query );
 
 		// Get the total
-		$total = $this->_db_old->loadResult();
-
 		try
 		{
 			$total = $this->_db_old->loadAssocList();
