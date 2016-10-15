@@ -10,7 +10,7 @@ composer update
 ```
 or
 ```
-composer install matware-lab/jupgradenext
+composer update matware-lab/jupgradenext
 ```
 
 ## Configuration
