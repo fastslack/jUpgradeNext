@@ -1,0 +1,42 @@
+{
+	"method" : "database",
+	"database": {
+    "driver"   : "mysqli",
+    "host"     : "localhost",
+    "user"     : "",
+    "password" : "",
+    "database" : "",
+		"prefix"   : "jos_",
+    "debug"    : false
+  },
+	"ext_database": {
+    "driver"   : "mysqli",
+    "host"     : "localhost",
+    "user"     : "",
+    "password" : "",
+    "database" : "",
+		"prefix"   : "jos_",
+    "debug"    : false
+  },
+  "chunk_limit" : 100,
+  "positions" : 0,
+  "keep_ids" : 0,
+	"skip_core_users" : false,
+	"skip_core_categories" : false,
+	"skip_core_contents" : false,
+	"skip_core_contents_frontpage" : false,
+	"skip_core_menus" : false,
+	"skip_core_menus_types" : false,
+	"skip_core_modules" : false,
+	"skip_core_modules_menu" : false,
+	"skip_core_banners" : false,
+	"skip_core_banners_clients" : false,
+	"skip_core_banners_tracks" : false,
+	"skip_core_contacts" : false,
+	"skip_core_newsfeeds" : false,
+	"skip_core_weblinks" : false,
+	"debug" : false,
+	"logger" : {
+		"channel" : "jUpgradeNext"
+	}
+}
