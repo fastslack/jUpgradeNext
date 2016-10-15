@@ -323,12 +323,11 @@ class TableContent extends Table
 	 */
 	public function store($updateNulls = false)
 	{
-		//$date = JFactory::getDate();
+		// @@ TODO: Import users libraries
 		//$user = JFactory::getUser();
 
 		$date = new Date();
-
-		$this->modified = $date->toSql();
+		$this->modified = $date->__toString();
 
 		if ($this->id)
 		{
@@ -341,7 +340,7 @@ class TableContent extends Table
 			// so we don't touch either of these if they are set.
 			if (!(int) $this->created)
 			{
-				$this->created = $date->toSql();
+				$this->created = $date->__toString();
 			}
 
 			if (empty($this->created_by))

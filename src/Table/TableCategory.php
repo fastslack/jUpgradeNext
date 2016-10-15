@@ -218,12 +218,11 @@ class TableCategory extends TableNested
 	 */
 	public function store($updateNulls = false)
 	{
-		//$date = JFactory::getDate();
+		// @@ TODO: Import users libraries
 		//$user = JFactory::getUser();
 
 		$date = new Date();
-
-		$this->modified_time = $date->toSql();
+		$this->modified_time = $date->__toString();
 
 		if ($this->id)
 		{
@@ -236,7 +235,7 @@ class TableCategory extends TableNested
 			// so we don't touch either of these if they are set.
 			if (!(int) $this->created_time)
 			{
-				$this->created_time = $date->toSql();
+				$this->created_time = $date->__toString();
 			}
 
 			if (empty($this->created_user_id))
