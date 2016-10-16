@@ -34,10 +34,6 @@ class Categories extends UpgradeCategories
 	 */
 	public static function getConditionsHook($options)
 	{
-		// Get the component parameters
-		JLoader::import('helpers.jupgradepro', JPATH_COMPONENT_ADMINISTRATOR);
-		$params = UpgradeHelper::getParams();
-
 		$conditions = array();
 		$conditions['select'] = '*';
 
@@ -70,10 +66,10 @@ class Categories extends UpgradeCategories
 	{
 		// Get the database query
 		$query = $this->_db->getQuery(true);
+
 		// Get the destination table
 		$table = $this->getDestinationTable();
-		// Get the component parameter with global settings
-		
+
 		// Initialize values
 		$rootidmap = 0;
 		// Content categories
