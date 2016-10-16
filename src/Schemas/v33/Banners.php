@@ -13,6 +13,7 @@
 
 namespace JUpgradeNext\Schemas\v33;
 
+use JUpgradeNext\Upgrade\UpgradeHelper;
 use JUpgradeNext\Upgrade\Upgrade;
 
 /**

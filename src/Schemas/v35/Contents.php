@@ -20,6 +20,8 @@ use JUpgradeNext\Upgrade\Upgrade;
 use JUpgradeNext\Upgrade\UpgradeHelper;
 use JUpgradeNext\Table\Table;
 
+use stdClass;
+
 /**
  * Upgrade class for content
  *

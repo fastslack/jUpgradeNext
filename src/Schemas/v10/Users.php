@@ -99,7 +99,7 @@ class Users extends UpgradeUsers
 		{
 			$row = (array) $row;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '>=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '<=')) {
 				unset($row['usertype']);
 			}
 

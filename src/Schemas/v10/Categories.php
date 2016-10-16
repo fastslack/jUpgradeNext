@@ -86,9 +86,9 @@ class Categories extends UpgradeCategories
 		// Getting the destination table
 		$table = $this->getDestinationTable();
 
-		
 		// Content categories
 		$this->section = 'com_content';
+
 		// Get the total
 		$total = count($rows);
 

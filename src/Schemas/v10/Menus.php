@@ -87,7 +87,7 @@ class Menus extends UpgradeMenus
 		// Getting the menus
 		$query->clear();
 		// 1.0Changes
-		if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '>=')) {
+		if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '<=')) {
 			$query->select("`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`");
 		}else{
 			$query->select("`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`");

@@ -95,7 +95,7 @@ class Categories extends UpgradeCategories
 		$rootidmap = 0;
 
 		// Table::store() run an update if id exists so we create them first
-		if ($this->params->keep_ids == 1)
+		if ($this->options->get('keep_ids') == 1)
 		{
 			foreach ($rows as $category)
 			{

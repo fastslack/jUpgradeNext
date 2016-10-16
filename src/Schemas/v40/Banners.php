@@ -14,6 +14,7 @@
 namespace JUpgradeNext\Schemas\v40;
 
 use JUpgradeNext\Upgrade\Upgrade;
+use JUpgradeNext\Upgrade\UpgradeHelper;
 
 /**
  * Upgrade class for Banners

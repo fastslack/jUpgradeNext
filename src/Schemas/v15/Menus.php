@@ -269,7 +269,7 @@ class Menus extends UpgradeMenus
 	 */
 	public function afterHook()
 	{
-		if ($this->params->keep_ids == 1)
+		if ($this->options->get('keep_ids') == 1)
 		{
 			$this->insertDefaultMenus();
 		}
