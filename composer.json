@@ -9,7 +9,7 @@
     "minimum-stability" : "dev",
     "prefer-stable" : true,
     "require": {
-        "php": "^5.5.9|~7.0",
+        "php": "^5.3.10|~7.0",
         "joomla/oauth2": "^1.1.4",
         "joomla/input": "~1.0",
         "joomla/http": "~1.0",
