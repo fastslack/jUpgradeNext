@@ -80,7 +80,7 @@ class DriversDatabase extends Drivers
 		if (version_compare(PHP_VERSION, '5.2.3', '<')) {
 			$this->_conditions = call_user_func(array($class, 'getConditionsHook'));
 		}else{
-			$this->_conditions = $class::getConditionsHook();
+			$this->_conditions = $class::getConditionsHook($this->options);
 		}
 	}
 
@@ -93,7 +93,7 @@ class DriversDatabase extends Drivers
 	public function getSourceDatabase( )
 	{
 		// Get the conditions
-		$conditions = $this->getConditionsHook();
+		$conditions = $this->getConditionsHook($this->options);
 
 		// Process the conditions
 		$query = $this->_processQuery($conditions, true);
@@ -126,7 +126,7 @@ class DriversDatabase extends Drivers
 	public function getTotal()
 	{
 		// Get the conditions
-		$conditions = $this->getConditionsHook();
+		$conditions = $this->getConditionsHook($this->options);
 
 		// Process the conditions
 		$query = $this->_processQuery($conditions);

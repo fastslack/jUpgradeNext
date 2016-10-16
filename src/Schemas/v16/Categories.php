@@ -30,7 +30,7 @@ class SchemasCategories extends UpgradeCategories
 	 * @since	1.00
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		// Get the component parameters
 		JLoader::import('helpers.jupgradepro', JPATH_COMPONENT_ADMINISTRATOR);

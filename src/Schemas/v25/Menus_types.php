@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v15;
+namespace JUpgradeNext\Schemas\v25;
 
 use JUpgradeNext\Upgrade\Upgrade;
 
@@ -31,7 +31,7 @@ class Menus_types extends Upgrade
 	 * @since	1.00
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		$conditions = array();
 

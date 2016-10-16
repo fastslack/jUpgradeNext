@@ -36,7 +36,7 @@ class Modules extends Upgrade
 	 * @since	1.00
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		$conditions = array();
 

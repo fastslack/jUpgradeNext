@@ -332,7 +332,7 @@ class TableContent extends Table
 		if ($this->id)
 		{
 			// Existing item
-			$this->modified_by = $user->get('id');
+			//$this->modified_by = $user->get('id');
 		}
 		else
 		{
@@ -345,7 +345,7 @@ class TableContent extends Table
 
 			if (empty($this->created_by))
 			{
-				$this->created_by = $user->get('id');
+				//$this->created_by = $user->get('id');
 			}
 		}
 

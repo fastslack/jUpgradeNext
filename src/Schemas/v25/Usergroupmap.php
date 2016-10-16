@@ -27,7 +27,7 @@ use JUpgradeNext\Upgrade\UpgradeUsers;
  *
  * @since		1.0
  */
-class Usersgroupmap extends UpgradeUsers
+class Usergroupmap extends UpgradeUsers
 {
 	/**
 	 * Setting the conditions hook
@@ -36,7 +36,7 @@ class Usersgroupmap extends UpgradeUsers
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		$conditions = array();
 

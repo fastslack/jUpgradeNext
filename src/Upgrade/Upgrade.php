@@ -393,7 +393,7 @@ class Upgrade extends UpgradeBase
 	 * @since	3.0.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		$conditions = array();
 

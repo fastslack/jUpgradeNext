@@ -32,12 +32,12 @@ class Categories extends UpgradeCategories
 	 * @since	  1.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		$conditions = array();
 		$conditions['select'] = '*';
 
-		if ($this->options->get('keep_ids') == 1)
+		if ($options->get('keep_ids') == 1)
 		{
 			$where_or = array();
 			$where_or[] = "extension REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'";
@@ -62,7 +62,7 @@ class Categories extends UpgradeCategories
 	 * @since	0.5.6
 	 * @throws	Exception
 	 */
-	public function upgrade()
+	public function upgrade($rows = false)
 	{
 /*
 		if (parent::upgrade()) {
@@ -74,8 +74,7 @@ class Categories extends UpgradeCategories
 			}
 		}
 */
-		parent::upgrade();
-
+		parent::upgrade($rows);
 	}
 
 	/**

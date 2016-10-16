@@ -36,7 +36,7 @@ class Menus extends UpgradeMenus
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook()
+	public static function getConditionsHook($options)
 	{
 		$conditions = array();
 
