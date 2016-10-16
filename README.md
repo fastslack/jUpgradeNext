@@ -1,16 +1,40 @@
 # jUpgradeNext
+
 Next generation for Joomla! migrations.
+
+**jUpgradeNext** uses two methods to migrate:
+
+♫ Database
+
+Read data directly from the database.
+
+♫ RESTful
+
+This method allows you to migrate data between two installations of Joomla! by webservices, which adds ease when setting the extension.
+
+## Versions of Joomla! supported
+
+Different versions of Joomla! They are supported by this extension:
+
+⊚ 1.0 ↠ 2.5, 3.0+ ※ Only supported database method
+
+⊚ 1.5 ↠ 2.5, 3.0+ ※ Both methods supported
+
+⊚ 2.5 ↠ 2.5, 3.0+ ※ Both methods supported
+
+⊚ 3.0+ ↠ 2.5, 3.0+ ※ Both methods supported. Downgrade available.
+
+## Requirements
+
+**jUpgradeNext** is a Joomla! Framework based extension so the requirements are the same as Joomla! Framework.
+
+http://www.joomla.org/technical-requirements.html
 
 ## Installation
 
 ```
 git clone https://github.com/matware-lab/jUpgradeNext
-cd jUpgradeNext
-composer update
-```
-or
-```
-composer update matware-lab/jupgradenext
+cd jUpgradeNext ; composer update
 ```
 
 ## Configuration
