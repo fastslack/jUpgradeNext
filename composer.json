@@ -1,7 +1,7 @@
 {
     "name": "matware-lab/jupgradenext",
     "type": "joomla-package",
-    "description": "jUpgradeNext Package",
+    "description": "jUpgradeNext is a Joomla! Framework extension that allow you to move/migrate your data from one Joomla! installation to another one.",
     "keywords": ["migration", "framework", "upgrade"],
     "homepage": "https://github.com/matware-lab/jUpgradeNext",
     "license": "GPL-2.0+",
