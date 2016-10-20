@@ -26,9 +26,9 @@ Different versions of Joomla! They are supported by this extension:
 
 ## Requirements
 
-**jUpgradeNext** is a Joomla! Framework based extension so the requirements are the same as Joomla! Framework.
-
-http://www.joomla.org/technical-requirements.html
+1. PHP **^5.3.10|~7.0**
+2. Composer **^1.1**
+3. MySQL **5.5.3 +**
 
 ## Installation
 
@@ -168,7 +168,6 @@ $ ./bin/jUpgradeNext
 |  [154] Migrating newsfeeds (Start:0 - Stop: 10 - Total: 11)
 |  [•••••••••••]
 |  [Benchmark] 0.014 seconds.
--------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------
 |  [155] Migrating weblinks (Start:0 - Stop: 27 - Total: 28)
 |  [••••••••••••••••••••••••••••]
