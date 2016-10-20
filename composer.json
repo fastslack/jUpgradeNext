@@ -22,14 +22,14 @@
         "joomla/model": "~1.0",
         "joomla/filesystem": "~1.0",
         "joomla/date": "2.0.*@dev",
-        "joomla/string": "~1.0"
+        "joomla/string": "~1.0",
+        "matware-lab/access": "~1.0",
+        "matware-lab/table": "~1.0"
     },
     "autoload": {
         "psr-4": {
             "jUpgradeNext\\": "src/",
-            "JUpgradeNext\\Access\\": "src/Access",
             "JUpgradeNext\\Drivers\\": "src/Drivers",
-            "JUpgradeNext\\Event\\": "src/Event",
             "Providers\\": "src/Providers",
             "JUpgradeNext\\Models\\": "src/Models",
             "JUpgradeNext\\Schemas\\v10\\": "src/Schemas/v10",
@@ -46,7 +46,6 @@
             "JUpgradeNext\\Schemas\\v36\\": "src/Schemas/v36",
             "JUpgradeNext\\Schemas\\v40\\": "src/Schemas/v40",
             "JUpgradeNext\\Steps\\": "src/Steps",
-            "JUpgradeNext\\Table\\": "src/Table",
             "JUpgradeNext\\Upgrade\\": "src/Upgrade"
         }
     },

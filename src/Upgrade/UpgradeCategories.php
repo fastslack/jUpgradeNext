@@ -13,10 +13,10 @@
 
 namespace JUpgradeNext\Upgrade;
 
-use JUpgradeNext\Table\Table;
-use JUpgradeNext\Upgrade\UpgradeHelper;
-
+use Joomla\Table\Table;
 use Joomla\Event\Dispatcher;
+
+use JUpgradeNext\Upgrade\UpgradeHelper;
 
 /**
  * Upgrade class for categories
@@ -144,7 +144,7 @@ class UpgradeCategories extends Upgrade
 	public function insertCategory($row, $parent = false)
 	{
 		// Get the category table
-		//$category = \JUpgradeNext\Table\Table::getInstance('Category', 'JTable', array('dbo' => $this->_db));
+		//$category = \Joomla\Table\Table::getInstance('Category', 'JTable', array('dbo' => $this->_db));
 
 		// Creating a dispatcher.
 		$dispatcher = new Dispatcher;
@@ -153,7 +153,7 @@ class UpgradeCategories extends Upgrade
 		$config['dbo'] = $this->container->get('db');
 		$config['dispatcher'] = $dispatcher;
 
-		Table::addIncludePath(JPATH_ROOT.'/src/Table');
+		Table::addIncludePath(dirname(__FILE__));
 		$category = Table::getInstance('Category', 'Table', $config);
 
 		// Disable observers calls

@@ -18,7 +18,7 @@ use Joomla\Event\Dispatcher;
 
 use JUpgradeNext\Upgrade\Upgrade;
 use JUpgradeNext\Upgrade\UpgradeHelper;
-use JUpgradeNext\Table\Table;
+use Joomla\Table\Table;
 
 use stdClass;
 
