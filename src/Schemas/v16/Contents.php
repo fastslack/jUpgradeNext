@@ -151,7 +151,7 @@ class Contents extends Upgrade
 			// Convert params to JSON
 			$articles_config = $this->convertParams($articles_config);
 
-		}else if ($this->options->get('method') == 'rest') {
+		}else if ($this->options->get('method') == 'restful') {
 
 			$task = "tableparams";
 			$table = "components";

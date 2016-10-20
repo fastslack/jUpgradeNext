@@ -18,6 +18,12 @@
 		"prefix"   : "jos_",
 		"debug"    : false
 	},
+	"restful": {
+		"hostname"   : "http://8.8.8.8/",
+		"username"   : "admin",
+		"password"   : "adminpass",
+		"key"        : "yourkey"
+	},
 	"chunk_limit" : 100,
 	"positions" : 0,
 	"keep_ids" : 0,

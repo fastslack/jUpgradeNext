@@ -15,10 +15,10 @@ namespace JUpgradeNext\Models;
 
 use Joomla\Model\AbstractModel;
 
+use JUpgradeNext\Drivers\Drivers;
 use JUpgradeNext\Steps\Steps;
 use JUpgradeNext\Upgrade\Upgrade;
 use JUpgradeNext\Upgrade\UpgradeHelper;
-
 
 /**
  * jUpgradeNext Cleanup Model
@@ -46,7 +46,8 @@ class Cleanup extends ModelBase
 
 		// If REST is enable, cleanup the source #__jupgradepro_steps table
 		if ($options->get('method') == 'restful') {
-			$driver = JUpgradeproDriver::getInstance();
+			// Initialize the driver to check the RESTful connection
+			$driver = Drivers::getInstance($this->container);
 			$code = $driver->requestRest('cleanup');
 		}
 

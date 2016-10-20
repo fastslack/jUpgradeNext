@@ -13,8 +13,6 @@
 
 namespace JUpgradeNext\Drivers;
 
-
-use JUpgradeNext\Schemas\v15;
 use JUpgradeNext\Steps\Steps;
 use JUpgradeNext\Upgrade\Upgrade;
 use JUpgradeNext\Upgrade\UpgradeHelper;
@@ -46,8 +44,6 @@ class DriversDatabase extends Drivers
 	function __construct(\Joomla\DI\Container $container)
 	{
 		parent::__construct($container);
-
-		$this->options = $container->get('config');
 
 		if (null !== $this->_steps)
 		{

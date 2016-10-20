@@ -35,7 +35,7 @@ class CliApplication extends AbstractCliApplication
 	 * @var    string
 	 * @since  1.0
 	 */
-	const VERSION = '1.0';
+	const VERSION = '3.4.0';
 
 	/**
 	 * The application's DI container.
@@ -120,17 +120,26 @@ class CliApplication extends AbstractCliApplication
 	 */
 	protected function initialise()
 	{
-		// New DI stuff!
+		// Get a new DI container
 		$container = new Container;
+
+		// Set input to container
 		$input = $this->input;
 		$container->share('input', function (Container $c) use ($input) {
 			return $input;
 		}, true);
+
+		// Set component version to container
+		$container->set('version', self::VERSION);
+
+		// Register providers
 		$container->registerServiceProvider(new \Providers\ConfigServiceProvider(APPLICATION_CONFIG));
 		$container->registerServiceProvider(new \Providers\LoggerServiceProvider);
 		$container->registerServiceProvider(new \Providers\DatabaseServiceProvider);
 		$container->registerServiceProvider(new \Providers\ExternalDatabaseServiceProvider);
 		$container->registerServiceProvider(new \Providers\StepsServiceProvider);
+
+		// Made container accesible
 		$this->container = $container;
 
 		// Maintain configuration API compatibility with \Joomla\Application\AbstractApplication.
@@ -198,7 +207,6 @@ class CliApplication extends AbstractCliApplication
 			$this->returnError (500, $e->getMessage());
 		}
 */
-
 	}
 
 	/**

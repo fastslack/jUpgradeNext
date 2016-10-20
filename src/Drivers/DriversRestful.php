@@ -1,29 +1,33 @@
 <?php
 /**
-* jUpgradePro
-*
-* @version $Id:
-* @package jUpgradePro
-* @copyright Copyright (C) 2004 - 2014 Matware. All rights reserved.
-* @author Matias Aguirre
-* @email maguirre@matware.com.ar
-* @link http://www.matware.com.ar/
-* @license GNU General Public License version 2 or later; see LICENSE
-*/
-// Check to ensure this file is included in Joomla!
-defined('_JEXEC') or die;
+ * jUpgradeNext
+ *
+ * @version $Id:
+ * @package jUpgradeNext
+ * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @author Matias Aguirre
+ * @email maguirre@matware.com.ar
+ * @link http://www.matware.com.ar/
+ * @license GNU General Public License version 2 or later; see LICENSE
+ */
+
+namespace JUpgradeNext\Drivers;
+
+use Joomla\Http\Http;
+
+use JUpgradeNext\Steps\Steps;
 
 /**
- * jUpgradePro RESTful utility class
+ * jUpgradeNext RESTful utility class
  *
- * @package		jUpgradePro
+ * @package		jUpgradeNext
  */
-class JUpgradeproDriverRest extends JUpgradeproDriver
+class DriversRestful extends Drivers
 {
 
-	function __construct(JUpgradeproStep $step = null)
+	function __construct(\Joomla\DI\Container $container)
 	{
-		parent::__construct($step);
+		parent::__construct($container);
 	}
 
 	/**
@@ -38,9 +42,9 @@ class JUpgradeproDriverRest extends JUpgradeproDriver
 		$data = array();
 
 		// Setting the headers for REST
-		$rest_username = $this->params->rest_username;
-		$rest_password = $this->params->rest_password;
-		$rest_key = $this->params->rest_key;
+		$rest_username = $this->options->get('restful.username');
+		$rest_password = $this->options->get('restful.password');
+		$rest_key = $this->options->get('restful.key');
 
 		// Setting the headers for REST
 		$str = $rest_username.":".$rest_password;
@@ -71,23 +75,25 @@ class JUpgradeproDriverRest extends JUpgradeproDriver
 	 * @return   step object
 	 */
 	public function requestRest($task = 'total', $table = false, $chunk = false) {
-		// JHttp instance
-		jimport('joomla.http.http');
-		$http = new JHttp();
+
+		// Http instance
+		$http = new Http();
+
+		// Get data
 		$data = $this->getRestData();
 
-		// Getting the total
+		// Get total
 		$data['task'] = $task;
 		$data['table'] = ($table !== false) ? $table : '';
 		$data['chunk'] = ($chunk !== false) ? $chunk : '';
-		$data['keepid'] = $this->params->keep_ids ? $this->params->keep_ids : 0;
+		$data['keepid'] = $this->options->get('keep_ids') ? $this->options->get('keep_ids') : 0;
 
-		$request = $http->get($this->params->rest_hostname.'/index.php', $data);
+		$request = $http->get($this->options->get('restful.hostname').'/index.php', $data);
 
 		$code = $request->code;
 
 		if ($code == 500) {
-			throw new Exception('COM_JUPGRADEPRO_ERROR_REST_REQUEST');
+			throw new Exception($request->body);
 		} else {
 			return ($code == 200 || $code == 301) ? $request->body : $code;
 		}
@@ -105,7 +111,7 @@ class JUpgradeproDriverRest extends JUpgradeproDriver
 		// Declare rows
 		$rows = array();
 
-		$chunk = $this->params->chunk_limit;
+		$chunk = $this->options->get('chunk_limit');
 
 		$rows = $this->requestRest('rows', $table, $chunk);
 

@@ -15,6 +15,7 @@ namespace JUpgradeNext\Models;
 
 use Joomla\Model\AbstractModel;
 
+use JUpgradeNext\Drivers\Drivers;
 use JUpgradeNext\Steps\Steps;
 use JUpgradeNext\Upgrade\Upgrade;
 use JUpgradeNext\Upgrade\UpgradeHelper;
@@ -49,19 +50,21 @@ class Checks extends ModelBase
 		$old_columns = array();
 
 		// Check for bad configurations
-		if ($options->get('method') == "rest") {
+		if ($options->get('method') == "restful") {
 
-			if (empty($options->get('rest_hostname')) || empty($options->get('rest_username')) || empty($options->get('rest_password')) || empty($options->get('rest_key')) ) {
+			if (empty($options->get('restful.hostname')) || empty($options->get('restful.username')) || empty($options->get('restful.password')) || empty($options->get('restful.key')) ) {
 				throw new Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
-			if ($options->get('rest_hostname') == 'http://www.example.org/' || $options->get('rest_hostname') == '' ||
-					$options->get('rest_username') == '' || $options->get('rest_password') == '' || $options->get('rest_key') == '') {
+			if ($options->get('restful.hostname') == 'http://www.example.org/' || $options->get('restful.hostname') == '' ||
+					$options->get('restful.username') == '' || $options->get('restful.password') == '' || $options->get('restful.key') == '') {
 				throw new Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
-			// Checking the RESTful connection
-			$driver = JUpgradeproDriver::getInstance();
+			// Initialize the driver to check the RESTful connection
+			$driver = Drivers::getInstance($this->container);
+
+			// Check if Restful and plugin are fine
 			$code = $driver->requestRest('check');
 
 			switch ($code) {
@@ -82,17 +85,15 @@ class Checks extends ModelBase
 			$old_columns = json_decode($driver->requestRest('tablescolumns'));
 			$old_prefix = substr($old_tables[10], 0, strpos($old_tables[10], '_')+1);
 
-			// Get the extension version
-			$xmlfile = JPATH_ADMINISTRATOR.'/components/com_jupgradepro/jupgradepro.xml';
-			$xml = JFactory::getXML($xmlfile);
-
-			$ext_version = (string) $xml->version[0];
+			// Get component version
+			$ext_version = $this->container->get('version');
 
 			// Compare the versions
 			if (trim($code) != $ext_version)
 			{
 				throw new Exception('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
 			}
+
 		}
 
 		// Check for bad configurations
@@ -111,7 +112,7 @@ class Checks extends ModelBase
 		}
 
 		// Check the old site Joomla! version
-		$old_version = $this->checkOldVersion($old_tables, $old_prefix, $old_columns);
+		$old_version = $this->checkVersion($old_tables, $old_prefix, $old_columns);
 
 		// Check if the version is fine
 		if (empty($old_version) || empty($new_version)) {
@@ -274,7 +275,7 @@ class Checks extends ModelBase
 	 * @return	version	The Joomla! version
 	 * @since	3.2.0
 	 */
-	public function checkOldVersion ($tables, $prefix, $columns)
+	public function checkVersion ($tables, $prefix, $columns)
 	{
 		// Trim the prefix value
 		$prefix = trim($prefix);

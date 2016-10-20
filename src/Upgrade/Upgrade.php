@@ -453,7 +453,7 @@ class Upgrade extends UpgradeBase
 		if ($this->options->get('method') == 'database') {
 			$result = $this->driver->_db_old->getTableCreate($table);
 			$structure = str_replace($this->driver->_db_old->getPrefix(), "#__", "{$result[$table]} ;\n\n");
-		}else if ($this->options->get('method') == 'rest') {
+		}else if ($this->options->get('method') == 'restful') {
 			$structure = $this->driver->requestRest("tablestructure", str_replace('#__', '', $table));
 		}
 
