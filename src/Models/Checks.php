@@ -27,6 +27,8 @@ use JUpgradeNext\Upgrade\UpgradeHelper;
  */
 class Checks extends ModelBase
 {
+	public $old_tables = array();
+
 	/**
 	 * Initial checks in jUpgradePro
 	 *
@@ -42,9 +44,8 @@ class Checks extends ModelBase
 		$step = new Steps($this->container, $this->options);
 
 		// Get the new site Joomla! version
-		//$v = new JVersion();
-		//$new_version = $v->RELEASE;
-		$new_version = '3.5';
+		$v = new JVersion();
+		$new_version = $v->RELEASE;
 
 		// Define tables array
 		$old_columns = array();
@@ -78,12 +79,13 @@ class Checks extends ModelBase
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_505');
 				case 406:
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_506');
+				case 410:
+					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_510');
 			}
 
 			// Get the database parameters
-			$old_tables = json_decode($driver->requestRest('tableslist'));
-			$old_columns = json_decode($driver->requestRest('tablescolumns'));
-			$old_prefix = substr($old_tables[10], 0, strpos($old_tables[10], '_')+1);
+			$this->old_tables = json_decode($driver->requestRest('tableslist'));
+			$this->old_prefix = substr($old_tables[10], 0, strpos($old_tables[10], '_')+1);
 
 			// Get component version
 			$ext_version = $this->container->get('version');
@@ -91,7 +93,7 @@ class Checks extends ModelBase
 			// Compare the versions
 			if (trim($code) != $ext_version)
 			{
-				throw new Exception('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
 			}
 
 		}
@@ -102,21 +104,20 @@ class Checks extends ModelBase
 			if ($options->get('ext_database.host') == '' || $options->get('ext_database.user') == ''
 			  || $options->get('ext_database.database') == '' || $options->get('ext_database.prefix') == '' )
 			{
-				throw new Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
 			}
 
 			// Get the database parameters
-			$old_tables = $this->container->get('external')->getTableList();
-			$old_columns = $this->container->get('external')->getTableColumns('#__users');
-			$old_prefix = $options->get('ext_database.prefix');
+			$this->old_tables = $this->container->get('external')->getTableList();
+			$this->old_prefix = $options->get('ext_database.prefix');
 		}
 
 		// Check the old site Joomla! version
-		$old_version = $this->checkVersion($old_tables, $old_prefix, $old_columns);
+		$old_version = $this->checkOldVersion();
 
 		// Check if the version is fine
 		if (empty($old_version) || empty($new_version)) {
-			throw new Exception('COM_JUPGRADEPRO_ERROR_NO_VERSION');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_NO_VERSION');
 		}
 
 		// Save the versions to database
@@ -143,12 +144,12 @@ class Checks extends ModelBase
 
 		foreach ($tablesComp as $table) {
 			if (!in_array($this->container->get('db')->getPrefix() . 'jupgradepro_' . $table, $tables)) {
-				if (JUpgradeproHelper::isCli()) {
+				if (UpgradeHelper::isCli()) {
 					print("\n\033[1;37m-------------------------------------------------------------------------------------------------\n");
 					print("\033[1;37m|  \033[0;34m	Installing jUpgradePro tables\n");
 				}
 
-				JUpgradeproHelper::populateDatabase($this->container->get('db'), JPATH_COMPONENT_ADMINISTRATOR.'/sql/install.sql');
+				UpgradeHelper::populateDatabase($this->container->get('db'), JPATH_COMPONENT_ADMINISTRATOR.'/sql/install.sql');
 				break;
 			}
 		}
@@ -165,12 +166,12 @@ class Checks extends ModelBase
 		$nine = $this->container->get('db')->loadResult();
 
 		if ($nine < 10) {
-			throw new Exception('COM_JUPGRADEPRO_ERROR_TABLE_STEPS_NOT_VALID');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_TABLE_STEPS_NOT_VALID');
 		}
 
 		// Check safe_mode_gid
 		if (@ini_get('safe_mode_gid') && @ini_get('safe_mode')) {
-			throw new Exception('COM_JUPGRADEPRO_ERROR_DISABLE_SAFE_GID');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_DISABLE_SAFE_GID');
 		}
 
 		// Convert the params to array
@@ -270,52 +271,97 @@ class Checks extends ModelBase
 	}
 
 	/**
+	 * Check if one column exists
+	 *
+	 * @return	none
+	 * @since	3.8.0
+	 */
+	public function checkColumn ($table, $column)
+	{
+		if (!in_array($table, $this->old_tables))
+		{
+			return false;
+		}
+
+		// Get the step instance
+		$step = JUpgradeproStep::getInstance(false);
+		$columns = JUpgradepro::getInstance($step)->_driver->_db_old->getTableColumns($table);
+
+		return array_key_exists($column, $columns) ? true : false;
+	}
+
+	/**
 	 * Check the Joomla! version from tables
 	 *
 	 * @return	version	The Joomla! version
 	 * @since	3.2.0
 	 */
-	public function checkVersion ($tables, $prefix, $columns)
+	public function checkOldVersion ()
 	{
 		// Trim the prefix value
-		$prefix = trim($prefix);
+		$this->prefix = trim($this->old_prefix);
 
 		// Set the tables to search
-		$j10 = "{$prefix}bannerfinish";
-		$j15 = "{$prefix}core_acl_aro";
-		$j25 = "{$prefix}update_categories";
-		$j30 = "{$prefix}assets";
-		$j31 = "{$prefix}content_types";
-		$j32 = $j33 = "{$prefix}postinstall_messages";
+		$j10 = "{$this->old_prefix}bannerfinish";
+		$j15 = "{$this->old_prefix}core_acl_aro";
+		$j25 = "{$this->old_prefix}update_categories";
+		$j30 = "{$this->old_prefix}assets";
+		$j31 = "{$this->old_prefix}content_types";
+		$j32 = $j33 = "{$this->old_prefix}postinstall_messages";
+		$j34 = "{$this->old_prefix}redirect_links";
+		$j35 = "{$this->old_prefix}utf8_conversion";
+		$j36 = "{$this->old_prefix}menu_types";
+		$j37 = "{$this->old_prefix}fields";
+		$j38 = "{$this->old_prefix}fields_groups";
 
 		// Check the correct version
-		if (in_array($j10, $tables))
+		if (in_array($j10, $this->old_tables))
 		{
 			$version = "1.0";
 		}
-		else if(in_array($j15, $tables))
+		else if(in_array($j15, $this->old_tables))
 		{
 			$version = "1.5";
 		}
-		else if(in_array($j30, $tables) && !in_array($j25, $tables) && !in_array($j31, $tables))
+		else if(in_array($j30, $this->old_tables) && !in_array($j25, $this->old_tables) && !in_array($j31, $this->old_tables))
 		{
 			$version = "3.0";
 		}
-		else if(in_array($j31, $tables) && !in_array($j32, $tables))
+		else if(in_array($j31, $this->old_tables) && !in_array($j32, $this->old_tables))
 		{
 			$version = "3.1";
 		}
-		else if(in_array($j33, $tables) && array_key_exists('requireReset', $columns))
+		else if($this->checkColumn($j33, 'requireReset'))
 		{
 			$version = "3.3";
 		}
-		else if(in_array($j25, $tables) || in_array($j30, $tables))
+		else if($this->checkColumn($j34, 'header'))
 		{
-			$version = "2.5";
+			$version = "3.4";
 		}
-		else if(in_array($j32, $tables))
+		else if(in_array($j32, $this->old_tables))
+		{
+			$version = "3.5";
+		}
+		else if(in_array($j32, $this->old_tables))
 		{
 			$version = "3.2";
+		}
+		else if($this->checkColumn($j36, 'asset_id'))
+		{
+			$version = "3.6";
+		}
+		else if(in_array($j37, $this->old_tables))
+		{
+			$version = "3.7";
+		}
+		else if($this->checkColumn($j38, 'params'))
+		{
+			$version = "3.8";
+		}
+		else if(in_array($j25, $this->old_tables) || in_array($j30, $this->old_tables))
+		{
+			$version = "2.5";
 		}
 
 		return $version;
