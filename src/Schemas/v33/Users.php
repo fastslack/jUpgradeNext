@@ -11,10 +11,10 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v33;
+namespace Jupgradenext\Schemas\v33;
 
-use JUpgradeNext\Upgrade\UpgradeHelper;
-use JUpgradeNext\Upgrade\UpgradeUsers;
+use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\UpgradeUsers;
 
 /**
  * Upgrade class for Users

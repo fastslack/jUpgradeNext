@@ -11,14 +11,14 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Models;
+namespace Jupgradenext\Models;
 
 use Joomla\Model\AbstractModel;
 
-use JUpgradeNext\Drivers\Drivers;
-use JUpgradeNext\Steps\Steps;
-use JUpgradeNext\Upgrade\Upgrade;
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Drivers\Drivers;
+use Jupgradenext\Steps\Steps;
+use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * jUpgradeNext Cleanup Model

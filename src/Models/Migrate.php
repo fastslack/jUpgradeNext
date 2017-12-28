@@ -11,13 +11,13 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Models;
+namespace Jupgradenext\Models;
 
 use Joomla\Model\AbstractModel;
 
-use JUpgradeNext\Steps\Steps;
-use JUpgradeNext\Upgrade\Upgrade;
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Steps\Steps;
+use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * jUpgradeNext Model
@@ -33,7 +33,7 @@ class Migrate extends ModelBase
 	 * @since	3.0.3
 	 */
 	//function migrate($table = false, $json = true, $extensions = false) {
-	function migrate(\JUpgradeNext\Steps\Steps $steps = null) {
+	function migrate(\Jupgradenext\Steps\Steps $steps = null) {
 
 		//echo get_class($steps);
 

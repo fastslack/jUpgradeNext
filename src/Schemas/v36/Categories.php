@@ -11,10 +11,10 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v36;
+namespace Jupgradenext\Schemas\v36;
 
-use JUpgradeNext\Upgrade\UpgradeHelper;
-use JUpgradeNext\Upgrade\UpgradeCategories;
+use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\UpgradeCategories;
 
 /**
  * Upgrade class for categories

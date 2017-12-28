@@ -11,12 +11,12 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v40;
+namespace Jupgradenext\Schemas\v40;
 
 use Joomla\Event\Dispatcher;
 
-use JUpgradeNext\Upgrade\UpgradeHelper;
-use JUpgradeNext\Upgrade\UpgradeMenus;
+use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\UpgradeMenus;
 use Joomla\Table\Table;
 use stdClass;
 

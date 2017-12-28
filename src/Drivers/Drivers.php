@@ -11,10 +11,10 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Drivers;
+namespace Jupgradenext\Drivers;
 
-use JUpgradeNext\Schemas\v15;
-use JUpgradeNext\Steps\Steps;
+use Jupgradenext\Schemas\v15;
+use Jupgradenext\Steps\Steps;
 
 /**
  * jUpgradeNext driver class
@@ -68,7 +68,7 @@ class Drivers
 
 		// Derive the class name from the driver.
 		$class_name = 'Drivers' . ucfirst(strtolower($options->get('method')));
-		$class_name = '\\JUpgradeNext\\Drivers\\' . $class_name;
+		$class_name = '\\Jupgradenext\\Drivers\\' . $class_name;
 
 		// If the class still doesn't exist we have nothing left to do but throw an exception.  We did our best.
 		if (!class_exists($class_name))

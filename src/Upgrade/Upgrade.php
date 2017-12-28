@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Upgrade;
+namespace Jupgradenext\Upgrade;
 
 use Joomla\DI\Container;
 use Joomla\DI\ContainerAwareTrait;
@@ -22,8 +22,8 @@ use Joomla\Event\DispatcherInterface;
 
 use Joomla\Registry\Registry;
 
-use JUpgradeNext\Steps\Steps;
-use JUpgradeNext\Drivers\Drivers;
+use Jupgradenext\Steps\Steps;
+use Jupgradenext\Drivers\Drivers;
 
 /**
  * jUpgradePro utility class for migrations
@@ -150,7 +150,7 @@ class Upgrade extends UpgradeBase
 
 				// Derive the class name from the driver.
 				$class_name = ucfirst(strtolower($name));
-				$class = "\\JUpgradeNext\\Schemas\\v{$version}\\{$class_name}";
+				$class = "\\Jupgradenext\\Schemas\\v{$version}\\{$class_name}";
 
 				$xmlpath = !empty($steps->get('xmlpath')) ? $steps->get('xmlpath') : '';
 			}

@@ -11,10 +11,10 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v31;
+namespace Jupgradenext\Schemas\v31;
 
-use JUpgradeNext\Upgrade\Upgrade;
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * Upgrade class for weblinks

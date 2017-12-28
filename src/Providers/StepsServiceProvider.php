@@ -20,7 +20,7 @@ use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Registry\Registry;
 
-use JUpgradeNext\Steps\Steps;
+use Jupgradenext\Steps\Steps;
 
 /**
  * Registers the Configuration service provider.

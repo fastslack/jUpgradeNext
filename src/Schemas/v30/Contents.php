@@ -11,13 +11,13 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v30;
+namespace Jupgradenext\Schemas\v30;
 
 use Joomla\Filter\OutputFilter;
 use Joomla\Event\Dispatcher;
 
-use JUpgradeNext\Upgrade\Upgrade;
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 use Joomla\Table\Table;
 
 use stdClass;

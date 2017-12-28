@@ -11,11 +11,11 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v10;
+namespace Jupgradenext\Schemas\v10;
 
 use Joomla\Registry\Registry;
 
-use JUpgradeNext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\Upgrade;
 
 /**
  * Upgrade class for Banners

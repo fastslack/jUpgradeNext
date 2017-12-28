@@ -11,12 +11,12 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v31;
+namespace Jupgradenext\Schemas\v31;
 
 use Joomla\Registry\Registry;
 
-use JUpgradeNext\Upgrade\UpgradeHelper;
-use JUpgradeNext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\Upgrade;
 
 use stdClass;
 

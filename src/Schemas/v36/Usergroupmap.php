@@ -11,9 +11,9 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v36;
+namespace Jupgradenext\Schemas\v36;
 
-use JUpgradeNext\Upgrade\UpgradeUsers;
+use Jupgradenext\Upgrade\UpgradeUsers;
 
 /**
  * Upgrade class for the Usergroup Map

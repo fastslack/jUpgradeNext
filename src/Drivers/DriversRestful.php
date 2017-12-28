@@ -11,11 +11,11 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Drivers;
+namespace Jupgradenext\Drivers;
 
 use Joomla\Http\Http;
 
-use JUpgradeNext\Steps\Steps;
+use Jupgradenext\Steps\Steps;
 
 /**
  * jUpgradeNext RESTful utility class

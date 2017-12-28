@@ -11,9 +11,9 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Schemas\v34;
+namespace Jupgradenext\Schemas\v34;
 
-use JUpgradeNext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\Upgrade;
 
 /**
  * Upgrade class for modules menu

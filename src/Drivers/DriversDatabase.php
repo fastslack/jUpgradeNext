@@ -11,11 +11,11 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Drivers;
+namespace Jupgradenext\Drivers;
 
-use JUpgradeNext\Steps\Steps;
-use JUpgradeNext\Upgrade\Upgrade;
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Steps\Steps;
+use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * jUpgradePro database utility class
@@ -55,7 +55,7 @@ class DriversDatabase extends Drivers
 			$version = $this->_steps->get('version');
 			$version = str_replace(".", "", $version);
 
-			$class = "\\JUpgradeNext\\Schemas\\v{$version}\\{$class_name}";
+			$class = "\\Jupgradenext\\Schemas\\v{$version}\\{$class_name}";
 			$this->getConditionsCallback($class);
 
 			$xmlpath = !empty($this->_steps->get('xmlpath')) ? $this->_steps->get('xmlpath') : '';

@@ -11,10 +11,10 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Upgrade;
+namespace Jupgradenext\Upgrade;
 
-use JUpgradeNext\Drivers\Drivers;
-use JUpgradeNext\Steps\Steps;
+use Jupgradenext\Drivers\Drivers;
+use Jupgradenext\Steps\Steps;
 use Joomla\Database;
 
 /**
@@ -94,7 +94,7 @@ class UpgradeHelper
 	 */
 	public static function getTotal(\Joomla\DI\Container $container)
 	{
-		$driver = \JUpgradeNext\Drivers\Drivers::getInstance($container);
+		$driver = \Jupgradenext\Drivers\Drivers::getInstance($container);
 		return $driver->getTotal();
 	}
 

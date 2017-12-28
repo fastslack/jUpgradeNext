@@ -11,11 +11,11 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Steps;
+namespace Jupgradenext\Steps;
 
 use Joomla\Registry\Registry;
 
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * jUpgradeNext step class

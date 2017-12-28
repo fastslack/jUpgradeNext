@@ -11,12 +11,12 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext\Upgrade;
+namespace Jupgradenext\Upgrade;
 
 use Joomla\Table\Table;
 use Joomla\Event\Dispatcher;
 
-use JUpgradeNext\Upgrade\UpgradeHelper;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * Upgrade class for categories

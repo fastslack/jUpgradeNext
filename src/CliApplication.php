@@ -11,16 +11,16 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace JUpgradeNext;
+namespace Jupgradenext;
 
 use Joomla\Application\AbstractCliApplication;
 use Joomla\Application\Cli\Output\Processor\ColorProcessor;
 use Joomla\DI\Container;
 use Joomla\Database;
 
-use JUpgradeNext\Upgrade;
-use JUpgradeNext\Upgrade\UpgradeHelper;
-use JUpgradeNext\Models;
+use Jupgradenext\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Models;
 
 /**
  * The Acme application class.
@@ -240,7 +240,7 @@ class CliApplication extends AbstractCliApplication
 			//$step = json_decode($step_model->step());
 			$stepsObj = $step_model->step();
 
-			if ($stepsObj instanceof \JUpgradeNext\Steps\Steps)
+			if ($stepsObj instanceof \Jupgradenext\Steps\Steps)
 			{
 				$step = $stepsObj->toObject();
 			} else {
