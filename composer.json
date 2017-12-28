@@ -24,7 +24,8 @@
         "joomla/date": "2.0.*@dev",
         "joomla/string": "~1.0",
         "matware-lab/access": "~1.0",
-        "matware-lab/table": "~1.0"
+        "matware-lab/table": "~1.0",
+        "ghostff/dump5": "^1.0"
     },
     "autoload": {
         "psr-4": {
