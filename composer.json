@@ -29,9 +29,9 @@
     },
     "autoload": {
         "psr-4": {
-            "jUpgradeNext\\": "src/",
-            "Jupgradenext\\Drivers\\": "src/Drivers",
             "Providers\\": "src/Providers",
+            "JupgradeNext\\": "src/",
+            "Jupgradenext\\Drivers\\": "src/Drivers",
             "Jupgradenext\\Models\\": "src/Models",
             "Jupgradenext\\Schemas\\v10\\": "src/Schemas/v10",
             "Jupgradenext\\Schemas\\v15\\": "src/Schemas/v15",
