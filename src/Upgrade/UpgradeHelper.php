@@ -14,6 +14,7 @@
 namespace Jupgradenext\Upgrade;
 
 use Jupgradenext\Drivers\Drivers;
+use Jupgradenext\Models\Checks;
 use Jupgradenext\Steps\Steps;
 use Joomla\Database;
 
@@ -53,9 +54,9 @@ class UpgradeHelper
 
 		// Getting the params and Joomla version web and cli
 		if ($sapi != 'cli') {
-			$params	= JComponentHelper::getParams('com_jupgradepro');
+			$params	= \JComponentHelper::getParams('com_jupgradepro');
 		}else if ($sapi == 'cli') {
-			$params = new JRegistry(new JConfig);
+			$params = new \JRegistry(new JConfig);
 		}
 
 		return ($object === true) ? $params->toObject() : $params;
@@ -70,18 +71,12 @@ class UpgradeHelper
 	 */
 	public static function getVersion(\Joomla\DI\Container $container, $site)
 	{
-		$db = $container->get('db');
-
-		$query = $db->getQuery(true);
-		$query->select($site);
-		$query->from("`#__jupgradepro_version`");
-		$query->limit(1);
-		$db->setQuery($query);
-
-		try {
-			return $db->loadResult();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		if ($site == 'external_version')
+		{
+			$checks = new Checks($this->container);
+			return  $checks->checkSite();
+		}else if ($site == 'origin_version'){
+			return $this->container->get('origin_version');
 		}
 	}
 

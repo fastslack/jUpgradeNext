@@ -16,6 +16,7 @@ namespace Jupgradenext\Steps;
 use Joomla\Registry\Registry;
 
 use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Models\Checks;
 
 /**
  * jUpgradeNext step class
@@ -31,12 +32,13 @@ class Steps extends Registry
 	function __construct(\Joomla\DI\Container $container)
 	{
 		$this->container = $container;
-		$this->options = $container->get('config');
 
-		// Creating dabatase instance for this installation
+		//$this->options = UpgradeHelper::getParams();
+
 		$this->_db = $this->container->get('db');
 
-		$extensions = $container->get('config')->get('extensions');
+		//$extensions = $container->get('config')->get('extensions');
+		$extensions = false;
 
 		// Set step table
 		if ($extensions == false) {
@@ -53,9 +55,9 @@ class Steps extends Registry
 
 	/**
 	 *
-	 * @param   stdClass   $options  Parameters to be passed to the database driver.
+	 * @param   stdClass   $container  Joomla! DI Container
 	 *
-	 * @return  jUpgradeNext  A jUpgradeNext object.
+	 * @return  Steps  A Steps object.
 	 *
 	 * @since  3.0.0
 	 */
@@ -93,9 +95,11 @@ class Steps extends Registry
 	 */
 	public function loadFromDb($name = null) {
 
+		$checks = new Checks($this->container);
+		$ext_ver = $checks->checkSite();
+
 		// Get the old version
-		$old_ver = UpgradeHelper::getVersion($this->container, 'old');
-		$this->set('old_ver', $old_ver);
+		$orig_ver = $this->container->get('origin_version');
 
 		// Get the data from db
 		$query = $this->_db->getQuery(true);
@@ -113,7 +117,10 @@ class Steps extends Registry
 			$query->where("e.status != 2");
 		}
 
-		$query->where("e.version = {$this->_db->quote($old_ver)}");
+		$ext_ver = str_replace(".", "", $ext_ver);
+		$orig_ver = str_replace(".", "", $orig_ver);
+		//$query->where("{$orig_ver} BETWEEN e.from AND e.to");
+		$query->where("{$ext_ver} BETWEEN e.from AND e.to");
 
 		$query->order('e.id ASC');
 		$query->limit(1);
@@ -123,7 +130,7 @@ class Steps extends Registry
 
 		// Check for query error.
 		$error = $this->_db->getErrorMsg();
-		if ($error) {
+		if (!empty($error)) {
 			print_r($error);
 			return false;
 		}
@@ -137,18 +144,25 @@ class Steps extends Registry
 		$query->clear();
 
 		// Select last step
-		$query->select('name');
-		$query->from($this->_table);
-		$query->where("status = 0");
+		$query->select('t.name');
+		$query->from($this->_table . ' AS t');
+		$query->where("t.status = 0");
 		if ($this->_table == '#__jupgradepro_extensions_tables') {
 			$query->where("element = '{$step['element']}'");
 		}
-		$query->where("version = {$this->_db->quote($this->get('old_ver'))}");
-		$query->order('id DESC');
+
+		$query->where("{$ext_ver} BETWEEN t.from AND t.to");
+
+		$query->order('t.id DESC');
 		$query->limit(1);
 
 		$this->_db->setQuery($query);
-		$step['laststep'] = $this->_db->loadResult();
+
+		try {
+			$step['laststep'] = $this->_db->loadResult();
+		} catch (RuntimeException $e) {
+			throw new RuntimeException($e->getMessage());
+		}
 
 		return $step;
 	}
@@ -179,14 +193,14 @@ class Steps extends Registry
 
 		$update = new \stdClass();
 
-		$options = $this->container->get('config');
+		$site = $this->container->get('sites')->getSite();
 
-		$limit = $update->chunk = $options->get('chunk_limit');
+		$limit = $update->chunk = $site['chunk_limit'];
 		$source = $this->get('source');
 
 		// Get the total
 		if (isset($source)) {
-			$this->container->get('steps')->load($source);
+			$this->load($source);
 			$update->total = UpgradeHelper::getTotal($this->container, $this);
 		}
 
@@ -275,15 +289,13 @@ class Steps extends Registry
 	 */
 	public function updateStep($update = '')
 	{
-		// Get the old version
-		$old_ver = UpgradeHelper::getVersion($this->container, 'old');
-
 		$query = $this->_db->getQuery(true);
 		$query->update($this->_table);
 
 		$columns = array('status', 'cache', 'total', 'start', 'stop', 'first', 'debug');
 
-		foreach ($columns as $column) {
+		foreach ($columns as $column)
+		{
 			if (!empty($update->$column)) {
 				$query->set("{$column} = '{$update->$column}'");
 			}
@@ -295,7 +307,7 @@ class Steps extends Registry
 		}
 
 		$query->where("name = {$this->_db->quote($this->get('name'))}");
-		$query->where("version = {$this->_db->quote($old_ver)}");
+		//$query->where("version = {$this->_db->quote($old_ver)}");
 
 		// Execute the query
 		$this->_db->setQuery($query)->execute();
@@ -322,13 +334,19 @@ class Steps extends Registry
 	 */
 	public function _updateID($id)
 	{
+		$checks = new Checks($this->container);
+		$ext_ver = $checks->checkSite();
+
+		$ext_ver = str_replace(".", "", $ext_ver);
+
 		$name = $this->_getStepName();
 
 		$query = $this->_db->getQuery(true);
-		$query->update($this->_table);
+		$query->update($this->_table . ' AS e');
 		$query->set("`cid` = '{$id}'");
 		$query->where("name = {$this->_db->quote($name)}");
-		$query->where("version = {$this->_db->quote($this->get('old_ver'))}");
+		$query->where("{$ext_ver} BETWEEN e.from AND e.to");
+		$query->limit(1);
 
 		// Execute the query
 		return $this->_db->setQuery($query)->execute();
@@ -346,7 +364,7 @@ class Steps extends Registry
 	{
 		$update_cid = (int) $this->_getStepID() + 1;
 		$this->_updateID($update_cid);
-		echo UpgradeHelper::isCli() ? "•" : "";
+		echo !UpgradeHelper::isCli() ? "" : "•";
 	}
 
 	/**

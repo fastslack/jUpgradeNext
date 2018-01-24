@@ -32,12 +32,15 @@ class Categories extends UpgradeCategories
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($options)
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 		$conditions['select'] = '*';
 
-		if ($options->get('keep_ids') == 1)
+		// Get the parameters with global settings
+		$options = $container->get('sites')->getSite();
+
+		if ($options['keep_ids'] == 1)
 		{
 			$where_or = array();
 			$where_or[] = "extension REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'";

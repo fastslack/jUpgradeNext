@@ -31,7 +31,7 @@ class Banners_tracks extends Upgrade
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($options)
+	public static function getConditionsHook($container)	
 	{
 		$conditions = array();
 

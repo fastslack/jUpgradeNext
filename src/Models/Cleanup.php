@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -13,12 +13,15 @@
 
 namespace Jupgradenext\Models;
 
+defined('_JEXEC') or die;
+
 use Joomla\Model\AbstractModel;
 
 use Jupgradenext\Drivers\Drivers;
 use Jupgradenext\Steps\Steps;
 use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Models\Checks;
 
 /**
  * jUpgradeNext Cleanup Model
@@ -36,7 +39,9 @@ class Cleanup extends ModelBase
 	function cleanup()
 	{
 		// Get the parameters with global settings
-		$options = $this->container->get('config');
+		$options = $this->container->get('sites')->getSite();
+
+		$skips = (array) json_decode($options['skips']);
 
 		// Get the db instance
 		$this->_db = $this->container->get('db');
@@ -45,7 +50,7 @@ class Cleanup extends ModelBase
 		$del_tables = array();
 
 		// If REST is enable, cleanup the source #__jupgradepro_steps table
-		if ($options->get('method') == 'restful') {
+		if ($options['method'] == 'restful') {
 			// Initialize the driver to check the RESTful connection
 			$driver = Drivers::getInstance($this->container);
 			$code = $driver->requestRest('cleanup');
@@ -56,11 +61,8 @@ class Cleanup extends ModelBase
 		$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, stop = 0, first = 0, debug = \'\'');
 		$this->_db->setQuery($query)->execute();
 
-		// Convert the $options to array
-		$core_skips = $options->toArray();
-
 		// Skiping the steps setted by user
-		foreach ($core_skips as $k => $v) {
+		foreach ($skips as $k => $v) {
 			$core = substr($k, 0, 9);
 			$name = substr($k, 10, 18);
 
@@ -99,26 +101,33 @@ class Cleanup extends ModelBase
 		}
 
 		// Truncate menu types if menus are enabled
-		if ($options->get('skip_core_categories') != 1)
+		if ($skips['skip_core_categories'] != 1)
 		{
 			$del_tables[] = '#__jupgradepro_categories';
 			$del_tables[] = '#__jupgradepro_default_categories';
 		}
 
 		// Truncate menu types if menus are enabled
-		if ($options->get('skip_core_menus') != 1 && $options->get('keep_ids') == 1)
+		if ($skips['skip_core_menus'] != 1 && $options['keep_ids'] == 1)
 		{
 			$del_tables[] = '#__menu_types';
 			$del_tables[] = '#__jupgradepro_menus';
 		}
 
 		// Truncate contents if are enabled
-		if ($options->get('skip_core_modules') != 1)
+		if ($skips['skip_core_modules'] != 1)
 			$del_tables[] = '#__jupgradepro_modules';
 
 		// Truncate contents if are enabled
-		if ($options->get('skip_core_contents') != 1 && $options->get('keep_ids') == 1)
+		if ($skips['skip_core_contents'] != 1 && $options['keep_ids'] == 1)
 			$del_tables[] = '#__content';
+
+		// Truncate usergroups if are enabled
+		if ($skips['skip_core_users'] != 1 && $options['keep_ids'] == 1)
+		{
+			$del_tables[] = '#__usergroups';
+			$del_tables[] = '#__viewlevels';
+		}
 
 		// Clean selected tables
 		for ($i=0;$i<count($del_tables);$i++) {
@@ -133,9 +142,9 @@ class Cleanup extends ModelBase
 		}
 
 		// Insert default root category
-		if ($options->get('skip_core_categories') != 1)
+		if ($skips['skip_core_categories'] != 1)
 		{
-			if ($options->get('keep_ids') == 1)
+			if ($options['keep_ids'] == 1)
 			{
 				$query->clear();
 				$query->delete()->from("#__categories")->where("id > 1");
@@ -157,7 +166,18 @@ class Cleanup extends ModelBase
 
 		// Done checks
 		if (!UpgradeHelper::isCli())
-			$this->returnError (100, 'DONE');
+		{
+			$current_version = $this->container->get('origin_version');
+
+			$checks = new Checks($this->container);
+			$ext_version = $checks->checkSite();
+
+			$return = "[[g;white;]|] [[g;orange;]✓] Current site version: [[g;orange;]{$current_version}] - External site version: [[g;orange;]{$ext_version}]{{NL}}";
+			$return .= "[[g;white;]|] [[g;orange;]✓] Migration method: [[g;orange;]{$options['method']}].{{NL}}";
+			$return .= "[[g;white;]|] [[g;orange;]✓] Cleanup done.";
+
+			return $return;
+		}
 	}
 
 	/**
@@ -183,20 +203,6 @@ class Cleanup extends ModelBase
 		} catch (RuntimeException $e) {
 			throw new RuntimeException($e->getMessage());
 		}
-	}
-
-	/**
-	 * returnError
-	 *
-	 * @return	none
-	 * @since	2.5.0
-	 */
-	public function returnError ($number, $text)
-	{
-		$message['number'] = $number;
-		$message['text'] = JText::_($text);
-		echo json_encode($message);
-		exit;
 	}
 
 } // end class

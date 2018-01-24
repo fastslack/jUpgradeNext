@@ -35,14 +35,8 @@ class Migrate extends ModelBase
 	//function migrate($table = false, $json = true, $extensions = false) {
 	function migrate(\Jupgradenext\Steps\Steps $steps = null) {
 
-		//echo get_class($steps);
-
-		//$this->container->share('steps', $steps);
-
-		$this->container->get('steps')->load();
-
 		// Init the jUpgradepro instance
-		$jupgrade = Upgrade::loadInstance($this->container);
+		$jupgrade = new Upgrade($this->container);
 
 		if ($steps === null)
 		{
@@ -70,9 +64,9 @@ class Migrate extends ModelBase
 			{
 				$jupgrade->upgrade();
 			}
-			catch (Exception $e)
+			catch (RuntimeException $e)
 			{
-				throw new \Exception($e->getMessage());
+				throw new RuntimeException($e->getMessage());
 			}
 		}
 
@@ -106,12 +100,16 @@ class Migrate extends ModelBase
 			$update->status = 2;
 		}
 
+		// Set chunk
+		$site = $this->container->get('sites')->getSite();
+		$update->chunk = $site['chunk_limit'];
+
 		$steps->updateStep($update);
 
-		if (!UpgradeHelper::isCli()) {
+		if (UpgradeHelper::isCli()) {
 			echo $steps->getParameters();
 		}else{
-			return $steps->getParameters();
+			echo $steps->getParameters();
 		}
 	}
 
@@ -124,7 +122,7 @@ class Migrate extends ModelBase
 	public function returnError ($number, $text)
 	{
 		$message['number'] = $number;
-		$message['text'] = JText::_($text);
+		$message['text'] = \JText::_($text);
 		print(json_encode($message));
 		exit;
 	}

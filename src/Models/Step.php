@@ -38,16 +38,17 @@ class Step extends ModelBase
 		$extensions = (bool) ($extensions != false) ? $extensions : $this->container->get('input')->get('extensions', false);
 
 		// Init step instance
-		$steps = new Steps($this->container);
-		//$steps = $this->container->get('steps');
+
+	  $steps = $this->container->get('steps');
+		$steps->load();
 
 		// Check if name exists
 		$name = !empty($name) ? $name : $steps->get('name');
 
-		// Get the next step
+		// Check if next step exists
 		if (!$steps->getStep($name))
 		{
-			return false;
+			$this->returnError (404, 'No more steps');
 		}
 
 		if (!UpgradeHelper::isCli()) {
@@ -55,20 +56,6 @@ class Step extends ModelBase
 		}else{
 			return $steps;
 		}
-	}
-
-	/**
-	 * returnError
-	 *
-	 * @return	none
-	 * @since	2.5.0
-	 */
-	public function returnError ($number, $text)
-	{
-		$message['number'] = $number;
-		$message['text'] = JText::_($text);
-		echo json_encode($message);
-		exit;
 	}
 
 } // end class

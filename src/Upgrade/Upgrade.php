@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -24,6 +24,7 @@ use Joomla\Registry\Registry;
 
 use Jupgradenext\Steps\Steps;
 use Jupgradenext\Drivers\Drivers;
+use Jupgradenext\Models\Checks;
 
 /**
  * jUpgradePro utility class for migrations
@@ -86,7 +87,6 @@ class Upgrade extends UpgradeBase
 		// Set the current step
 		$this->container = $container;
 		$this->steps = $container->get('steps');
-		$this->options = $container->get('config');
 		$this->_db = $container->get('db');
 
 		if ($this->steps instanceof Steps) {
@@ -103,17 +103,18 @@ class Upgrade extends UpgradeBase
 
 		// Set timelimit to 0
 		if(!@ini_get('safe_mode')) {
-			if (!empty($this->options->get('timelimit'))) {
+			//if (!empty($this->options->get('timelimit'))) {
 				set_time_limit(0);
-			}
+			//}
 		}
 
+/*
 		// Make sure we can see all errors.
 		if (!empty($this->options->get('error_reporting'))) {
 			error_reporting(E_ALL);
 			@ini_set('display_errors', 1);
 		}
-
+*/
 		// MySQL grants check
 		$query = "SHOW GRANTS FOR CURRENT_USER";
 		$this->_db->setQuery( $query );
@@ -145,7 +146,8 @@ class Upgrade extends UpgradeBase
 			{
 				$name = !empty($steps->get('name')) ? $steps->get('name') : '';
 
-				$version = $steps->get('version');
+				$checks = new Checks($container);
+				$version = $checks->checkSite();
 				$version = str_replace(".", "", $version);
 
 				// Derive the class name from the driver.
@@ -175,7 +177,7 @@ class Upgrade extends UpgradeBase
 	{
 		try
 		{
-			//$this->upgrade();
+			$this->upgrade();
 		}
 		catch (Exception $e)
 		{
@@ -195,7 +197,8 @@ class Upgrade extends UpgradeBase
 	public function upgrade($rows = false)
 	{
 		$name = $this->steps->_getStepName();
-		$method = $this->options->get('method');
+		$site = $this->container->get('sites')->getSite();
+		$method = $site['method'];
 
 		// Before migrate hook
 		if ($this->steps->get('first') == true && $this->steps->get('cid') == 0) {
@@ -312,8 +315,9 @@ class Upgrade extends UpgradeBase
 		$rows = array();
 
 		// Get the method and chunk
-		$method = $this->options->get('method');
-		$chunk = $this->options->get('chunk_limit');
+		$site = $this->container->get('sites')->getSite();
+		$method = $site['method'];
+		$chunk = $site['chunk_limit'];
 
 		// TODO: Move this to Drivers
 		switch ($method) {
@@ -393,7 +397,7 @@ class Upgrade extends UpgradeBase
 	 * @since	3.0.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($options)
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 
@@ -450,12 +454,12 @@ class Upgrade extends UpgradeBase
 
 		// Get the structure
 		// @@ TODO: move this to Drivers
-		if ($this->options->get('method') == 'database') {
-			$result = $this->driver->_db_old->getTableCreate($table);
-			$structure = str_replace($this->driver->_db_old->getPrefix(), "#__", "{$result[$table]} ;\n\n");
-		}else if ($this->options->get('method') == 'restful') {
-			$structure = $this->driver->requestRest("tablestructure", str_replace('#__', '', $table));
-		}
+		//if ($this->options->get('method') == 'database') {
+			$result = $this->container->get('external')->getTableCreate($table);
+			$structure = str_replace($this->container->get('external')->getPrefix(), "#__", "{$result[$table]} ;\n\n");
+		//}else if ($this->options->get('method') == 'restful') {
+		//	$structure = $this->driver->requestRest("tablestructure", str_replace('#__', '', $table));
+		//}
 
 		// Create only if not exists
 		$structure = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $structure);

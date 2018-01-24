@@ -33,7 +33,7 @@ class Arogroup extends UpgradeUsers
 	 * @since	1.00
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($options)
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 

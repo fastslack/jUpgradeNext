@@ -32,7 +32,7 @@ class Weblinks extends Upgrade
 	 * @since	1.00
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($options)
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 

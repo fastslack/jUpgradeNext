@@ -56,7 +56,10 @@ class UpgradeCategories extends Upgrade
 	{
 		$query = $this->_db->getQuery(true);
 
-		if ($this->options->get('keep_ids') == 1)
+		// Get the parameters with global settings
+		$options = $this->container->get('sites')->getSite();
+
+		if ($options['keep_ids'] == 1)
 		{
 			// Getting the categories
 			$query->clear();
@@ -196,7 +199,7 @@ class UpgradeCategories extends Upgrade
 		$row['alias'] = (!empty($alias)) ? $alias."-".rand(0, 999999) : $row['alias'];
 
 		// Remove the default id if keep ids parameters is not enabled
-		if ($this->options->get('keep_ids') != 1)
+		if ($options['keep_ids'] != 1)
 		{
 			// Unset id
 			unset($row['id']);
@@ -208,7 +211,7 @@ class UpgradeCategories extends Upgrade
 			}else{
 				$parent = 1;
 			}
-		}else if ($this->options->get('keep_ids') == 1){
+		}else if ($options['keep_ids'] == 1){
 
 			// Save section id if old Joomla! version is 1.0
 			if (version_compare(UpgradeHelper::getVersion($this->container, 'old'), '1.0', '=') && isset($row['section']))

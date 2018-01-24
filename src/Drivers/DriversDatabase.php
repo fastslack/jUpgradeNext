@@ -13,6 +13,7 @@
 
 namespace Jupgradenext\Drivers;
 
+use Jupgradenext\Models\Checks;
 use Jupgradenext\Steps\Steps;
 use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
@@ -47,12 +48,15 @@ class DriversDatabase extends Drivers
 
 		if (null !== $this->_steps)
 		{
+			$var = $this->_steps->loadFromDb();
+
 			$name = !empty($this->_steps->get('name')) ? $this->_steps->get('name') : '';
 
 			// Derive the class name from the driver.
 			$class_name = ucfirst(strtolower($name));
 
-			$version = $this->_steps->get('version');
+			$checks = new Checks($container);
+			$version = $checks->checkSite();
 			$version = str_replace(".", "", $version);
 
 			$class = "\\Jupgradenext\\Schemas\\v{$version}\\{$class_name}";
@@ -72,12 +76,7 @@ class DriversDatabase extends Drivers
 	 */
 	public function getConditionsCallback($class)
 	{
-		// @@ Fix bug using PHP < 5.2.3 version
-		if (version_compare(PHP_VERSION, '5.2.3', '<')) {
-			$this->_conditions = call_user_func(array($class, 'getConditionsHook'));
-		}else{
-			$this->_conditions = $class::getConditionsHook($this->options);
-		}
+		$this->_conditions = $class::getConditionsHook($this->container);
 	}
 
 	/**
@@ -88,15 +87,19 @@ class DriversDatabase extends Drivers
 	 */
 	public function getSourceDatabase( )
 	{
+		$site = $this->container->get('sites')->getSite();
+
+		$chunk_limit = (int) $site['chunk_limit'];
+
 		// Get the conditions
-		$conditions = $this->getConditionsHook($this->options);
+		$conditions = $this->getConditionsHook();
 
 		// Process the conditions
 		$query = $this->_processQuery($conditions, true);
 
 		// Setting the query
-		$chunk_limit = (int) $this->options->get('chunk_limit');
 		$cid = (int) $this->_getStepID();
+		$query->setLimit($chunk_limit, $cid);
 		$this->_db_old->setQuery( $query, $cid, $chunk_limit );
 
 		//echo "\nQUERY: {$query->__toString()}\n";
@@ -122,7 +125,7 @@ class DriversDatabase extends Drivers
 	public function getTotal()
 	{
 		// Get the conditions
-		$conditions = $this->getConditionsHook($this->options);
+		$conditions = $this->getConditionsHook();
 
 		// Process the conditions
 		$query = $this->_processQuery($conditions);

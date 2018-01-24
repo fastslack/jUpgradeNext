@@ -33,7 +33,7 @@ class Banners extends Upgrade
 	 * @since	1.00
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($options)
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 
@@ -82,7 +82,7 @@ class Banners extends Upgrade
 	public function dataHook($rows = null)
 	{
 
-		
+
 
 		// Fixing the changes between versions
 		foreach($rows as &$row)

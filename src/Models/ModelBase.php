@@ -38,7 +38,7 @@ class ModelBase implements ModelInterface
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(\Joomla\DI\Container $container, Registry $options = null)
+	public function __construct(\Joomla\DI\Container $container = null, Registry $options = null)
 	{
 		$this->options = ($options instanceof Registry) ? $options : new Registry;
 		$this->container = ($container instanceof \Joomla\DI\Container) ? $container : new \Joomla\DI\Container;
@@ -68,5 +68,20 @@ class ModelBase implements ModelInterface
 	public function setState(Registry $state)
 	{
 		$this->state = $state;
+	}
+
+	/**
+	 * returnError
+	 *
+	 * @return	none
+	 * @since	2.5.0
+	 */
+	public function returnError ($code, $message)
+	{
+		$response = array();
+		$response['code'] = $code;
+		$response['message'] = \JText::_($message);
+		print(json_encode($response));
+		exit;
 	}
 }

@@ -19,8 +19,7 @@ namespace Providers;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Registry\Registry;
-
-use Jupgradenext\Steps\Steps;
+use Jupgradenext\Models\Sites;
 
 /**
  * Registers the Configuration service provider.
@@ -29,22 +28,24 @@ use Jupgradenext\Steps\Steps;
  *
  * @since  1.2
  */
-class StepsServiceProvider implements ServiceProviderInterface
+class SitesServiceProvider implements ServiceProviderInterface
 {
 	/**
-	 * Gets a configuration object.
+	 * @var    string
+	 * @since  1.0
+	 */
+	private $name;
+
+	/**
+	 * Class constructor.
 	 *
-	 * @param   Container  $c  A DI container.
-	 *
-	 * @return  Registry
+	 * @param   string  $path  The full path and file name for the configuration file.
 	 *
 	 * @since   1.0
-	 * @throws  \LogicException if the configuration file does not exist.
-	 * @throws  \UnexpectedValueException if the configuration file could not be parsed.
 	 */
-	public function getSteps(Container $c)
+	public function __construct()
 	{
-		return new Steps($c);
+		//$this->name = $name;
 	}
 
 	/**
@@ -61,10 +62,10 @@ class StepsServiceProvider implements ServiceProviderInterface
 		// Workaround for PHP 5.3 compatibility.
 		$that = $this;
 		$container->share(
-			'steps',
+			'sites',
 			function ($c) use ($that)
 			{
-				return $that->getSteps($c);
+				return new Sites($c);
 			}
 			, true
 		);
