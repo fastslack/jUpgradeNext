@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -12,6 +12,8 @@
  */
 
 namespace Jupgradenext\Upgrade;
+
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * Database methods
@@ -127,7 +129,7 @@ class UpgradeUsers extends Upgrade
 	protected function getUserIdAroMap($aro_id)
 	{
 		// Get the version
-		$old_version = JUpgradeproHelper::getVersion('old');
+		$old_version = UpgradeHelper::getVersion('external_version');
 		// Get thge correct table key
 		$key = ($old_version == '1.0') ? 'aro_id' : 'id';
 

@@ -36,7 +36,7 @@ class Usergroupmap extends UpgradeUsers
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 

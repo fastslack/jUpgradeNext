@@ -139,12 +139,12 @@ class Checks extends ModelBase
 
 		foreach ($tablesComp as $table) {
 			if (!in_array($this->container->get('db')->getPrefix() . 'jupgradepro_' . $table, $tables)) {
-				if (JUpgradeproHelper::isCli()) {
+				if (UpgradeHelper::isCli()) {
 					print("\n\033[1;37m-------------------------------------------------------------------------------------------------\n");
 					print("\033[1;37m|  \033[0;34m	Installing jUpgradePro tables\n");
 				}
 
-				JUpgradeproHelper::populateDatabase($this->container->get('db'), JPATH_COMPONENT_ADMINISTRATOR.'/sql/install.sql');
+				UpgradeHelper::populateDatabase($this->container->get('db'), JPATH_COMPONENT_ADMINISTRATOR.'/sql/install.sql');
 				break;
 			}
 		}

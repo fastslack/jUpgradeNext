@@ -31,7 +31,7 @@ class Modules_menu extends Upgrade
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 
