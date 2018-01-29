@@ -4,7 +4,7 @@
     "description": "jUpgradeNext is a Joomla! Framework extension that allow you to move/migrate your data from one Joomla! installation to another one.",
     "keywords": ["joomla", "migration", "framework", "upgrade"],
     "homepage": "https://github.com/matware-lab/jUpgradeNext",
-    "license": "GPL-2.0+",
+    "license": "GPL-2.0-or-later",
     "version": "1.0",
     "minimum-stability" : "dev",
     "prefer-stable" : true,
@@ -30,7 +30,7 @@
     "autoload": {
         "psr-4": {
             "Providers\\": "src/Providers",
-            "JupgradeNext\\": "src/",
+            "Jupgradenext\\": "src/",
             "Jupgradenext\\Drivers\\": "src/Drivers",
             "Jupgradenext\\Models\\": "src/Models",
             "Jupgradenext\\Schemas\\v10\\": "src/Schemas/v10",
@@ -45,6 +45,9 @@
             "Jupgradenext\\Schemas\\v34\\": "src/Schemas/v34",
             "Jupgradenext\\Schemas\\v35\\": "src/Schemas/v35",
             "Jupgradenext\\Schemas\\v36\\": "src/Schemas/v36",
+            "Jupgradenext\\Schemas\\v37\\": "src/Schemas/v37",
+            "Jupgradenext\\Schemas\\v38\\": "src/Schemas/v38",
+            "Jupgradenext\\Schemas\\v39\\": "src/Schemas/v39",
             "Jupgradenext\\Schemas\\v40\\": "src/Schemas/v40",
             "Jupgradenext\\Steps\\": "src/Steps",
             "Jupgradenext\\Upgrade\\": "src/Upgrade"
@@ -52,7 +55,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "jUpgradeNext\\Tests\\": "Tests/"
+            "Jupgradenext\\Tests\\": "Tests/"
         }
     }
 }
