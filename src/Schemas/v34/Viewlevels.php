@@ -15,6 +15,7 @@ namespace Jupgradenext\Schemas\v34;
 
 use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
+use Jupgradenext\Models\Cleanup;
 
 /**
  * Upgrade class for weblinks
@@ -40,11 +41,25 @@ class Viewlevels extends Upgrade
 			// Convert the array into an object.
 			$row = (array) $row;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.0', '<=')) {
+			//if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.0', '<=')) {
 
-			}
+			//}
 		}
 
 		return $rows;
+	}
+
+	/*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+
+
+		return true;
 	}
 }

@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -29,6 +29,28 @@ use Jupgradenext\Models\Sites;
 class Checks extends ModelBase
 {
 	/**
+	 * Instantiate the model.
+	 *
+	 * @param   Registry  $state  The model state.
+	 *
+	 * @since   1.0
+	 */
+	public function __construct(\Joomla\DI\Container $container = null, Registry $options = null)
+	{
+		parent::__construct($container, $options);
+
+		// Get the parameters with global settings
+		$this->options = $this->container->get('sites')->getSite();
+
+		// Check for bad configurations
+		if ($this->options['method'] == "restful")
+		{
+			// Initialize the driver to check the RESTful connection
+			$this->driver = Drivers::getInstance($this->container);
+		}
+	}
+
+	/**
 	 * Initial checks in jUpgradePro
 	 *
 	 * @return	none
@@ -36,10 +58,6 @@ class Checks extends ModelBase
 	 */
 	function checks()
 	{
-		// Get the parameters with global settings
-		$options = $this->container->get('sites')->getSite();
-		$optionsDb = $this->container->get('sites')->getSiteDboConfig();
-
 		// Get the origin site Joomla! version
 		$origin_version = $this->container->get('origin_version');
 
@@ -47,22 +65,21 @@ class Checks extends ModelBase
 		$old_columns = array();
 
 		// Check for bad configurations
-		if ($options['method'] == "restful") {
+		if ($this->options['method'] == "restful") {
 
-			if (empty($options['restful.hostname']) || empty($options['restful.username']) || empty($options['restful.password']) || empty($options['restful.key']) ) {
+			$this->optionsRest = (array) json_decode($this->options['restful']);
+
+			if (empty($this->optionsRest['rest_hostname']) || empty($this->optionsRest['rest_username']) || empty($this->optionsRest['rest_password']) || empty($this->optionsRest['rest_key']) ) {
 				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
-			if ($options['restful.hostname']== 'http://www.example.org/' || $options['restful.hostname']== '' ||
-					$options['restful.username']== '' || $options['restful.password']== '' || $options['restful.key']== '') {
+			if ($this->optionsRest['rest_hostname']== 'http://www.example.org/' || $this->optionsRest['rest_hostname']== '' ||
+					$this->optionsRest['rest_username']== '' || $this->optionsRest['rest_password']== '' || $this->optionsRest['rest_key']== '') {
 				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
-
-			// Initialize the driver to check the RESTful connection
-			$driver = Drivers::getInstance($this->container);
 
 			// Check if Restful and plugin are fine
-			$code = $driver->requestRest('check');
+			$code = $this->driver->requestRest('check');
 
 			switch ($code) {
 				case 401:
@@ -78,9 +95,11 @@ class Checks extends ModelBase
 			}
 
 			// Get the database parameters
-			$this->old_tables = json_decode($driver->requestRest('tableslist'));
-			$this->old_prefix = substr($old_tables[10], 0, strpos($old_tables[10], '_')+1);
+			$this->old_tables = json_decode($this->driver->requestRest('tableslist'));
+			$this->old_prefix = substr($this->old_tables[10], 0, strpos($this->old_tables[10], '_')+1);
 
+
+/*
 			// Get component version
 			$ext_version = $this->container->get('version');
 
@@ -89,21 +108,27 @@ class Checks extends ModelBase
 			{
 				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
 			}
+*/
 
 		}
 
 		// Check for bad configurations
-		if ($options['method'] == "database")
+		if ($this->options['method'] == "database")
 		{
-			if ($optionsDb['db_hostname']== '' || $optionsDb['db_username']== ''
-			  || $optionsDb['db_name']== '' || $optionsDb['db_prefix']== '' )
+			$this->optionsDb = $this->container->get('sites')->getSiteDboConfig();
+
+			if ($this->optionsDb['db_hostname']== '' || $this->optionsDb['db_username']== ''
+			  || $this->optionsDb['db_name']== '' || $this->optionsDb['db_prefix']== '' )
 			{
 				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
 			}
 
+			// Get external driver
+			$this->external = $this->container->get('external');
+
 			// Get the database parameters
-			$this->old_tables = $this->container->get('external')->getTableList();
-			$this->old_prefix = $optionsDb['db_prefix'];
+			$this->old_tables = $this->external->getTableList();
+			$this->old_prefix = $this->external->getPrefix();
 		}
 
 
@@ -170,7 +195,7 @@ class Checks extends ModelBase
 		}
 
 		// Convert the params to array
-		$core_skips = json_decode($options['skips']);
+		$core_skips = json_decode($this->options['skips']);
 		$flag = false;
 
 		// Check is all skips is set
@@ -196,7 +221,7 @@ class Checks extends ModelBase
 		}
 
 		// Checking tables
-		if ($core_skips->skip_core_contents != 1 && $options['keep_ids']== 1) {
+		if ($core_skips->skip_core_contents != 1 && $this->options['keep_ids']== 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
 			$query->from("`#__content`");
@@ -222,7 +247,7 @@ class Checks extends ModelBase
 		}
 
 		// Checking tables
-		if ($core_skips->skip_core_categories != 1 && $options['keep_ids'] == 1) {
+		if ($core_skips->skip_core_categories != 1 && $this->options['keep_ids'] == 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
 			$query->from("`#__categories`");
@@ -254,25 +279,19 @@ class Checks extends ModelBase
 	}
 
 	/**
-	 * Check if one column exists
+	 * checkSite
 	 *
-	 * @return	none
-	 * @since	3.8.0
+	 * @return	bool True if sun is shining
+	 * @since	  3.8
 	 */
-	public function checkColumn ($table, $column)
+	public function checkSite ()
 	{
-		if (!in_array($table, $this->old_tables))
+		$version = $this->checkOldVersion();
+
+		if ($version != false)
 		{
-			return false;
-		}
-
-		if ($this->external)
-		{
-			$columns = $this->external->getTableColumns($table);
-
-			return array_key_exists($column, $columns) ? true : false;
-
-		}else {
+			return $version;
+		}else{
 			return false;
 		}
 	}
@@ -288,21 +307,27 @@ class Checks extends ModelBase
 		// Set default
 		$version = false;
 
+		if (empty($this->old_tables) && $this->options['method'] == 'restful')
+		{
+			$this->old_tables = json_decode($this->driver->requestRest('tableslist'));
+			$this->old_prefix = substr($this->old_tables[10], 0, strpos($this->old_tables[10], '_')+1);
+		}
+
 		// Trim the prefix value
-		$this->prefix = trim($this->old_prefix);
+		$prefix = trim($this->old_prefix);
 
 		// Set the tables to search
-		$j10 = "{$this->old_prefix}bannerfinish";
-		$j15 = "{$this->old_prefix}core_acl_aro";
-		$j25 = "{$this->old_prefix}update_categories";
-		$j30 = "{$this->old_prefix}assets";
-		$j31 = "{$this->old_prefix}content_types";
-		$j32 = $j33 = "{$this->old_prefix}postinstall_messages";
-		$j34 = "{$this->old_prefix}redirect_links";
-		$j35 = "{$this->old_prefix}utf8_conversion";
-		$j36 = "{$this->old_prefix}menu_types";
-		$j37 = "{$this->old_prefix}fields";
-		$j38 = "{$this->old_prefix}fields_groups";
+		$j10 = "{$prefix}bannerfinish";
+		$j15 = "{$prefix}core_acl_aro";
+		$j25 = "{$prefix}update_categories";
+		$j30 = "{$prefix}assets";
+		$j31 = "{$prefix}content_types";
+		$j32 = $j33 = "{$prefix}postinstall_messages";
+		$j34 = "{$prefix}redirect_links";
+		$j35 = "{$prefix}utf8_conversion";
+		$j36 = "{$prefix}menu_types";
+		$j37 = "{$prefix}fields";
+		$j38 = "{$prefix}fields_groups";
 
 		// Check the correct version
 		if (in_array($j10, $this->old_tables))
@@ -321,11 +346,11 @@ class Checks extends ModelBase
 		{
 			$version = "3.1";
 		}
-		else if($this->checkColumn($j33, 'requireReset', $external))
+		else if($this->checkColumn($j33, 'requireReset'))
 		{
 			$version = "3.3";
 		}
-		else if($this->checkColumn($j34, 'header', $external))
+		else if($this->checkColumn($j34, 'header'))
 		{
 			$version = "3.4";
 		}
@@ -337,7 +362,7 @@ class Checks extends ModelBase
 		{
 			$version = "3.2";
 		}
-		else if($this->checkColumn($j36, 'asset_id', $external))
+		else if($this->checkColumn($j36, 'asset_id'))
 		{
 			$version = "3.6";
 		}
@@ -345,7 +370,7 @@ class Checks extends ModelBase
 		{
 			$version = "3.7";
 		}
-		else if($this->checkColumn($j38, 'params', $external))
+		else if($this->checkColumn($j38, 'params'))
 		{
 			$version = "3.8";
 		}
@@ -358,29 +383,38 @@ class Checks extends ModelBase
 	}
 
 	/**
-	 * checkSite
+	 * Check if one column exists
 	 *
-	 * @return	bool True if sun is shining
-	 * @since	  3.8
+	 * @return	none
+	 * @since	3.8.0
 	 */
-	public function checkSite ()
+	public function checkColumn ($table, $column)
 	{
-		// Get external driver
-		$this->external = $this->container->get('external');
-
-		// Get the database parameters
-		$this->old_tables = $this->external->getTableList();
-		$this->old_prefix = $this->external->getPrefix();
-
-		$version = $this->checkOldVersion($this->external);
-
-		if ($version != false)
+		if (!in_array($table, $this->old_tables))
 		{
-			return $version;
-		}else{
 			return false;
 		}
 
+		if ($this->options['method'] == 'restful')
+		{
+			$request = $this->driver->requestRest('tablescolumns', $table);
+
+			// Check if Restful and plugin are fine
+			$columns = json_decode($request);
+
+			return array_key_exists($column, $columns) ? true : false;
+		}
+		else if ($site['method'] == 'database')
+		{
+			if ($this->external)
+			{
+				$columns = $this->external->getTableColumns($table);
+
+				return array_key_exists($column, $columns) ? true : false;
+			}else {
+				return false;
+			}
+		}
 	}
 
 } // end class

@@ -41,4 +41,18 @@ class Menus_types extends Upgrade
 
 		return $conditions;
 	}
+
+	/*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+
+
+		return true;
+	}
 }

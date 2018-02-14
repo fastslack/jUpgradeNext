@@ -14,6 +14,7 @@
 namespace Jupgradenext\Schemas\v34;
 
 use Jupgradenext\Upgrade\UpgradeUsers;
+use Jupgradenext\Models\Cleanup;
 
 /**
  * Upgrade class for the Usergroups
@@ -38,9 +39,24 @@ class Usergroups extends UpgradeUsers
 		$conditions = array();
 
 		$conditions['where'] = array();
+		$conditions['where'][] = "id > 9";
 		$conditions['order'] = "id ASC";
 
 		return $conditions;
+	}
+
+	/*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+
+
+		return true;
 	}
 
 	/**
@@ -52,6 +68,8 @@ class Usergroups extends UpgradeUsers
 	 */
 	public function beforeHook()
 	{
+		//$cleanup = new Cleanup;
+		//$cleanup->truncateTables(array('#__usergroups'));
 	}
 
 	/**

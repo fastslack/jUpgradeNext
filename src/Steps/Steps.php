@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -31,12 +31,6 @@ class Steps extends Registry
 	 */
 	function __construct(\Joomla\DI\Container $container)
 	{
-		$this->container = $container;
-
-		//$this->options = UpgradeHelper::getParams();
-
-		$this->_db = $this->container->get('db');
-
 		//$extensions = $container->get('config')->get('extensions');
 		$extensions = false;
 
@@ -49,7 +43,24 @@ class Steps extends Registry
 			$this->_table = '#__jupgradepro_extensions';
 		}
 
+		$this->container = $container;
+
+		// Get site params
+		$site = $container->get('sites')->getSite();
+
+		$this->_db = $this->container->get('db');
+
 		$data = $this->loadFromDb();
+
+		if ($site['method'] == 'database')
+		{
+			//$data = $this->loadFromDb();
+		}
+		else if ($site['method'] == 'restful')
+		{
+			//$data = $this->load();
+		}
+
 		parent::__construct($data);
 	}
 
@@ -95,11 +106,9 @@ class Steps extends Registry
 	 */
 	public function loadFromDb($name = null) {
 
-		$checks = new Checks($this->container);
-		$ext_ver = $checks->checkSite();
-
-		// Get the old version
-		$orig_ver = $this->container->get('origin_version');
+		// Get versions
+		$external_version = UpgradeHelper::getVersionFromDB('old');
+		$origin_version = $this->container->get('origin_version');
 
 		// Get the data from db
 		$query = $this->_db->getQuery(true);
@@ -117,10 +126,10 @@ class Steps extends Registry
 			$query->where("e.status != 2");
 		}
 
-		$ext_ver = str_replace(".", "", $ext_ver);
-		$orig_ver = str_replace(".", "", $orig_ver);
-		//$query->where("{$orig_ver} BETWEEN e.from AND e.to");
-		$query->where("{$ext_ver} BETWEEN e.from AND e.to");
+		$external_version = str_replace(".", "", $external_version);
+		//$orig_ver = str_replace(".", "", $origin_version);
+		//$query->where("{$origin_version} BETWEEN e.from AND e.to");
+		$query->where("{$external_version} BETWEEN e.from AND e.to");
 
 		$query->order('e.id ASC');
 		$query->limit(1);
@@ -151,7 +160,7 @@ class Steps extends Registry
 			$query->where("element = '{$step['element']}'");
 		}
 
-		$query->where("{$ext_ver} BETWEEN t.from AND t.to");
+		$query->where("{$external_version} BETWEEN t.from AND t.to");
 
 		$query->order('t.id DESC');
 		$query->limit(1);
@@ -192,6 +201,7 @@ class Steps extends Registry
 		}
 
 		$update = new \stdClass();
+		$update->debug = '';
 
 		$site = $this->container->get('sites')->getSite();
 
@@ -199,15 +209,17 @@ class Steps extends Registry
 		$source = $this->get('source');
 
 		// Get the total
-		if (isset($source)) {
+		if (isset($source))
+		{
 			$this->load($source);
-			$update->total = UpgradeHelper::getTotal($this->container, $this);
+			$update->total = (int) UpgradeHelper::getTotal($this->container);
 		}
+
 
 		// We must to fragment the steps
 		if ($update->total > $limit) {
 
-			if ($this->get('cache') == 0 && $this->get('status') == 0) {
+			if ((int) $this->get('cache') == 0 && (int) $this->get('status') == 0) {
 
 				if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
 					$update->cache = round( ($this->get('total')-1) / $limit, 0, PHP_ROUND_HALF_DOWN);
@@ -334,10 +346,9 @@ class Steps extends Registry
 	 */
 	public function _updateID($id)
 	{
-		$checks = new Checks($this->container);
-		$ext_ver = $checks->checkSite();
-
-		$ext_ver = str_replace(".", "", $ext_ver);
+		// Get versions
+		$external_version = UpgradeHelper::getVersionFromDB('old');
+		$external_version = str_replace(".", "", $external_version);
 
 		$name = $this->_getStepName();
 
@@ -345,7 +356,7 @@ class Steps extends Registry
 		$query->update($this->_table . ' AS e');
 		$query->set("`cid` = '{$id}'");
 		$query->where("name = {$this->_db->quote($name)}");
-		$query->where("{$ext_ver} BETWEEN e.from AND e.to");
+		$query->where("{$external_version} BETWEEN e.from AND e.to");
 		$query->limit(1);
 
 		// Execute the query

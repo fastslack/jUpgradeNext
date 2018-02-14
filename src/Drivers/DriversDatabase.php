@@ -65,6 +65,8 @@ class DriversDatabase extends Drivers
 			$xmlpath = !empty($this->_steps->get('xmlpath')) ? $this->_steps->get('xmlpath') : '';
 		}
 
+		// Creating dabatase instance for this installation
+		$this->_db = $container->get('db');
 		$this->_db_old = $container->get('external');
 	}
 

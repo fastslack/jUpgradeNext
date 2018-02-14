@@ -38,13 +38,16 @@ class Sites extends ModelBase
 		}
 
     $query = $this->container->get('db')->getQuery(true);
+
 		$query->select('*');
 		$query->from("`#__jupgradepro_sites`");
     $query->where("`name` = '{$name}'");
 		$this->container->get('db')->setQuery($query);
 
+		$return = $this->container->get('db')->loadAssoc();
+
 		try {
-			return $this->container->get('db')->loadAssoc();
+			return $return;
 		} catch (RuntimeException $e) {
 			throw new RuntimeException($e->getMessage());
 		}

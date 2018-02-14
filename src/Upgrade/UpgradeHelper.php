@@ -81,6 +81,30 @@ class UpgradeHelper
 	}
 
 	/**
+	 * Get the Joomla! version
+	 *
+	 * @return  string	The Joomla! version
+	 *
+	 * @since   3.8.0
+	 */
+	public static function getVersionFromDB($site)
+	{
+		$db = \JFactory::getDBO();
+
+		$query = $db->getQuery(true);
+		$query->select($site);
+		$query->from("`#__jupgradepro_version`");
+		$query->limit(1);
+		$db->setQuery($query);
+
+		try {
+			return $db->loadResult();
+		} catch (\RuntimeException $e) {
+			throw new \RuntimeException($e->getMessage());
+		}
+	}
+
+	/**
 	 * Getting the total
 	 *
 	 * @return  int	The total number
@@ -90,7 +114,10 @@ class UpgradeHelper
 	public static function getTotal(\Joomla\DI\Container $container)
 	{
 		$driver = \Jupgradenext\Drivers\Drivers::getInstance($container);
-		return $driver->getTotal();
+
+		$total = $driver->getTotal($container->get('steps')->get('source'));
+
+		return $total;
 	}
 
 	/**

@@ -202,6 +202,20 @@ class Upgrade extends UpgradeBase
 
 		// Before migrate hook
 		if ($this->steps->get('first') == true && $this->steps->get('cid') == 0) {
+
+			// Call to truncate table if needed
+			try
+			{
+				if (method_exists($this, 'truncateTable')) {
+					$this->truncateTable();
+				}
+			}
+			catch (Exception $e)
+			{
+				throw new Exception($e->getMessage());
+			}
+
+			// Call to hook before migrate
 			try
 			{
 				if (method_exists($this, 'beforeHook')) {
@@ -216,7 +230,7 @@ class Upgrade extends UpgradeBase
 
 		// Get the source data.
 		if ($rows === false) {
-			$rows = $this->dataSwitch();
+			$rows = $this->driver->getSourceData();
 		}
 
 		// Call to database method hook
@@ -300,38 +314,6 @@ class Upgrade extends UpgradeBase
 		}
 
 		return $this->ready;
-	}
-
-	/**
-	 * dataSwitch
-	 *
-	 * @return	array	The requested data
-	 * @since	3.0.0
-	 * @throws	Exception
-	 */
-	protected function dataSwitch($name = null)
-	{
-		// Init rows variable
-		$rows = array();
-
-		// Get the method and chunk
-		$site = $this->container->get('sites')->getSite();
-		$method = $site['method'];
-		$chunk = $site['chunk_limit'];
-
-		// TODO: Move this to Drivers
-		switch ($method) {
-			case 'restful':
-				$name = ($name == null) ? $this->steps->_getStepName() : $name;
-
-				$rows = $this->driver->getSourceDataRestList($name, $chunk);
-		    break;
-			case 'database':
-		    $rows = $this->driver->getSourceDatabase();
-		    break;
-		}
-
-		return $rows;
 	}
 
 	/**
@@ -444,6 +426,18 @@ class Upgrade extends UpgradeBase
 		return true;
 	}
 
+	/*
+	 * Fake method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+		return true;
+	}
+
 	/**
  	* Get the table structure
 	*/
@@ -452,14 +446,11 @@ class Upgrade extends UpgradeBase
 		// Get the source table
 		$table = $this->getSourceTable();
 
-		// Get the structure
-		// @@ TODO: move this to Drivers
-		//if ($this->options->get('method') == 'database') {
-			$result = $this->container->get('external')->getTableCreate($table);
-			$structure = str_replace($this->container->get('external')->getPrefix(), "#__", "{$result[$table]} ;\n\n");
-		//}else if ($this->options->get('method') == 'restful') {
-		//	$structure = $this->driver->requestRest("tablestructure", str_replace('#__', '', $table));
-		//}
+		// Get site params
+		$site = $this->container->get('sites')->getSite();
+
+		// Get table structure;
+		$structure = $this->driver->getStructure($table);
 
 		// Create only if not exists
 		$structure = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $structure);

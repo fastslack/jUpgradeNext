@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -38,7 +38,6 @@ class Step extends ModelBase
 		$extensions = (bool) ($extensions != false) ? $extensions : $this->container->get('input')->get('extensions', false);
 
 		// Init step instance
-
 	  $steps = $this->container->get('steps');
 		$steps->load();
 

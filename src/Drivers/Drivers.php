@@ -45,11 +45,7 @@ class Drivers
 	function __construct(\Joomla\DI\Container $container)
 	{
 		$this->container = $container;
-
 		$this->_steps = $container->get('steps');
-
-		// Creating dabatase instance for this installation
-		$this->_db = $container->get('db');
 	}
 
 	/**
@@ -59,7 +55,7 @@ class Drivers
 	 * @return  jUpgradeNext  A jUpgradeNext object.
 	 *
 	 * @since   3.0.0
-	 * @deprecated  3.8.0 
+	 * @deprecated  3.8.0
 	 */
 	static function getInstance(\Joomla\DI\Container $container)
 	{
@@ -87,6 +83,73 @@ class Drivers
 		}
 
 		return $instance;
+	}
+
+	/**
+	 * Get table structure
+	 *
+	 * @return  int  The next id
+	 *
+	 * @since   3.0.0
+	 */
+	public function getStructure($table)
+	{
+		// Get site params
+		$site = $this->container->get('sites')->getSite();
+
+		// Get the structure
+		if ($site['method'] == 'database')
+		{
+			$result = $this->container->get('external')->getTableCreate($table);
+			$structure = str_replace($this->container->get('external')->getPrefix(), "#__", "{$result[$table]} ;\n\n");
+		}
+		else if ($site['method'] == 'restful')
+		{
+			if (strpos($table, '#__') === false)
+			{
+				$table = '#__'.$table;
+			}
+
+			$structure = $this->requestRest("tablestructure", $table);
+		}
+
+		return $structure;
+	}
+
+	/**
+	 * getSource
+	 *
+	 * @return	array	The requested data
+	 * @since	3.0.0
+	 * @throws	Exception
+	 */
+	public function getSourceData($table = null, $chunk = null)
+	{
+		// Init rows variable
+		$rows = array();
+
+		// Get the method and chunk
+		$site = $this->container->get('sites')->getSite();
+		$method = $site['method'];
+		$chunk = $site['chunk_limit'];
+
+		switch ($method) {
+			case 'restful':
+				$table = ($table == null) ? $this->_steps->_getStepName() : $table;
+
+				if (strpos($table, '#__') === false)
+				{
+					$table = '#__'.$table;
+				}
+
+				$rows = $this->getSourceDataRestList($table, $chunk);
+		    break;
+			case 'database':
+		    $rows = $this->getSourceDatabase();
+		    break;
+		}
+
+		return $rows;
 	}
 
 	/**

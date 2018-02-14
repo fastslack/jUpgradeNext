@@ -101,14 +101,14 @@ class Cleanup extends ModelBase
 		}
 
 		// Truncate menu types if menus are enabled
-		if ($skips['skip_core_categories'] != 1)
+		if ($skips['skip_core_categories'] != 1 && $options['keep_ids'] != 1)
 		{
 			$del_tables[] = '#__jupgradepro_categories';
 			$del_tables[] = '#__jupgradepro_default_categories';
 		}
 
 		// Truncate menu types if menus are enabled
-		if ($skips['skip_core_menus'] != 1 && $options['keep_ids'] == 1)
+		if ($skips['skip_core_menus'] != 1 && $options['keep_ids'] != 1)
 		{
 			$del_tables[] = '#__menu_types';
 			$del_tables[] = '#__jupgradepro_menus';
@@ -119,27 +119,18 @@ class Cleanup extends ModelBase
 			$del_tables[] = '#__jupgradepro_modules';
 
 		// Truncate contents if are enabled
-		if ($skips['skip_core_contents'] != 1 && $options['keep_ids'] == 1)
+		if ($skips['skip_core_contents'] != 1 && $options['keep_ids'] != 1)
 			$del_tables[] = '#__content';
 
 		// Truncate usergroups if are enabled
-		if ($skips['skip_core_users'] != 1 && $options['keep_ids'] == 1)
+		if ($skips['skip_core_users'] != 1 && $options['keep_ids'] != 1)
 		{
-			$del_tables[] = '#__usergroups';
-			$del_tables[] = '#__viewlevels';
+			//$del_tables[] = '#__usergroups';
+			//$del_tables[] = '#__viewlevels';
 		}
 
-		// Clean selected tables
-		for ($i=0;$i<count($del_tables);$i++) {
-			$query->clear();
-			$query->delete()->from("{$del_tables[$i]}");
-
-			try {
-				$this->_db->setQuery($query)->execute();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
-			}
-		}
+		// Truncate tables
+		$this->truncateTables($del_tables);
 
 		// Insert default root category
 		if ($skips['skip_core_categories'] != 1)
@@ -167,17 +158,44 @@ class Cleanup extends ModelBase
 		// Done checks
 		if (!UpgradeHelper::isCli())
 		{
-			$current_version = $this->container->get('origin_version');
+			$return = array();
+
+			$return['current_version'] = $this->container->get('origin_version');
 
 			$checks = new Checks($this->container);
-			$ext_version = $checks->checkSite();
+			$return['ext_version'] = $checks->checkSite();
 
-			$return = "[[g;white;]|] [[g;orange;]✓] Current site version: [[g;orange;]{$current_version}] - External site version: [[g;orange;]{$ext_version}]{{NL}}";
-			$return .= "[[g;white;]|] [[g;orange;]✓] Migration method: [[g;orange;]{$options['method']}].{{NL}}";
-			$return .= "[[g;white;]|] [[g;orange;]✓] Cleanup done.";
+			$return['method'] = $options['method'];
 
-			return $return;
+			return json_encode($return);
 		}
+	}
+
+	/**
+	 * Truncate tables
+	 *
+	 * @param		array  $del_tables  The list of tables to truncate.
+	 *
+	 * @return	bool   True if its ok, RuntimeException if not.
+	 *
+	 * @since	3.8
+	 */
+	public function truncateTables ($del_tables)
+	{
+		// Clean selected tables
+		for ($i=0;$i<count($del_tables);$i++)
+		{
+			$query = $this->_db->getQuery(true);
+			$query->delete()->from("{$del_tables[$i]}");
+
+			try {
+				$this->_db->setQuery($query)->execute();
+			} catch (RuntimeException $e) {
+				throw new RuntimeException($e->getMessage());
+			}
+		}
+
+		return true;
 	}
 
 	/**

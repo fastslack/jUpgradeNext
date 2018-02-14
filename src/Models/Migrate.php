@@ -36,7 +36,7 @@ class Migrate extends ModelBase
 	function migrate(\Jupgradenext\Steps\Steps $steps = null) {
 
 		// Init the jUpgradepro instance
-		$jupgrade = new Upgrade($this->container);
+		$jupgrade = Upgrade::loadInstance($this->container);
 
 		if ($steps === null)
 		{
@@ -62,7 +62,7 @@ class Migrate extends ModelBase
 		if ($steps->get('total') > 0) {
 			try
 			{
-				$jupgrade->upgrade();
+				$ret = $jupgrade->upgrade();
 			}
 			catch (RuntimeException $e)
 			{

@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -41,10 +41,13 @@ class DriversRestful extends Drivers
 	{
 		$data = array();
 
+		$options = $this->container->get('sites')->getSite();
+		$optionsRest = (array) json_decode($options['restful']);
+
 		// Setting the headers for REST
-		$rest_username = $this->options->get('restful.username');
-		$rest_password = $this->options->get('restful.password');
-		$rest_key = $this->options->get('restful.key');
+		$rest_username = $optionsRest['rest_username'];
+		$rest_password = $optionsRest['rest_password'];
+		$rest_key = $optionsRest['rest_key'];
 
 		// Setting the headers for REST
 		$str = $rest_username.":".$rest_password;
@@ -79,6 +82,9 @@ class DriversRestful extends Drivers
 		// Http instance
 		$http = new Http();
 
+		$options = $this->container->get('sites')->getSite();
+		$optionsRest = (array) json_decode($options['restful']);
+
 		// Get data
 		$data = $this->getRestData();
 
@@ -86,14 +92,16 @@ class DriversRestful extends Drivers
 		$data['task'] = $task;
 		$data['table'] = ($table !== false) ? $table : '';
 		$data['chunk'] = ($chunk !== false) ? $chunk : '';
-		$data['keepid'] = $this->options->get('keep_ids') ? $this->options->get('keep_ids') : 0;
+		$data['keepid'] = $options['keep_ids'] ? $options['keep_ids'] : 0;
+//echo '<pre>',print_r($data,1),'</pre>';
+		$request = $http->get($optionsRest['rest_hostname'].'/index.php', $data);
 
-		$request = $http->get($this->options->get('restful.hostname').'/index.php', $data);
 
+//echo '<pre>',print_r($request,1),'</pre>';
 		$code = $request->code;
 
 		if ($code == 500) {
-			throw new Exception($request->body);
+			throw new \Exception($request->body);
 		} else {
 			return ($code == 200 || $code == 301) ? $request->body : $code;
 		}
@@ -108,11 +116,11 @@ class DriversRestful extends Drivers
 	 */
 	public function getSourceDataRestList($table = null)
 	{
+		$options = $this->container->get('sites')->getSite();
+		$chunk = $options['chunk_limit'];
+
 		// Declare rows
 		$rows = array();
-
-		$chunk = $this->options->get('chunk_limit');
-
 		$rows = $this->requestRest('rows', $table, $chunk);
 
 		return json_decode($rows);
@@ -124,11 +132,10 @@ class DriversRestful extends Drivers
 	 * @access	public
 	 * @return	int	The total of rows
 	 */
-	public function getTotal()
+	public function getTotal($table)
 	{
-		$total = $this->requestRest('total', $this->_getStepName());
-
-		return (int)$total;
+		$total = $this->requestRest('total', '#__' . $table);
+		return (int) $total;
 	}
 
  /**
