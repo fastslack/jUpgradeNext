@@ -35,10 +35,16 @@ class Usergroups extends UpgradeUsers
 	 */
 	public static function getConditionsHook($container)
 	{
-		$conditions = array();
+		$options = $container->get('sites')->getSite();
 
+		$conditions = array();
 		$conditions['where'] = array();
-		//$conditions['where'][] = "id > 9";
+
+		if ($options['keep_ids'] == 0)
+		{
+			$conditions['where'][] = "id > 9";
+		}
+
 		$conditions['order'] = "id ASC";
 
 		return $conditions;
@@ -53,7 +59,10 @@ class Usergroups extends UpgradeUsers
 	 */
 	public function truncateTable()
 	{
-		parent::truncateTable(true);
+		if ($this->options['keep_ids'] == 1)
+		{
+			parent::truncateTable(true);
+		}
 	}
 
 	/**

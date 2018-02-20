@@ -33,11 +33,16 @@ class Menus_types extends Upgrade
 	 */
 	public static function getConditionsHook($container)
 	{
+		$options = $container->get('sites')->getSite();
+
 		$conditions = array();
 
 		$conditions['select'] = "*";
 
-		$conditions['where'][] = "id != 1";
+		if ($options['keep_ids'] == 0)
+		{
+			$conditions['where'][] = "id != 1";
+		}
 
 		return $conditions;
 	}
@@ -51,6 +56,9 @@ class Menus_types extends Upgrade
 	 */
 	public function truncateTable()
 	{
-		parent::truncateTable(true);
-	}	
+		if ($this->options['keep_ids'] == 1)
+		{
+			parent::truncateTable(true);
+		}
+	}
 }

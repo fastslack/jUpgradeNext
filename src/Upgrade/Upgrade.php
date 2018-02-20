@@ -109,6 +109,9 @@ class Upgrade extends UpgradeBase
 			//}
 		}
 
+		// Get the parameters with global settings
+		$this->options = $container->get('sites')->getSite();
+
 		// MySQL grants check
 		$query = "SHOW GRANTS FOR CURRENT_USER";
 		$this->_db->setQuery( $query );

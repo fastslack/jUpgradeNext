@@ -98,7 +98,6 @@ class Checks extends ModelBase
 			$this->old_tables = json_decode($this->driver->requestRest('tableslist'));
 			$this->old_prefix = substr($this->old_tables[10], 0, strpos($this->old_tables[10], '_')+1);
 
-
 /*
 			// Get component version
 			$ext_version = $this->container->get('version');
@@ -109,7 +108,6 @@ class Checks extends ModelBase
 				throw new Exception('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
 			}
 */
-
 		}
 
 		// Check for bad configurations

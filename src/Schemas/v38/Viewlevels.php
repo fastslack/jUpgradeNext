@@ -26,6 +26,45 @@ use Jupgradenext\Upgrade\UpgradeHelper;
 class Viewlevels extends Upgrade
 {
 	/**
+	 * Setting the conditions hook
+	 *
+	 * @return	array
+	 * @since	  3.6.2
+	 * @throws	Exception
+	 */
+	public static function getConditionsHook($container)
+	{
+		$options = $container->get('sites')->getSite();
+
+		$conditions = array();
+		$conditions['where'] = array();
+
+		if ($options['keep_ids'] == 0)
+		{
+			$conditions['where'][] = "id > 5";
+		}
+
+		$conditions['order'] = "id ASC";
+
+		return $conditions;
+	}
+
+	/*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+		if ($this->options['keep_ids'] == 1)
+		{
+			parent::truncateTable(true);
+		}
+	}
+
+	/**
 	 * Sets the data in the destination database.
 	 *
 	 * @return	void
@@ -40,6 +79,11 @@ class Viewlevels extends Upgrade
 			// Convert the array into an object.
 			$row = (array) $row;
 
+			if ($options['keep_ids'] == 0)
+			{
+				unset($row['id']);
+			}
+
 			//if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.0', '<=')) {
 
 			//}
@@ -47,16 +91,3 @@ class Viewlevels extends Upgrade
 
 		return $rows;
 	}
-
-	/*
-	 * Method to truncate table
-	 *
-	 * @return	void
-	 * @since		3.8.0
-	 * @throws	Exception
-	 */
-	public function truncateTable()
-	{
-		parent::truncateTable(true);
-	}
-}
