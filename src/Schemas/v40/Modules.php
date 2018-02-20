@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -68,8 +68,8 @@ class Modules extends Upgrade
 
 		try {
 			$modules_id = $this->_db->loadResult();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		if ($modules_id > 86) {
@@ -86,8 +86,8 @@ class Modules extends Upgrade
 
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 	}
 
@@ -109,8 +109,8 @@ class Modules extends Upgrade
 		$query->update('#__jupgradepro_steps')->set('status = 2')->where('name = \''.$name.'\'');
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 	}
 

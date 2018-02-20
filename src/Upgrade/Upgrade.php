@@ -25,6 +25,7 @@ use Joomla\Registry\Registry;
 use Jupgradenext\Steps\Steps;
 use Jupgradenext\Drivers\Drivers;
 use Jupgradenext\Models\Checks;
+use Jupgradenext\Models\Cleanup;
 
 /**
  * jUpgradePro utility class for migrations
@@ -108,13 +109,6 @@ class Upgrade extends UpgradeBase
 			//}
 		}
 
-/*
-		// Make sure we can see all errors.
-		if (!empty($this->options->get('error_reporting'))) {
-			error_reporting(E_ALL);
-			@ini_set('display_errors', 1);
-		}
-*/
 		// MySQL grants check
 		$query = "SHOW GRANTS FOR CURRENT_USER";
 		$this->_db->setQuery( $query );
@@ -159,9 +153,9 @@ class Upgrade extends UpgradeBase
 
 			$instance = new $class($container);
 		}
-		catch (RuntimeException $e)
+		catch (Exception $e)
 		{
-			throw new RuntimeException(sprintf('Unable to load Steps object: %s', $e->getMessage()));
+			throw new Exception(sprintf('Unable to load Steps object: %s', $e->getMessage()));
 		}
 
 		return $instance;
@@ -341,7 +335,7 @@ class Upgrade extends UpgradeBase
 					$row = (object) $row;
 
 					try	{
-						//$this->_db->insertObject($table, $row);
+						$this->_db->insertObject($table, $row);
 
 						$this->steps->_nextID($total);
 
@@ -359,7 +353,7 @@ class Upgrade extends UpgradeBase
 			if ($rows != false) {
 				try
 				{
-					//$this->_db->insertObject($table, $rows);
+					$this->_db->insertObject($table, $rows);
 				}
 				catch (Exception $e)
 				{
@@ -427,15 +421,21 @@ class Upgrade extends UpgradeBase
 	}
 
 	/*
-	 * Fake method to truncate table
+	 * Method to truncate table
 	 *
 	 * @return	void
 	 * @since		3.8.0
 	 * @throws	Exception
 	 */
-	public function truncateTable()
+	protected function truncateTable($run = false)
 	{
-		return true;
+		if ($run == true)
+		{
+			$cleanup = new Cleanup($this->container);
+			$cleanup->truncateTables(array($this->getDestinationTable()));
+		}
+
+		return $run;
 	}
 
 	/**

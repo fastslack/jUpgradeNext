@@ -66,10 +66,13 @@ class UpgradeUsers extends Upgrade
 
 		try {
 			$superuser = $this->_db->loadObject();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
+		$this->container->set('origin_super_admin', $superuser);
+
+/*
 		// Update the super user id to 2147483647
 		$query->clear();
 		$query->update("#__users");
@@ -79,8 +82,8 @@ class UpgradeUsers extends Upgrade
 		// Execute the query
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		// Update the user_usergroup_map
@@ -93,9 +96,10 @@ class UpgradeUsers extends Upgrade
 		// Execute the query
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
+*/
 	}
 
 	/**

@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -69,7 +69,7 @@ class Drivers
 		// If the class still doesn't exist we have nothing left to do but throw an exception.  We did our best.
 		if (!class_exists($class_name))
 		{
-			throw new \RuntimeException(sprintf('Unable to load Database Driver: %s', $site['method']));
+			throw new Exception(sprintf('Unable to load Database Driver: %s', $site['method']));
 		}
 
 		// Create our new jUpgradeDriver connector based on the options given.
@@ -77,9 +77,9 @@ class Drivers
 		{
 			$instance = new $class_name($container);
 		}
-		catch (RuntimeException $e)
+		catch (Exception $e)
 		{
-			throw new RuntimeException(sprintf('Unable to load jUpgradeNext object: %s', $e->getMessage()));
+			throw new Exception(sprintf('Unable to load jUpgradeNext object: %s', $e->getMessage()));
 		}
 
 		return $instance;
@@ -135,7 +135,8 @@ class Drivers
 
 		switch ($method) {
 			case 'restful':
-				$table = ($table == null) ? $this->_steps->_getStepName() : $table;
+
+				$table = ($table == null) ? $this->container->get('steps')->get('source') : $table;
 
 				if (strpos($table, '#__') === false)
 				{

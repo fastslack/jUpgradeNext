@@ -70,12 +70,12 @@ class Checks extends ModelBase
 			$this->optionsRest = (array) json_decode($this->options['restful']);
 
 			if (empty($this->optionsRest['rest_hostname']) || empty($this->optionsRest['rest_username']) || empty($this->optionsRest['rest_password']) || empty($this->optionsRest['rest_key']) ) {
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
+				throw new Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
 			if ($this->optionsRest['rest_hostname']== 'http://www.example.org/' || $this->optionsRest['rest_hostname']== '' ||
 					$this->optionsRest['rest_username']== '' || $this->optionsRest['rest_password']== '' || $this->optionsRest['rest_key']== '') {
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
+				throw new Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
 			// Check if Restful and plugin are fine
@@ -83,15 +83,15 @@ class Checks extends ModelBase
 
 			switch ($code) {
 				case 401:
-					throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_501');
+					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_501');
 				case 402:
-					throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_502');
+					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_502');
 				case 403:
-					throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_503');
+					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_503');
 				case 405:
-					throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_505');
+					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_505');
 				case 406:
-					throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_REST_506');
+					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_506');
 			}
 
 			// Get the database parameters
@@ -106,7 +106,7 @@ class Checks extends ModelBase
 			// Compare the versions
 			if (trim($code) != $ext_version)
 			{
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
+				throw new Exception('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
 			}
 */
 
@@ -120,7 +120,7 @@ class Checks extends ModelBase
 			if ($this->optionsDb['db_hostname']== '' || $this->optionsDb['db_username']== ''
 			  || $this->optionsDb['db_name']== '' || $this->optionsDb['db_prefix']== '' )
 			{
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
+				throw new Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
 			}
 
 			// Get external driver
@@ -131,13 +131,12 @@ class Checks extends ModelBase
 			$this->old_prefix = $this->external->getPrefix();
 		}
 
-
 		// Check the external site Joomla! version
 		$external_version = $this->checkSite();
 
 		// Check if the version is fine
 		if (empty($external_version) || empty($origin_version)) {
-			throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_NO_VERSION');
+			throw new Exception('COM_JUPGRADEPRO_ERROR_NO_VERSION');
 		}
 
 		// Save the versions to database
@@ -178,20 +177,22 @@ class Checks extends ModelBase
 		$message = array();
 		$message['status'] = "ERROR";
 
-		// Check if all jupgrade tables are there
 		$query = $this->container->get('db')->getQuery(true);
+
+/*
+		// Check if all jupgrade tables are there
 		$query->select('COUNT(id)');
 		$query->from("`#__jupgradepro_steps`");
 		$this->container->get('db')->setQuery($query);
 		$nine = $this->container->get('db')->loadResult();
 
 		if ($nine < 10) {
-			throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_TABLE_STEPS_NOT_VALID');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_TABLE_STEPS_NOT_VALID');
 		}
-
+*/
 		// Check safe_mode_gid
 		if (@ini_get('safe_mode_gid') && @ini_get('safe_mode')) {
-			throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_DISABLE_SAFE_GID');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_DISABLE_SAFE_GID');
 		}
 
 		// Convert the params to array
@@ -217,7 +218,7 @@ class Checks extends ModelBase
 		}
 
 		if ($flag === false) {
-			throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_SKIPS_ALL');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_SKIPS_ALL');
 		}
 
 		// Checking tables
@@ -229,7 +230,7 @@ class Checks extends ModelBase
 			$content_count = $this->container->get('db')->loadResult();
 
 			if ($content_count > 0) {
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_DATABASE_CONTENT');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CONTENT');
 			}
 		}
 
@@ -242,7 +243,7 @@ class Checks extends ModelBase
 			$users_count = $this->container->get('db')->loadResult();
 
 			if ($users_count > 1) {
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_DATABASE_USERS');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_DATABASE_USERS');
 			}
 		}
 
@@ -255,7 +256,7 @@ class Checks extends ModelBase
 			$categories_count = $this->container->get('db')->loadResult();
 
 			if ($categories_count > 7) {
-				throw new \RuntimeException('COM_JUPGRADEPRO_ERROR_DATABASE_CATEGORIES');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CATEGORIES');
 			}
 		}
 
@@ -311,6 +312,15 @@ class Checks extends ModelBase
 		{
 			$this->old_tables = json_decode($this->driver->requestRest('tableslist'));
 			$this->old_prefix = substr($this->old_tables[10], 0, strpos($this->old_tables[10], '_')+1);
+		}
+		else if (empty($this->old_tables) && $this->options['method'] == 'database')
+		{
+			// Get external driver
+			$this->external = $this->container->get('external');
+
+			// Get the database parameters
+			$this->old_tables = $this->external->getTableList();
+			$this->old_prefix = $this->external->getPrefix();
 		}
 
 		// Trim the prefix value

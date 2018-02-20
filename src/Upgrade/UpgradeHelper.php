@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -73,10 +73,10 @@ class UpgradeHelper
 	{
 		if ($site == 'external_version')
 		{
-			$checks = new Checks($this->container);
+			$checks = new Checks($container);
 			return  $checks->checkSite();
 		}else if ($site == 'origin_version'){
-			return $this->container->get('origin_version');
+			return $container->get('origin_version');
 		}
 	}
 
@@ -99,8 +99,8 @@ class UpgradeHelper
 
 		try {
 			return $db->loadResult();
-		} catch (\RuntimeException $e) {
-			throw new \RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 	}
 

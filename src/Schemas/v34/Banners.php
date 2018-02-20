@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -40,7 +40,7 @@ class Banners extends Upgrade
 			$row = (array) $row;
 
 			// Remove unused fields.
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '2.5', '=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '2.5', '=')) {
 				unset($row['created_by']);
 				unset($row['created_by_alias']);
 				unset($row['modified']);

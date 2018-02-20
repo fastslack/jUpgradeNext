@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -32,12 +32,15 @@ class Categories extends UpgradeCategories
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public static function getConditionsHook($container)	
+	public static function getConditionsHook($container)
 	{
 		$conditions = array();
 		$conditions['select'] = '*';
 
-		if ($options->get('keep_ids') == 1)
+		// Get the parameters with global settings
+		$options = $container->get('sites')->getSite();
+
+		if ($options['keep_ids'] == 1)
 		{
 			$where_or = array();
 			$where_or[] = "extension REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'";
@@ -67,6 +70,9 @@ class Categories extends UpgradeCategories
 		// Get the database query
 		$query = $this->_db->getQuery(true);
 
+		// Get the parameters with global settings
+		$options = $this->container->get('sites')->getSite();
+
 		// Get the destination table
 		$table = $this->getDestinationTable();
 
@@ -76,7 +82,7 @@ class Categories extends UpgradeCategories
 		$this->section = 'com_content';
 
 		// Table::store() run an update if id exists so we create them first
-		if ($this->options->get('keep_ids') == 1)
+		if ($options['keep_ids'] == 1)
 		{
 			foreach ($rows as $category)
 			{
@@ -105,9 +111,9 @@ class Categories extends UpgradeCategories
 				{
 					$this->_db->insertObject($table, $object);
 				}
-				catch (RuntimeException $e)
+				catch (Exception $e)
 				{
-					throw new RuntimeException($this->_db->getErrorMsg());
+					throw new Exception($this->_db->getErrorMsg());
 				}
 			}
 		}

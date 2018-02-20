@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -67,7 +67,7 @@ class Contents extends Upgrade
 			$row['fulltext'] = !empty($row['fulltext']) ? $row['fulltext'] : "###BLANK###";
 
 			// Add tags if Joomla! is greater than 3.1
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '3.1', '>=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.1', '>=')) {
 				$row['metadata'] = $row['metadata'] . "\ntags=";
 			}
 

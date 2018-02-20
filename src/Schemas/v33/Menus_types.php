@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -41,4 +41,16 @@ class Menus_types extends Upgrade
 
 		return $conditions;
 	}
+
+	/*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+		parent::truncateTable(true);
+	}	
 }

@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -34,6 +34,8 @@ class Users extends UpgradeUsers
 	 */
 	public function &databaseHook($rows)
 	{
+		$superuser = $this->container->get('origin_super_admin');
+
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
@@ -58,15 +60,51 @@ class Users extends UpgradeUsers
 	 */
 	public function &dataHook($rows)
 	{
+		$changeId = false;
+
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
 			$row = (array) $row;
 
+			if ($superuser->id == $row['id'])
+			{
+				$changeID = $row['id'];
+			}
+
 			// Remove unused fields.
 			unset($row['otpKey']);
 			unset($row['otep']);
 			unset($row['gid']);
+		}
+
+		// Change id
+		if ($changeId != false)
+		{
+			foreach ($rows as &$row)
+			{
+				$row = (array) $row;
+
+				if ($changeID == $row['id'])
+				{
+					// Get the data
+					$query = $this->_db->getQuery(true);
+					$query->select("u.id");
+					$query->from("#__users AS u");
+					$query->order('u.id DESC');
+					$query->limit(1);
+
+					$this->_db->setQuery($query);
+
+					try {
+						$lastId = $this->_db->loadResult();
+					} catch (Exception $e) {
+						throw new Exception($e->getMessage());
+					}
+
+					$row['id'] = $lastId + 1;
+				}
+			}
 		}
 
 		return $rows;
@@ -81,6 +119,7 @@ class Users extends UpgradeUsers
 	 */
 	public function afterHook()
 	{
+		/*
 		// Updating the super user id to 10
 		$query = $this->_db->getQuery(true);
 		$query->update("#__users");
@@ -89,8 +128,8 @@ class Users extends UpgradeUsers
 		// Execute the query
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		// Updating the user_usergroup_map
@@ -101,8 +140,10 @@ class Users extends UpgradeUsers
 		// Execute the query
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
+		*/
+
 	}
 }

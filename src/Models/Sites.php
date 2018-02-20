@@ -48,8 +48,8 @@ class Sites extends ModelBase
 
 		try {
 			return $return;
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 	}
 

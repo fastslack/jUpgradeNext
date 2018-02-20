@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -169,7 +169,7 @@ class Menus extends UpgradeMenus
 			// Fixing name
 			$row->title = $row->name;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '>='))
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '>='))
 				unset($row->ordering);
 
 			// Not needed
@@ -181,15 +181,15 @@ class Menus extends UpgradeMenus
 			// Bind the data
 			try {
 				$table->bind((array) $row);
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Store to database
 			try {
 				$table->store();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Save the new id in rowmap and row
@@ -223,23 +223,23 @@ class Menus extends UpgradeMenus
 			// Bind the data
 			try {
 				$table->bind((array) $row);
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			$table->setLocation($row->parent, 'last-child');
 
 			try {
 				$table->check();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Store to database
 			try {
 				$table->store();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			$table->rebuildPath($table->id);
@@ -253,8 +253,8 @@ class Menus extends UpgradeMenus
 		// rebuild table
 		try {
 			$table->rebuild();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		return false;

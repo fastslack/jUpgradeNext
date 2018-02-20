@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -13,7 +13,7 @@
 
 namespace Jupgradenext\Upgrade;
 
-use Joomla\Table\Table;
+use Joomla\CMS\Table\Category;
 use Joomla\Event\Dispatcher;
 
 use Jupgradenext\Upgrade\UpgradeHelper;
@@ -129,10 +129,15 @@ class UpgradeCategories extends Upgrade
 	{
 		if (parent::upgrade()) {
 			// Rebuild the categories table
-			$table = Table::getInstance('Category', 'Table', array('dbo' => $this->_db));
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
+			{
+				$category = \Joomla\Table\Table::getInstance('Category', 'JTable', array('dbo' => $this->_db));
+			}else{
+				$category = new Category($this->_db);
+			}
 
-			if (!$table->rebuild()) {
-				throw new Exception($table->getError());
+			if (!$category->rebuild()) {
+				throw new RuntimeException($table->getError());
 			}
 		}
 	}
@@ -149,20 +154,28 @@ class UpgradeCategories extends Upgrade
 		// Get the category table
 		//$category = \Joomla\Table\Table::getInstance('Category', 'JTable', array('dbo' => $this->_db));
 
+/*
 		// Creating a dispatcher.
 		$dispatcher = new Dispatcher;
 
 		$config = array();
 		$config['dbo'] = $this->container->get('db');
 		$config['dispatcher'] = $dispatcher;
+*/
 
-		Table::addIncludePath(dirname(__FILE__));
-		$category = Table::getInstance('Category', 'Table', $config);
+		// Get the content table
+		if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
+		{
+			//\JTable::addIncludePath(dirname(__FILE__));
+			$category = \Joomla\Table\Table::getInstance('Category', 'JTable', array('dbo' => $this->_db));
+		}else{
+			$category = new Category($this->_db);
+		}
 
 		// Disable observers calls
 		// @@ Prevent Joomla! 'Application Instantiation Error' when try to call observers
 		// @@ See: https://github.com/joomla/joomla-cms/pull/3408
-		//if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '3.0', '>=')) {
+		//if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.0', '>=')) {
 			//$category->_observers->doCallObservers(false);
 		//}
 
@@ -205,7 +218,7 @@ class UpgradeCategories extends Upgrade
 			unset($row['id']);
 
 			// Save the parent if old installation is 2.5 or greater
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'old'), '1.5', '>') && $row['parent_id'] != 1)
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.5', '>') && $row['parent_id'] != 1)
 			{
 				$oldlist->section = $row['parent_id'];
 			}else{
@@ -214,10 +227,10 @@ class UpgradeCategories extends Upgrade
 		}else if ($options['keep_ids'] == 1){
 
 			// Save section id if old Joomla! version is 1.0
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'old'), '1.0', '=') && isset($row['section']))
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.0', '=') && isset($row['section']))
 			{
 				$oldlist->section = $row['section'];
-			}else	if (version_compare(UpgradeHelper::getVersion($this->container, 'old'), '1.5', '>') && $row['parent_id'] != 1) {
+			}else	if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.5', '>') && $row['parent_id'] != 1) {
 				$oldlist->section = $row['parent_id'];
 			}
 		}
@@ -245,21 +258,36 @@ class UpgradeCategories extends Upgrade
 		}
 
 		// Bind data to save category
-		if (!$category->bind($row)) {
-			throw new Exception($category->getError());
+		try
+		{
+			$category->bind($row);
+		}
+		catch (RuntimeException $e)
+		{
+			throw new RuntimeException($e->getMessage());
 		}
 
 		// Insert the category
-		if (!$category->store()) {
-			throw new Exception($category->getError());
+		try
+		{
+			$category->store();
+		}
+		catch (RuntimeException $e)
+		{
+			throw new RuntimeException($e->getMessage());
 		}
 
 		// Get new id
 		$oldlist->new = (int) $category->id;
 
 		// Insert the row backup
-		if (!$this->_db->insertObject('#__jupgradepro_categories', $oldlist)) {
-			throw new Exception($this->_db->getErrorMsg());
+		try
+		{
+			$this->_db->insertObject('#__jupgradepro_categories', $oldlist);
+		}
+		catch (RuntimeException $e)
+		{
+			throw new RuntimeException($e->getMessage());
 		}
 
 	 	return true;

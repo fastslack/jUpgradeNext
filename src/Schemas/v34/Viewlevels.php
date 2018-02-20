@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -15,7 +15,6 @@ namespace Jupgradenext\Schemas\v34;
 
 use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
-use Jupgradenext\Models\Cleanup;
 
 /**
  * Upgrade class for weblinks
@@ -58,7 +57,8 @@ class Viewlevels extends Upgrade
 	 */
 	public function truncateTable()
 	{
-
+		$cleanup = new Cleanup($this->container);
+		$cleanup->truncateTables(array($this->getDestinationTable()));
 
 		return true;
 	}

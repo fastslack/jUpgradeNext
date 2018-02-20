@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -71,7 +71,7 @@ class Categories extends UpgradeCategories
 				$row['extension'] = "com_contact";
 			}
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '<=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
 				$row['created_time'] = '1970-01-01 00:00:00';
 				$row['modified_time'] = '1970-01-01 00:00:00';
 				$row['checked_out_time'] = '1970-01-01 00:00:00';
@@ -130,8 +130,8 @@ class Categories extends UpgradeCategories
 
 				try {
 					$this->_db->setQuery($query)->execute();
-				} catch (RuntimeException $e) {
-					throw new RuntimeException($e->getMessage());
+				} catch (Exception $e) {
+					throw new Exception($e->getMessage());
 				}
 
 				$l = $l + 2 ;

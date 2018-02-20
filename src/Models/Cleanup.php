@@ -78,6 +78,12 @@ class Cleanup extends ModelBase
 
 						// Disable the sections step
 						$this->updateStep('usergroupmap');
+
+						// Disable the sections step
+						$this->updateStep('usergroups');
+
+						// Disable the sections step
+						$this->updateStep('viewlevels');
 					}
 
 					if ($name == 'categories') {
@@ -110,7 +116,7 @@ class Cleanup extends ModelBase
 		// Truncate menu types if menus are enabled
 		if ($skips['skip_core_menus'] != 1 && $options['keep_ids'] != 1)
 		{
-			$del_tables[] = '#__menu_types';
+			//$del_tables[] = '#__menu_types';
 			$del_tables[] = '#__jupgradepro_menus';
 		}
 
@@ -120,7 +126,7 @@ class Cleanup extends ModelBase
 
 		// Truncate contents if are enabled
 		if ($skips['skip_core_contents'] != 1 && $options['keep_ids'] != 1)
-			$del_tables[] = '#__content';
+			//$del_tables[] = '#__content';
 
 		// Truncate usergroups if are enabled
 		if ($skips['skip_core_users'] != 1 && $options['keep_ids'] != 1)
@@ -141,8 +147,8 @@ class Cleanup extends ModelBase
 				$query->delete()->from("#__categories")->where("id > 1");
 				try {
 					$this->_db->setQuery($query)->execute();
-				} catch (RuntimeException $e) {
-					throw new RuntimeException($e->getMessage());
+				} catch (Exception $e) {
+					throw new Exception($e->getMessage());
 				}
 			}
 
@@ -150,8 +156,8 @@ class Cleanup extends ModelBase
 			$query->insert('#__jupgradepro_categories')->columns('`old`, `new`')->values("0, 2");
 			try {
 				$this->_db->setQuery($query)->execute();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 		}
 
@@ -176,12 +182,17 @@ class Cleanup extends ModelBase
 	 *
 	 * @param		array  $del_tables  The list of tables to truncate.
 	 *
-	 * @return	bool   True if its ok, RuntimeException if not.
+	 * @return	bool   True if its ok, Exception if not.
 	 *
 	 * @since	3.8
 	 */
 	public function truncateTables ($del_tables)
 	{
+		if (empty($this->_db))
+		{
+			$this->_db = $this->container->get('db');
+		}
+
 		// Clean selected tables
 		for ($i=0;$i<count($del_tables);$i++)
 		{
@@ -190,8 +201,8 @@ class Cleanup extends ModelBase
 
 			try {
 				$this->_db->setQuery($query)->execute();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 		}
 
@@ -209,17 +220,17 @@ class Cleanup extends ModelBase
 	 */
 	public function updateStep ($name)
 	{
-		// Get the version
-		$version = UpgradeHelper::getVersion($this->container, 'old');
+		// Get the external version
+		$external_version = UpgradeHelper::getVersion($this->container, 'external_version');
 
 		// Get the JQuery object
 		$query = $this->_db->getQuery(true);
 
-		$query->update('#__jupgradepro_steps')->set('status = 2')->where('name = \''.$name.'\'')->where('version = \''.$version.'\'');
+		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where('t.name = \''.$name.'\'');
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 	}
 

@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -112,8 +112,8 @@ class Categories extends UpgradeCategories
 
 				try {
 					$this->_db->setQuery($query)->execute();
-				} catch (RuntimeException $e) {
-					throw new RuntimeException($e->getMessage());
+				} catch (Exception $e) {
+					throw new Exception($e->getMessage());
 				}
 			}
 		}

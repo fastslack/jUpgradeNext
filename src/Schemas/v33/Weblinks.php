@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -57,7 +57,7 @@ class Weblinks extends Upgrade
 			// Convert the array into an object.
 			$row = (array) $row;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '<=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
 				$row['created'] = $row['date'];
 				unset($row['approved']);
 				unset($row['archived']);
@@ -66,7 +66,7 @@ class Weblinks extends Upgrade
 			}
 
 			// Remove unused fields.
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '2.5', '=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '2.5', '=')) {
 				unset($row['version']);
 				unset($row['images']);
 			}

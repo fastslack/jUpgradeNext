@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -64,9 +64,10 @@ class Menus extends UpgradeMenus
 	{
 		$table	= $this->getDestinationTable();
 
-		// Getting the extensions id's of the new Joomla installation
-		$query = "SELECT extension_id, element"
-		." FROM #__extensions";
+		// Get extensions id's of the new Joomla installation
+		$query = $this->_db->getQuery(true);
+		$query->select('e.extension_id, e.element');
+		$query->from('#__extensions AS e');
 		$this->_db->setQuery($query);
 		$extensions_ids = $this->_db->loadObjectList('element');
 

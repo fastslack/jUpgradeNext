@@ -80,9 +80,9 @@ class Steps extends Registry
 		{
 			$instance = new Steps($container);
 		}
-		catch (RuntimeException $e)
+		catch (Exception $e)
 		{
-			throw new RuntimeException(sprintf('Unable to load Steps object: %s', $e->getMessage()));
+			throw new Exception(sprintf('Unable to load Steps object: %s', $e->getMessage()));
 		}
 
 		return $instance;
@@ -169,8 +169,8 @@ class Steps extends Registry
 
 		try {
 			$step['laststep'] = $this->_db->loadResult();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		return $step;

@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -67,7 +67,7 @@ class Contents extends Upgrade
 			$row['alias'] = !empty($row['alias']) ? $row['alias'] : "###BLANK###";
 
 			// Add tags if Joomla! is greater than 3.1
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '3.1', '>=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.1', '>=')) {
 				$row['metadata'] = $row['metadata'] . "\ntags=";
 			}
 
@@ -76,26 +76,34 @@ class Contents extends Upgrade
 			$object->id = $row['id'];
 
 			// Inserting the content
-			if (!$this->_db->insertObject($table, $object)) {
-				throw new Exception($this->_db->getErrorMsg());
+			try {
+				$this->_db->insertObject($table, $object);
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Get the content table
 			$content = Table::getInstance('Content', 'Table', array('dbo' => $this->_db));
 
 			// Bind data to save content
-			if (!$content->bind($row)) {
-				throw new Exception($content->getError());
+			try {
+				$content->bind($row);
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Check the content
-			if (!$content->check()) {
-				throw new Exception($content->getError());
+			try {
+				$content->check();
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Insert the content
-			if (!$content->store()) {
-				throw new Exception($content->getError());
+			try {
+				$content->store();
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Updating the steps table

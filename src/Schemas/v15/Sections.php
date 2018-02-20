@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -125,7 +125,7 @@ class Sections extends UpgradeCategories
 		// Change protected to $observers object to disable it
 		// @@ Prevent Joomla! 'Application Instantiation Error' when try to call observers
 		// @@ See: https://github.com/joomla/joomla-cms/pull/1.0
-		if (version_compare(UpgradeHelper::getVersion($this->container, 'new'), '1.0', '<=')) {
+		if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
 			$file = JPATH_LIBRARIES.'/joomla/observer/updater.php';
 			$read = JFile::read($file);
 			$read = str_replace("//call_user_func_array(\$eventListener, \$params)", "call_user_func_array(\$eventListener, \$params)", $read);

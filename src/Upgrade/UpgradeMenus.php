@@ -4,7 +4,7 @@
  *
  * @version $Id:
  * @package jUpgradeNext
- * @copyright Copyright (C) 2004 - 2016 Matware. All rights reserved.
+ * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
  * @link http://www.matware.com.ar/
@@ -34,17 +34,20 @@ class UpgradeMenus extends Upgrade
 	 */
 	public function beforeHook()
 	{
+		// Get the parameters with global settings
+		$options = $this->container->get('sites')->getSite();
+
 		// Insert needed value
 		$query = $this->_db->getQuery(true);
 		$query->insert('#__jupgradepro_menus')->columns('`old`, `new`')->values("0, 0");
 
 		try {
 			$this->_db->setQuery($query)->execute();
-		} catch (RuntimeException $e) {
-			throw new RuntimeException($e->getMessage());
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
-		if ($this->options->get('keep_ids') == 1)
+		if ($options['keep_ids'] == 1)
 		{
 			// Clear the default database
 			$query->clear();
@@ -52,14 +55,14 @@ class UpgradeMenus extends Upgrade
 
 			try {
 				$this->_db->setQuery($query)->execute();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			// Getting the menus
 			$query->clear();
 			// 3.0 Changes
-			if (version_compare(UpgradeproHelper::getVersion('new'), '3.0', '>=')) {
+			if (version_compare(UpgradeproHelper::getVersion($this->container, 'origin_version'), '3.0', '>=')) {
 				$query->select("`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`");
 			}else{
 				$query->select("`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`");
@@ -73,8 +76,8 @@ class UpgradeMenus extends Upgrade
 
 			try {
 				$menus = $this->_db->loadObjectList();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 
 			foreach ($menus as $menu)
@@ -84,8 +87,8 @@ class UpgradeMenus extends Upgrade
 
 				try {
 					$this->_db->insertObject('#__jupgradepro_default_menus', $menu);
-				} catch (RuntimeException $e) {
-					throw new RuntimeException($e->getMessage());
+				} catch (Exception $e) {
+					throw new Exception($e->getMessage());
 				}
 			}
 
@@ -95,8 +98,8 @@ class UpgradeMenus extends Upgrade
 
 			try {
 				$this->_db->setQuery($query)->execute();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
 			}
 		}
 	}
