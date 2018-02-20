@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v34;
+namespace Jupgradenext\Schemas\v31;
 
 use Joomla\Filter\OutputFilter;
 use Joomla\Event\Dispatcher;
