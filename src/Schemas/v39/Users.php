@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v40;
+namespace Jupgradenext\Schemas\v39;
 
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\UpgradeUsers;
@@ -34,6 +34,8 @@ class Users extends UpgradeUsers
 	 */
 	public function &databaseHook($rows)
 	{
+		$superuser = $this->container->get('origin_super_admin');
+
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
@@ -72,37 +74,4 @@ class Users extends UpgradeUsers
 		return $rows;
 	}
 
-	/*
-	 * Fake method after hooks
-	 *
-	 * @return	void
-	 * @since	1.0
-	 * @throws	Exception
-	 */
-	public function afterHook()
-	{
-		// Updating the super user id to 10
-		$query = $this->_db->getQuery(true);
-		$query->update("#__users");
-		$query->set("`id` = 2");
-		$query->where("id = 2147483647");
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		// Updating the user_usergroup_map
-		$query->clear();
-		$query->update("#__user_usergroup_map");
-		$query->set("`user_id` = 2");
-		$query->where("`user_id` = 2147483647");
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-	}
 }

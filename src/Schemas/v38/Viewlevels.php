@@ -76,18 +76,17 @@ class Viewlevels extends Upgrade
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
-			// Convert the array into an object.
-			$row = (array) $row;
-
-			if ($options['keep_ids'] == 0)
+			foreach ($rows as &$row)
 			{
-				unset($row['id']);
+				$row = (object) $row;
+
+				if ($this->valueExists($row, array('title')))
+				{
+					$row->title = $row->title ."-".rand(0, 99999999);
+				}
 			}
-
-			//if (version_compare(UpgradeHelper::getVersion($this->container, 'external_version'), '1.0', '<=')) {
-
-			//}
 		}
 
 		return $rows;
 	}
+}

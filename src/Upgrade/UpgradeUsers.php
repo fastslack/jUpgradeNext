@@ -30,7 +30,7 @@ class UpgradeUsers extends Upgrade
 	 */
 	protected	$usergroup_map = array(
 			// Old	=> // New
-			0		=> 0,	// ROOT
+			0     => 0,	// ROOT
 			28		=> 1,	// USERS (=Public)
 			29		=> 1,	// Public Frontend
 			17		=> 2,	// Registered
@@ -93,6 +93,43 @@ class UpgradeUsers extends Upgrade
 		$query->where("`group_id` = 8");
 		$query->where("`user_id` = {$superuser->id}");
 
+		// Execute the query
+		try {
+			$this->_db->setQuery($query)->execute();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
+		}
+*/
+	}
+
+	/*
+	 * Fake method after hooks
+	 *
+	 * @return	void
+	 * @since	1.00
+	 * @throws	Exception
+	 */
+	public function afterHook()
+	{
+
+/*
+		// Updating the super user id to 10
+		$query = $this->_db->getQuery(true);
+		$query->update("#__users");
+		$query->set("`id` = 2");
+		$query->where("id = 2147483647");
+		// Execute the query
+		try {
+			$this->_db->setQuery($query)->execute();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
+		}
+
+		// Updating the user_usergroup_map
+		$query->clear();
+		$query->update("#__user_usergroup_map");
+		$query->set("`user_id` = 2");
+		$query->where("`user_id` = 2147483647");
 		// Execute the query
 		try {
 			$this->_db->setQuery($query)->execute();

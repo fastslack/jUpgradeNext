@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v38;
+namespace Jupgradenext\Schemas\v39;
 
 use Jupgradenext\Upgrade\UpgradeUsers;
 
@@ -88,8 +88,17 @@ class Usergroups extends UpgradeUsers
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
-			$row = (array) $row;
+			$row = (object) $row;
 
+			if ($this->valueExists($row, array('title')))
+			{
+				$row->title = $row->title ."-".rand(0, 99999999);
+			}
+
+			if (!empty($row->user_id) && $this->valueExists($row, array('user_id')))
+			{
+				$row->user_id = $this->getNewId('#__users', $row->user_id);
+			}
 		}
 
 		return $rows;

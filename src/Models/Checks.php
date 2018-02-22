@@ -219,8 +219,25 @@ class Checks extends ModelBase
 			throw new \Exception('COM_JUPGRADEPRO_ERROR_SKIPS_ALL');
 		}
 
+		// Checking for other migrations
+		$query->clear();
+		$query->select('cid');
+		$query->from("`#__jupgradepro_steps`");
+		$query->where("cid != 0");
+		$this->container->get('db')->setQuery($query);
+		$latest_migration = $this->container->get('db')->loadObjectList();
+
+		if (count($latest_migration) != 0) {
+			$this->returnError (409, 'COM_JUPGRADEPRO_ERROR_LATEST_MIGRATION');
+		}else{
+			// Set all cid, status and cache to 0
+			$query->clear();
+			$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, stop = 0, first = 0, debug = \'\'');
+			$this->container->get('db')->setQuery($query)->execute();
+		}
+
 		// Checking tables
-		if ($core_skips->skip_core_contents != 1 && $this->options['keep_ids']== 1) {
+		if ($core_skips->skip_core_contents != 1 && $this->options['keep_ids'] == 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
 			$query->from("`#__content`");
@@ -233,7 +250,7 @@ class Checks extends ModelBase
 		}
 
 		// Checking tables
-		if ($core_skips->skip_core_users != 1) {
+		if ($core_skips->skip_core_users != 1 && $this->options['keep_ids'] == 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
 			$query->from("`#__users`");

@@ -56,11 +56,6 @@ class Cleanup extends ModelBase
 			$code = $driver->requestRest('cleanup');
 		}
 
-		// Set all cid, status and cache to 0
-		$query = $this->_db->getQuery(true);
-		$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, stop = 0, first = 0, debug = \'\'');
-		$this->_db->setQuery($query)->execute();
-
 		// Skiping the steps setted by user
 		foreach ($skips as $k => $v) {
 			$core = substr($k, 0, 9);
@@ -137,6 +132,8 @@ class Cleanup extends ModelBase
 
 		// Truncate tables
 		$this->truncateTables($del_tables);
+
+		$query = $this->container->get('db')->getQuery(true);
 
 		// Insert default root category
 		if ($skips['skip_core_categories'] != 1)

@@ -323,6 +323,7 @@ class Upgrade extends UpgradeBase
 	protected function insertData($rows)
 	{
 		$table = $this->getDestinationTable();
+		$key = $this->getDestKeyName();
 
 		// Replacing the table name if xml exists
 		$table = $this->replaceTable($table);
@@ -338,7 +339,25 @@ class Upgrade extends UpgradeBase
 					$row = (object) $row;
 
 					try	{
+
+						$saveId = new \stdClass();
+						$saveId->table = $table;
+
+						// Check if it exists
+						if (isset($row->id) && $this->valueExists($row, array($key)))
+						{
+							$saveId->old_id = isset($row->$key) ? (int) $row->$key : 0;
+							unset($row->$key);
+						}
+
 						$this->_db->insertObject($table, $row);
+
+						$saveId->new_id = (int) $this->_db->insertid();
+
+						if (!empty($saveId->old_id) && $saveId->old_id != $saveId->new_id)
+						{
+							$this->_db->insertObject('#__jupgradepro_old_ids', $saveId);
+						}
 
 						$this->steps->_nextID($total);
 
@@ -500,13 +519,19 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getDestKeyName()
 	{
-		$table = $this->getDestinationTable();
+		$return = $this->steps->get('tbl_key');
 
-		$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
-		$this->_db->setQuery( $query );
-		$keys = $this->_db->loadObjectList();
+		if (empty($return))
+		{
+			$table = $this->getDestinationTable();
 
-		return !empty($keys) ? $keys[0]->Column_name : '';
+			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
+			$this->_db->setQuery( $query );
+			$keys = $this->_db->loadObjectList();
+			$return = !empty($keys) ? $keys[0]->Column_name : '';
+		}
+
+		return $return;
 	}
 
 	/**
@@ -516,18 +541,31 @@ class Upgrade extends UpgradeBase
 	 */
 	public function valueExists($row, $fields)
 	{
+		$query = $this->_db->getQuery(true);
+
 		$table = $this->getSourceTable();
 		$key = $this->getDestKeyName();
-		$value = $row->$key;
+
+		// Query
+		$query->select($key);
+		$query->from($table);
 
 		$conditions = array();
 		foreach ($fields as $field) {
-			$conditions[] = "{$field} = {$row->$field}";
+			if (!empty($row->$field))
+			{
+				if (is_string($row->$field))
+				{
+					$cond = $this->_db->quote($row->$field);
+				} else {
+					$cond = $row->$field;
+				}
+				$query->where("{$field} = {$cond}");
+			}
 		}
+		$query->limit(1);
+		$query->setLimit(1);
 
-		$where = count( $conditions ) ? 'WHERE ' . implode( ' AND ', $conditions ) : '';
-
-		$query = "SELECT `{$key}` FROM {$table} {$where} LIMIT 1";
 		$this->_db->setQuery( $query );
 		$exists = $this->_db->loadResult();
 
@@ -720,6 +758,45 @@ class Upgrade extends UpgradeBase
 	public function getDestinationTable()
 	{
 		return '#__'.$this->steps->get('destination');
+	}
+
+	/**
+	 * Get the new id
+	 *
+	 * @param	string	$table	The table to search.
+	 * @param	int	    $old_id	The old id to search.
+	 *
+	 * @return	int	The new_id
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function getNewId($table, $old_id)
+	{
+		// Get query instance
+		$query = $this->_db->getQuery(true);
+
+		// Quote params
+		$table = $this->_db->quote($table);
+		$old_id = $this->_db->quote($old_id);
+
+		// Query
+		$query->select("new_id");
+		$query->from("#__jupgradepro_old_ids AS ids");
+		$query->where("`table` = {$table}");
+		$query->where("`old_id` = {$old_id}");
+		$query->order("`id` DESC");
+		$query->setLimit(1);
+
+		$this->_db->setQuery($query);
+
+		try
+		{
+			return (int) $this->_db->loadResult();
+		}
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
 	}
 
 	/**
