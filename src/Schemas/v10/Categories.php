@@ -93,7 +93,7 @@ class Categories extends UpgradeCategories
 		$total = count($rows);
 
 		// Table::store() run an update if id exists so we create them first
-		if ($this->options->get('keep_ids') == 1)
+		if ($this->options['keep_ids'] == 1)
 		{
 			foreach ($rows as $category)
 			{
@@ -124,7 +124,7 @@ class Categories extends UpgradeCategories
 			$category = (array) $category;
 
 			// Check if id = 1
-			if ($category['id'] == 1 && $this->options->get('keep_ids') == 1) {
+			if ($category['id'] == 1 && $this->options['keep_ids'] == 1) {
 				// Set correct values
 				$category['root_id'] = 1;
 				unset($category['id']);

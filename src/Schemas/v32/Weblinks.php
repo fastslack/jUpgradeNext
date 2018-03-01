@@ -57,7 +57,7 @@ class Weblinks extends Upgrade
 			// Convert the array into an object.
 			$row = (array) $row;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '>=')) {
 				$row['created'] = $row['date'];
 				unset($row['approved']);
 				unset($row['archived']);

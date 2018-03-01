@@ -110,10 +110,15 @@ class Usergroupmap extends UpgradeUsers
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
-			$row = (array) $row;
+			$row = (object) $row;
 
-			if (empty($row['user_id'])) {
+			if (empty($row->user_id)) {
 				$row = false;
+			}
+
+			if (!empty($row->user_id) && $this->valueExists($row, array('aro_id')))
+			{
+				$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
 			}
 		}
 

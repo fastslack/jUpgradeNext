@@ -24,4 +24,33 @@ use Jupgradenext\Upgrade\Upgrade;
  */
 class Menus_types extends Upgrade
 {
+  /**
+	 * Setting the conditions hook
+	 *
+	 * @return	void
+	 * @since	1.0
+	 * @throws	Exception
+	 */
+	public static function getConditionsHook($container)
+	{
+		$conditions = array();
+
+		$conditions['select'] = "*";
+
+		$conditions['where'][] = "id != 1";
+
+		return $conditions;
+	}
+
+  /*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable()
+	{
+		parent::truncateTable(true);
+	}
 }

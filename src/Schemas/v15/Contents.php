@@ -13,12 +13,10 @@
 
 namespace Jupgradenext\Schemas\v15;
 
-use Joomla\Filter\OutputFilter;
-use Joomla\Event\Dispatcher;
-
 use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
-use Joomla\Table\Table;
+use Joomla\Filter\OutputFilter;
+use Joomla\CMS\Table\Content;
 
 /**
  * Upgrade class for content
@@ -116,7 +114,7 @@ class Contents extends Upgrade
 	*/
 	public function dataHook($rows = null)
 	{
-		
+
 		$table	= $this->getDestinationTable();
 
 		// Get category mapping
@@ -162,7 +160,7 @@ class Contents extends Upgrade
 			// Converting the metadata to JSON
 			$row['metadata'] = $this->convertParams($row['metadata'], false);
 
-			if ($this->options->get('keep_ids') == 1)
+			if ($this->options['keep_ids'] == 1)
 			{
 				// Table:store() run an update if id exists into the object so we create them first
 				$object = new stdClass();
@@ -178,15 +176,8 @@ class Contents extends Upgrade
 				unset($row['id']);
 			}
 
-			// Create a dispatcher.
-			$dispatcher = new Dispatcher;
-
-			$config = array();
-			$config['dbo'] = $this->_db;
-			$config['dispatcher'] = $dispatcher;
-
 			// Get the content table
-			$content = Table::getInstance('Content', 'Table', $config);
+			$content = new Content($this->_db);
 
 			// Aliases
 			$row['alias'] = !empty($row['alias']) ? $row['alias'] : "###BLANK###";
@@ -201,6 +192,15 @@ class Contents extends Upgrade
 				// Set the modified alias
 				$row['alias'] .= "-".rand(0, 99999999);
 			}
+
+			// Fix separator field (??)
+			unset($content->separator);
+
+			// Unset unused fields
+			unset($row['title_alias']);
+			unset($row['sectionid']);
+			unset($row['mask']);
+			unset($row['parentid']);
 
 			// Bind data to save content
 			if (!$content->bind($row)) {
@@ -232,7 +232,7 @@ class Contents extends Upgrade
 	 */
 	public function afterHook()
 	{
-		$this->fixComponentConfiguration();
+		//$this->fixComponentConfiguration();
 		//$this->updateFeature();
 	}
 

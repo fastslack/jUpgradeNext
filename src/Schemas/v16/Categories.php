@@ -37,7 +37,7 @@ class Categories extends UpgradeCategories
 		$conditions = array();
 		$conditions['select'] = '*';
 
-		if ($this->options->get('keep_ids') == 1)
+		if ($this->options['keep_ids'] == 1)
 		{
 			$where_or = array();
 			$where_or[] = "extension REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'";
@@ -95,7 +95,7 @@ class Categories extends UpgradeCategories
 		$rootidmap = 0;
 
 		// Table::store() run an update if id exists so we create them first
-		if ($this->options->get('keep_ids') == 1)
+		if ($this->options['keep_ids'] == 1)
 		{
 			foreach ($rows as $category)
 			{

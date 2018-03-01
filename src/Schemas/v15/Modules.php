@@ -185,7 +185,7 @@ class Modules extends Upgrade
 			$row = (object) $row;
 
 			## Change positions
-			if ($this->options->get('positions') == 0) {
+			if (isset($this->options['positions']) && $this->options['positions'] == 0) {
 				if (in_array($row->position, $map_keys)) {
 						$row->position = $map[$row->position];
 				}

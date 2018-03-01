@@ -34,6 +34,7 @@ class Users extends UpgradeUsers
 	 */
 	public function afterHook()
 	{
+		/*
 		// Updating the super user id to 10
 		$query = $this->_db->getQuery(true);
 		$query->update("#__users");
@@ -56,7 +57,7 @@ class Users extends UpgradeUsers
 			$this->_db->setQuery($query)->execute();
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
-		}
+		}*/
 	}
 
 	/**
@@ -92,12 +93,14 @@ class Users extends UpgradeUsers
 	 */
 	public function dataHook($rows)
 	{
+		$origin_version = UpgradeHelper::getVersion($this->container, 'origin_version');
+
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)
 		{
 			$row = (array) $row;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
+			if (version_compare($origin_version, '1.0', '>=')) {
 				unset($row['usertype']);
 				if (isset($row['uid'])) {
 					unset($row['uid']);

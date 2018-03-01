@@ -52,5 +52,5 @@ class Menus_types extends Upgrade
 	public function truncateTable()
 	{
 		parent::truncateTable(true);
-	}	
+	}
 }

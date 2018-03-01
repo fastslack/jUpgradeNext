@@ -60,7 +60,7 @@ class Contacts extends Upgrade
 		{
 			$row = (array) $row;
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '>=')) {
 				unset($row['imagepos']);
 			}
 		}

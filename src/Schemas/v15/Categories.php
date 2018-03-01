@@ -71,7 +71,7 @@ class Categories extends UpgradeCategories
 				$row['extension'] = "com_contact";
 			}
 
-			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '<=')) {
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '>=')) {
 				$row['created_time'] = '1970-01-01 00:00:00';
 				$row['modified_time'] = '1970-01-01 00:00:00';
 				$row['checked_out_time'] = '1970-01-01 00:00:00';
@@ -103,7 +103,7 @@ class Categories extends UpgradeCategories
 		$total = count($rows);
 
 		// Table::store() run an update if id exists so we create them first
-		if ($this->options->get('keep_ids') == 1)
+		if ($this->options['keep_ids'] == 1)
 		{
 			$l = 1;
 
