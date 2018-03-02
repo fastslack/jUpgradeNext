@@ -91,7 +91,7 @@ class Weblinks extends Upgrade
 				unset($row['archived']);
 				unset($row['date']);
 				unset($row['sid']);
-				unset($row['sid']);				
+				unset($row['state']);
 			}
 
 			unset($row['published']);

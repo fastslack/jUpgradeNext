@@ -170,18 +170,22 @@ class UpgradeUsers extends Upgrade
 	protected function getUserIdAroMap($aro_id)
 	{
 		// Get the version
-		$old_version = UpgradeHelper::getVersion('external_version');
+		$old_version = UpgradeHelper::getVersion($this->container, 'external_version');
+
 		// Get thge correct table key
 		$key = ($old_version == '1.0') ? 'aro_id' : 'id';
 
-		$this->_driver->_db_old->setQuery(
-			'SELECT value' .
-			' FROM #__core_acl_aro' .
-			' WHERE '.$key.' = '.$aro_id
-		);
+		// Get the data
+		$query = $this->container->get('external')->getQuery(true);
+		$query->select("u.value");
+		$query->from("#__core_acl_aro AS u");
+		$query->where("{$key} = {$aro_id}");
+		$query->limit(1);
 
-		$return	= $this->_driver->_db_old->loadResult();
-		$error	= $this->_driver->_db_old->getErrorMsg();
+		$this->container->get('external')->setQuery( $query );
+
+		$return	= $this->container->get('external')->loadResult();
+		$error	= $this->container->get('external')->getErrorMsg();
 
 		// Check for query error.
 		if ($error) {

@@ -127,8 +127,8 @@ class Steps extends Registry
 		}
 
 		$external_version = str_replace(".", "", $external_version);
-		//$orig_ver = str_replace(".", "", $origin_version);
-		//$query->where("{$origin_version} BETWEEN e.from AND e.to");
+		$origin_version = str_replace(".", "", $origin_version);
+		$query->where("{$origin_version} BETWEEN e.from AND e.to");
 		$query->where("{$external_version} BETWEEN e.from AND e.to");
 
 		$query->order('e.id ASC');
@@ -161,6 +161,7 @@ class Steps extends Registry
 		}
 
 		$query->where("{$external_version} BETWEEN t.from AND t.to");
+		$query->where("{$origin_version} BETWEEN t.from AND t.to");
 
 		$query->order('t.id DESC');
 		$query->limit(1);
