@@ -25,7 +25,8 @@
         "joomla/string": "~1.0",
         "matware-lab/access": "~1.0",
         "matware-lab/table": "~1.0",
-        "ghostff/dump5": "^1.0"
+        "ghostff/dump5": "^1.0",
+        "illuminate/database": "*"
     },
     "autoload": {
         "psr-4": {
@@ -50,6 +51,7 @@
             "Jupgradenext\\Schemas\\v39\\": "src/Schemas/v39",
             "Jupgradenext\\Schemas\\v40\\": "src/Schemas/v40",
             "Jupgradenext\\Steps\\": "src/Steps",
+            "Jupgradenext\\Tables\\": "src/Tables",
             "Jupgradenext\\Upgrade\\": "src/Upgrade"
         }
     },
