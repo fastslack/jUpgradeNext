@@ -74,7 +74,7 @@ class UpgradeHelper
 		if ($site == 'external_version')
 		{
 			$checks = new Checks($container);
-			return  $checks->checkSite();
+			return $checks->checkSite();
 		}else if ($site == 'origin_version'){
 			return $container->get('origin_version');
 		}

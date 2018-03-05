@@ -46,6 +46,15 @@ class Cleanup extends ModelBase
 		// Get the db instance
 		$this->_db = $this->container->get('db');
 
+		// Check if sites DB options are correct.
+		if ($options['method'] == 'database')
+		{
+			if ($this->container->get('external')->connected() == false)
+			{
+				$this->returnError(500, 'COM_JUPGRADEPRO_ERROR_CANNOT_CONNECT_TO_DB');
+			}
+		}
+
 		// Initialise the tables array
 		$del_tables = array();
 

@@ -93,6 +93,8 @@ class Sites extends ModelBase
 
 		$dbo = DatabaseDriver::getInstance($configDbo);
 
+		$dbo->connect();
+
     return $dbo;
 	}
 
