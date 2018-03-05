@@ -151,17 +151,8 @@ class UpgradeCategories extends Upgrade
 	 */
 	public function insertCategory($row, $parent = false)
 	{
-		// Get the category table
-		//$category = \Joomla\Table\Table::getInstance('Category', 'JTable', array('dbo' => $this->_db));
-
-/*
-		// Creating a dispatcher.
-		$dispatcher = new Dispatcher;
-
-		$config = array();
-		$config['dbo'] = $this->container->get('db');
-		$config['dispatcher'] = $dispatcher;
-*/
+		// Get the parameters with global settings
+		$options = $this->container->get('sites')->getSite();
 
 		// Get the content table
 		if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))

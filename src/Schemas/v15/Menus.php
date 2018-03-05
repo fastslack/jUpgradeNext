@@ -13,11 +13,9 @@
 
 namespace Jupgradenext\Schemas\v15;
 
-use Joomla\Event\Dispatcher;
-
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\UpgradeMenus;
-use Joomla\Table\Table;
+use Joomla\CMS\Table\Menu;
 use stdClass;
 
 /**
@@ -105,15 +103,17 @@ class Menus extends UpgradeMenus
 
 		$oldnewmap = array();
 
-		// Create a dispatcher.
-		$dispatcher = new Dispatcher;
+		// Get the parameters with global settings
+		$options = $this->container->get('sites')->getSite();
 
-		$config = array();
-		$config['dbo'] = $this->_db;
-		$config['dispatcher'] = $dispatcher;
-
-		// Getting the table and query
-		$table = Table::getInstance('Menu', 'Table', $config);
+		// Get the content table
+		if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
+		{
+			//\JTable::addIncludePath(dirname(__FILE__));
+			$table = \JTable::getInstance('Menu', 'JTable', array('dbo' => $this->_db));
+		}else{
+			$table = new Menu($this->_db);
+		}
 
 		// Start the update
 		foreach ($rows as &$row)
@@ -286,13 +286,20 @@ class Menus extends UpgradeMenus
 	{
 		jimport('joomla.table.table');
 
-		// Getting the database instance
+		// Get the database instance
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
-		// Getting the table and query
-		$table = Table::getInstance('Menu', 'Table');
 
-		// Getting the data
+		// Get the table instance
+		if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
+		{
+			//\JTable::addIncludePath(dirname(__FILE__));
+			$table = \JTable::getInstance('Menu', 'JTable', array('dbo' => $this->_db));
+		}else{
+			$table = new Menu($this->_db);
+		}
+
+		// Get the data
 		$query->select('`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`');
 		$query->from('#__jupgradepro_default_menus');
 		$query->order('id ASC');
@@ -304,7 +311,7 @@ class Menus extends UpgradeMenus
 			// Unset id
 			$menu['id'] = 0;
 
-			// Getting the duplicated alias
+			// Get the duplicated alias
 			$alias = $this->getAlias('#__menu', $menu['alias']);
 
 			// Prevent MySQL duplicate error
@@ -328,9 +335,9 @@ class Menus extends UpgradeMenus
 				$parent = $db->loadResult();
 			}
 
-			// Resetting the table object
+			// Reset the table object
 			$table->reset();
-			// Setting the location of the new category
+			// Set the location of the new category
 			$table->setLocation($parent, 'last-child');
 			// Bind the data
 			$table->bind($menu);

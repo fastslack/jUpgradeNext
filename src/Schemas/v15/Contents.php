@@ -181,7 +181,12 @@ class Contents extends Upgrade
 
 			// Aliases
 			$row['alias'] = !empty($row['alias']) ? $row['alias'] : "###BLANK###";
-			$row['alias'] = OutputFilter::stringURLSafe($row['alias']);
+			if (class_exists('JFilterOutput'))
+			{
+				$row['alias'] = \JFilterOutput::stringURLSafe($row['alias']);
+			}else{
+				$row['alias'] = OutputFilter::stringURLSafe($row['alias']);
+			}
 
 			// Prevent MySQL duplicate error
 			// @@ Duplicate entry for key 'idx_client_id_parent_id_alias_language'
