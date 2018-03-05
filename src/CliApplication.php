@@ -35,7 +35,7 @@ class CliApplication extends AbstractCliApplication
 	 * @var    string
 	 * @since  1.0
 	 */
-	const VERSION = '3.4.0';
+	const VERSION = '3.8.0';
 
 	/**
 	 * The application's DI container.

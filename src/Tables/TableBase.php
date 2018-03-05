@@ -1,9 +1,9 @@
 <?php
 /**
- * jUpgradePro
+ * jUpgradeNext
  *
  * @version $Id:
- * @package jUpgradePro
+ * @package jUpgradeNext
  * @copyright Copyright (C) 2004 - 2018 Matware. All rights reserved.
  * @author Matias Aguirre
  * @email maguirre@matware.com.ar
@@ -11,15 +11,25 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-defined('_JEXEC') or die;
-
 namespace Jupgradenext\Tables;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Joomla\CMS\Factory;
 
+/**
+ * jUpgradeNext step class
+ *
+ * @package		jUpgradeNext
+ */
 class TableBase extends Model
 {
+  /**
+   * The connection name for the model.
+   *
+   * @var string
+   */
+  protected $connection = 'default';
 
   /**
    * Create a new Eloquent model instance.
@@ -29,30 +39,22 @@ class TableBase extends Model
    */
   public function __construct(array $attributes = [])
   {
-
-
-
-
-
-
-echo "{XXX}";exit;
-
-
-
+    $config = Factory::getConfig();
     $capsule = new Capsule;
 
     $capsule->addConnection(array(
         'driver'    => 'mysql',
-        'host'      => 'localhost',
-        'database'  => 'test',
-        'username'  => 'test',
-        'password'  => 'l4m3p455w0rd!',
+        'host'      => $config->get('host'),
+        'database'  => $config->get('db'),
+        'username'  => $config->get('user'),
+        'password'  => $config->get('password'),
         'charset'   => 'utf8',
         'collation' => 'utf8_unicode_ci',
-        'prefix'    => ''
+        'prefix'    => $config->get('dbprefix')
     ));
 
     $capsule->bootEloquent();
-  }
 
+    parent::__construct($attributes);
+  }
 }
