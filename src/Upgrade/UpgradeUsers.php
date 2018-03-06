@@ -45,101 +45,6 @@ class UpgradeUsers extends Upgrade
 	);
 
 	/**
-	 * Method to do pre-processes modifications before migrate
-	 *
-	 * @return      boolean Returns true if all is fine, false if not.
-	 * @since       3.2.0
-	 * @throws      Exception
-	 */
-	public function beforeHook()
-	{
-		// Get the data
-		$query = $this->_db->getQuery(true);
-		$query->select("u.id, u.username");
-		$query->from("#__users AS u");
-		$query->join("LEFT", "#__user_usergroup_map AS um ON um.user_id = u.id");
-		$query->join("LEFT", "#__usergroups AS ug ON ug.id = um.group_id");
-		$query->order('u.id ASC');
-		$query->limit(1);
-
-		$this->_db->setQuery($query);
-
-		try {
-			$superuser = $this->_db->loadObject();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		$this->container->set('origin_super_admin', $superuser);
-
-/*
-		// Update the super user id to 2147483647
-		$query->clear();
-		$query->update("#__users");
-		$query->set("`id` = 2147483647");
-		$query->where("username = '{$superuser->username}'");
-
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		// Update the user_usergroup_map
-		$query->clear();
-		$query->update("#__user_usergroup_map");
-		$query->set("`user_id` = 2147483647");
-		$query->where("`group_id` = 8");
-		$query->where("`user_id` = {$superuser->id}");
-
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-*/
-	}
-
-	/*
-	 * Fake method after hooks
-	 *
-	 * @return	void
-	 * @since	1.00
-	 * @throws	Exception
-	 */
-	public function afterHook()
-	{
-
-/*
-		// Updating the super user id to 10
-		$query = $this->_db->getQuery(true);
-		$query->update("#__users");
-		$query->set("`id` = 2");
-		$query->where("id = 2147483647");
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		// Updating the user_usergroup_map
-		$query->clear();
-		$query->update("#__user_usergroup_map");
-		$query->set("`user_id` = 2");
-		$query->where("`user_id` = 2147483647");
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-*/
-	}
-
-	/**
 	 * Get the mapping of the old usergroups to the new usergroup id's.
 	 *
 	 * @return	array	An array with keys of the old id's and values being the new id's.
@@ -193,5 +98,45 @@ class UpgradeUsers extends Upgrade
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Method to do pre-processes modifications before migrate
+	 *
+	 * @return      boolean Returns true if all is fine, false if not.
+	 * @since       3.2.0
+	 * @throws      Exception
+	 */
+	public function beforeHook()
+	{
+		// Get the data
+		$query = $this->_db->getQuery(true);
+		$query->select("u.id, u.username");
+		$query->from("#__users AS u");
+		$query->join("LEFT", "#__user_usergroup_map AS um ON um.user_id = u.id");
+		$query->join("LEFT", "#__usergroups AS ug ON ug.id = um.group_id");
+		$query->order('u.id ASC');
+		$query->limit(1);
+
+		$this->_db->setQuery($query);
+
+		try {
+			$superuser = $this->_db->loadObject();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
+		}
+
+		$this->container->set('origin_super_admin', $superuser);
+	}
+
+	/*
+	 * Fake method after hooks
+	 *
+	 * @return	void
+	 * @since	1.00
+	 * @throws	Exception
+	 */
+	public function afterHook()
+	{
 	}
 }

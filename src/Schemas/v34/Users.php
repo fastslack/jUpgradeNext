@@ -34,7 +34,7 @@ class Users extends UpgradeUsers
 	 */
 	public function &databaseHook($rows)
 	{
-		$superuser = $this->container->get('origin_super_admin');
+		//$superuser = $this->container->get('origin_super_admin');
 
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)

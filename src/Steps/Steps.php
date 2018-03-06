@@ -107,7 +107,7 @@ class Steps extends Registry
 	public function loadFromDb($name = null) {
 
 		// Get versions
-		$external_version = UpgradeHelper::getVersionFromDB('old');
+		$external_version = UpgradeHelper::getVersion($this->container, 'external_version');
 		$origin_version = $this->container->get('origin_version');
 
 		// Get the data from db
@@ -120,16 +120,16 @@ class Steps extends Registry
 			$query->select('ext.xmlpath');
 		}
 
-		if (!empty($name)) {
-			$query->where("e.name = '{$name}'");
-		}else{
-			$query->where("e.status != 2");
-		}
-
 		$external_version = str_replace(".", "", $external_version);
 		$origin_version = str_replace(".", "", $origin_version);
-		$query->where("{$origin_version} BETWEEN e.from AND e.to");
 		$query->where("{$external_version} BETWEEN e.from AND e.to");
+		$query->orWhere("e.to BETWEEN {$external_version} AND {$origin_version}");
+
+		if (!empty($name)) {
+			$query->andWhere("e.name = '{$name}'");
+		}else{
+			$query->andWhere("e.status != 2");
+		}
 
 		$query->order('e.id ASC');
 		$query->limit(1);
@@ -153,17 +153,18 @@ class Steps extends Registry
 		$query->clear();
 
 		// Select last step
-		$query->select('t.name');
-		$query->from($this->_table . ' AS t');
-		$query->where("t.status = 0");
+		$query->select('e.name');
+		$query->from($this->_table . ' AS e');
+
+		$query->where("{$external_version} BETWEEN e.from AND e.to");
+		$query->orWhere("e.to BETWEEN {$external_version} AND {$origin_version}");
+
+		$query->where("e.status = 0");
 		if ($this->_table == '#__jupgradepro_extensions_tables') {
 			$query->where("element = '{$step['element']}'");
 		}
 
-		$query->where("{$external_version} BETWEEN t.from AND t.to");
-		$query->where("{$origin_version} BETWEEN t.from AND t.to");
-
-		$query->order('t.id DESC');
+		$query->order('e.id DESC');
 		$query->limit(1);
 
 		$this->_db->setQuery($query);

@@ -234,6 +234,24 @@ class Checks extends ModelBase
 			$query->clear();
 			$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, stop = 0, first = 0, debug = \'\'');
 			$this->container->get('db')->setQuery($query)->execute();
+
+			$query->clear();
+
+			$query->select('`name`, `to`, `from`');
+			$query->from("`#__jupgradepro_steps`");
+			$this->container->get('db')->setQuery($query);
+			$disableSteps = $this->container->get('db')->loadObjectList();
+
+			$orig_version = (int) str_replace(".", "", $origin_version);
+			$ext_version = (int) str_replace(".", "", $external_version);
+
+			// Disable inconpatible steps
+			foreach ($disableSteps as $key => $value) {
+				if ($value->to != 99 && $value->to < $orig_version && $value->to > $ext_version)
+				{
+					$this->updateStep($value->name);
+				}
+			}
 		}
 
 		// Checking tables
@@ -439,6 +457,31 @@ class Checks extends ModelBase
 			}else {
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * Update the status of one step
+	 *
+	 * @param		string  $name  The name of the table to update
+	 *
+	 * @return	none
+	 *
+	 * @since	3.1.1
+	 */
+	public function updateStep ($name)
+	{
+		// Get the external version
+		$external_version = UpgradeHelper::getVersion($this->container, 'external_version');
+
+		// Get the JQuery object
+		$query = $this->container->get('db')->getQuery(true);
+
+		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where('t.name = \''.$name.'\'');
+		try {
+			$this->container->get('db')->setQuery($query)->execute();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 	}
 

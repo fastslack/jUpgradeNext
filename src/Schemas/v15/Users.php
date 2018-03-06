@@ -34,30 +34,6 @@ class Users extends UpgradeUsers
 	 */
 	public function afterHook()
 	{
-		/*
-		// Updating the super user id to 10
-		$query = $this->_db->getQuery(true);
-		$query->update("#__users");
-		$query->set("`id` = 2");
-		$query->where("id = 2147483647");
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		// Updating the user_usergroup_map
-		$query->clear();
-		$query->update("#__user_usergroup_map");
-		$query->set("`user_id` = 2");
-		$query->where("`user_id` = 2147483647");
-		// Execute the query
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}*/
 	}
 
 	/**
