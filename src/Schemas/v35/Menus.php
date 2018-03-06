@@ -60,7 +60,7 @@ class Menus extends UpgradeMenus
 	 * @since		3.8.0
 	 * @throws	Exception
 	 */
-	public function truncateTable()
+	public function truncateTable($run = false)
 	{
 		parent::truncateTable(true);
 	}
