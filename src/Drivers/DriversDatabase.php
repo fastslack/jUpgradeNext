@@ -96,8 +96,13 @@ class DriversDatabase extends Drivers
 		// Get the conditions
 		$conditions = $this->getConditionsHook();
 
-		// Process the conditions
-		$query = $this->_processQuery($conditions, true);
+		// Process the conditions if needed
+		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery)
+		{
+			$query = $conditions;
+		} else {
+			$query = $this->_processQuery($conditions, true);
+		}
 
 		// Setting the query
 		$cid = (int) $this->_getStepID();
@@ -129,10 +134,15 @@ class DriversDatabase extends Drivers
 		// Get the conditions
 		$conditions = $this->getConditionsHook();
 
-		// Process the conditions
-		$query = $this->_processQuery($conditions);
+		// Process the conditions if needed
+		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery)
+		{
+			$query = $conditions;
+		} else {
+			$query = $this->_processQuery($conditions);
+		}
 
-		// Setting the query
+		// Set query to db instance
 		$this->_db_old->setQuery( $query );
 
 		// Get the total
