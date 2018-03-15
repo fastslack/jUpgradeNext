@@ -13,9 +13,6 @@
 
 namespace Jupgradenext\Schemas\v34;
 
-use Joomla\Filter\OutputFilter;
-use Joomla\Event\Dispatcher;
-
 use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Joomla\Table\Table;

@@ -123,7 +123,6 @@ class Steps extends Registry
 		$external_version = str_replace(".", "", $external_version);
 		$origin_version = str_replace(".", "", $origin_version);
 		$query->where("{$external_version} BETWEEN e.from AND e.to");
-		$query->orWhere("e.to BETWEEN {$external_version} AND {$origin_version}");
 
 		if (!empty($name)) {
 			$query->andWhere("e.name = '{$name}'");
@@ -157,7 +156,6 @@ class Steps extends Registry
 		$query->from($this->_table . ' AS e');
 
 		$query->where("{$external_version} BETWEEN e.from AND e.to");
-		$query->orWhere("e.to BETWEEN {$external_version} AND {$origin_version}");
 
 		$query->where("e.status = 0");
 		if ($this->_table == '#__jupgradepro_extensions_tables') {

@@ -43,9 +43,6 @@ class Cleanup extends ModelBase
 
 		$skips = (array) json_decode($options['skips']);
 
-		// Get the db instance
-		$this->_db = $this->container->get('db');
-
 		// Check if sites DB options are correct.
 		if ($options['method'] == 'database')
 		{
@@ -63,51 +60,6 @@ class Cleanup extends ModelBase
 			// Initialize the driver to check the RESTful connection
 			$driver = Drivers::getInstance($this->container);
 			$code = $driver->requestRest('cleanup');
-		}
-
-		// Skiping the steps setted by user
-		foreach ($skips as $k => $v) {
-			$core = substr($k, 0, 9);
-			$name = substr($k, 10, 18);
-
-			if ($core == "skip_core") {
-				if ($v == 1) {
-
-					// Disable the the steps setted by user
-					$this->updateStep($name);
-
-					if ($name == 'users') {
-						// Disable the sections step
-						$this->updateStep('arogroup');
-
-						// Disable the sections step
-						$this->updateStep('usergroupmap');
-
-						// Disable the sections step
-						$this->updateStep('usergroups');
-
-						// Disable the sections step
-						$this->updateStep('viewlevels');
-					}
-
-					if ($name == 'categories') {
-						// Disable the sections step
-						$this->updateStep('sections');
-					}
-				}
-			}
-
-			if ($k == 'skip_extensions') {
-				if ($v == 1) {
-					// Disable the extensions step
-					$this->updateStep('extensions');
-				}
-				else if ($v == 0)
-				{
-					// Add the tables to truncate for extensions
-					$del_tables[] = '#__jupgradepro_extensions_tables';
-				}
-			}
 		}
 
 		// Truncate menu types if menus are enabled
@@ -128,17 +80,6 @@ class Cleanup extends ModelBase
 		if ($skips['skip_core_modules'] != 1)
 			$del_tables[] = '#__jupgradepro_modules';
 
-		// Truncate contents if are enabled
-		if ($skips['skip_core_contents'] != 1 && $options['keep_ids'] != 1)
-			//$del_tables[] = '#__content';
-
-		// Truncate usergroups if are enabled
-		if ($skips['skip_core_users'] != 1 && $options['keep_ids'] != 1)
-		{
-			//$del_tables[] = '#__usergroups';
-			//$del_tables[] = '#__viewlevels';
-		}
-
 		// Truncate tables
 		$this->truncateTables($del_tables);
 
@@ -152,7 +93,7 @@ class Cleanup extends ModelBase
 				$query->clear();
 				$query->delete()->from("#__categories")->where("id > 1");
 				try {
-					$this->_db->setQuery($query)->execute();
+					$this->container->get('db')->setQuery($query)->execute();
 				} catch (Exception $e) {
 					throw new Exception($e->getMessage());
 				}
@@ -161,7 +102,7 @@ class Cleanup extends ModelBase
 			$query->clear();
 			$query->insert('#__jupgradepro_categories')->columns('`old`, `new`')->values("0, 2");
 			try {
-				$this->_db->setQuery($query)->execute();
+				$this->container->get('db')->setQuery($query)->execute();
 			} catch (Exception $e) {
 				throw new Exception($e->getMessage());
 			}
@@ -194,19 +135,14 @@ class Cleanup extends ModelBase
 	 */
 	public function truncateTables ($del_tables)
 	{
-		if (empty($this->_db))
-		{
-			$this->_db = $this->container->get('db');
-		}
-
 		// Clean selected tables
 		for ($i=0;$i<count($del_tables);$i++)
 		{
-			$query = $this->_db->getQuery(true);
+			$query = $this->container->get('db')->getQuery(true);
 			$query->delete()->from("{$del_tables[$i]}");
 
 			try {
-				$this->_db->setQuery($query)->execute();
+				$this->container->get('db')->setQuery($query)->execute();
 			} catch (Exception $e) {
 				throw new Exception($e->getMessage());
 			}
@@ -230,11 +166,11 @@ class Cleanup extends ModelBase
 		$external_version = UpgradeHelper::getVersion($this->container, 'external_version');
 
 		// Get the JQuery object
-		$query = $this->_db->getQuery(true);
+		$query = $this->container->get('db')->getQuery(true);
 
 		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where('t.name = \''.$name.'\'');
 		try {
-			$this->_db->setQuery($query)->execute();
+			$this->container->get('db')->setQuery($query)->execute();
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}

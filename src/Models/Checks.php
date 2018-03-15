@@ -42,10 +42,9 @@ class Checks extends ModelBase
 		// Get the parameters with global settings
 		$this->options = $this->container->get('sites')->getSite();
 
-		// Check for bad configurations
+		// Initialize the driver to check the RESTful connection
 		if ($this->options['method'] == "restful")
 		{
-			// Initialize the driver to check the RESTful connection
 			$this->driver = Drivers::getInstance($this->container);
 		}
 	}
@@ -53,8 +52,8 @@ class Checks extends ModelBase
 	/**
 	 * Initial checks in jUpgradePro
 	 *
-	 * @return	none
-	 * @since	1.2.0
+	 * @return	string  A JSON object with code and message
+	 * @since	  1.2.0
 	 */
 	function checks()
 	{
@@ -193,32 +192,6 @@ class Checks extends ModelBase
 			throw new \Exception('COM_JUPGRADEPRO_ERROR_DISABLE_SAFE_GID');
 		}
 
-		// Convert the params to array
-		$core_skips = json_decode($this->options['skips']);
-		$flag = false;
-
-		// Check is all skips is set
-		foreach ($core_skips as $k => $v) {
-			$core = substr($k, 0, 9);
-			$name = substr($k, 10, 18);
-
-			if ($core == "skip_core") {
-				if ($v == 0) {
-					$flag = true;
-				}
-			}
-
-			if ($core == "skip_exte") {
-				if ($v == 0) {
-					$flag = true;
-				}
-			}
-		}
-
-		if ($flag === false) {
-			throw new \Exception('COM_JUPGRADEPRO_ERROR_SKIPS_ALL');
-		}
-
 		// Checking for other migrations
 		$query->clear();
 		$query->select('cid');
@@ -247,11 +220,66 @@ class Checks extends ModelBase
 
 			// Disable inconpatible steps
 			foreach ($disableSteps as $key => $value) {
-				if ($value->to != 99 && $value->to < $orig_version && $value->to > $ext_version)
+				if ($value->to != 99)
 				{
-					$this->updateStep($value->name);
+					if ( $value->to < $orig_version && $value->to > $ext_version )
+					{
+						$this->updateStep($value->name);
+					}
 				}
 			}
+		}
+
+		// Convert the params to array
+		$core_skips = json_decode($this->options['skips']);
+		$flag = false;
+
+		// Check is all skips is set
+		foreach ($core_skips as $k => $v) {
+			$core = substr($k, 0, 9);
+			$name = substr($k, 10, 18);
+
+			if ($core == "skip_core") {
+				if ($v == 0) {
+					$flag = true;
+				}
+
+				if ($v == 1)
+				{
+					// Disable the the steps setted by user
+					$this->updateStep($name);
+
+					if ($name == 'users')
+					{
+						// Disable the sections step
+						$this->updateStep('arogroup');
+
+						// Disable the sections step
+						$this->updateStep('usergroupmap');
+
+						// Disable the sections step
+						$this->updateStep('usergroups');
+
+						// Disable the sections step
+						$this->updateStep('viewlevels');
+					}
+
+					if ($name == 'categories') {
+						// Disable the sections step
+						$this->updateStep('sections');
+					}
+				}
+			}
+
+			if ($core == "skip_exte") {
+				if ($v == 0) {
+					$flag = true;
+				}
+			}
+		}
+
+		if ($flag === false) {
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_SKIPS_ALL');
 		}
 
 		// Checking tables
@@ -447,7 +475,7 @@ class Checks extends ModelBase
 
 			return array_key_exists($column, $columns) ? true : false;
 		}
-		else if ($site['method'] == 'database')
+		else if ($this->options['method'] == 'database')
 		{
 			if ($this->external)
 			{
