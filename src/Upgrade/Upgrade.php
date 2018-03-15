@@ -747,7 +747,7 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getSourceTable()
 	{
-		return '#__'.$this->steps->get('source');
+		return $this->steps->getSourceTable();
 	}
 
 	/**
@@ -757,7 +757,7 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getDestinationTable()
 	{
-		return '#__'.$this->steps->get('destination');
+		return $this->steps->getDestinationTable();
 	}
 
 	/**

@@ -215,7 +215,6 @@ class Steps extends Registry
 			$update->total = (int) UpgradeHelper::getTotal($this->container);
 		}
 
-
 		// We must to fragment the steps
 		if ($update->total > $limit) {
 
@@ -400,5 +399,25 @@ class Steps extends Registry
 	public function _getStepName()
 	{
 		return $this->get('name');
+	}
+
+	/**
+	 * @return  string	The table name
+	 *
+	 * @since   3.8
+	 */
+	public function getSourceTable()
+	{
+		return '#__'.$this->get('source');
+	}
+
+	/**
+	 * @return  string	The table name
+	 *
+	 * @since   3.8
+	 */
+	public function getDestinationTable()
+	{
+		return '#__'.$this->get('destination');
 	}
 }

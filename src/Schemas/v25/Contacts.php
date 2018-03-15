@@ -14,6 +14,7 @@
 namespace Jupgradenext\Schemas\v25;
 
 use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * Upgrade class for Contacts

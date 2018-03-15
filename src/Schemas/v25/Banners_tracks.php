@@ -27,18 +27,22 @@ class Banners_tracks extends Upgrade
 	/**
 	 * Setting the conditions hook
 	 *
-	 * @return	array
+	 * @return	JDatabaseQuery
 	 * @since	1.0
 	 * @throws	Exception
 	 */
 	public static function getConditionsHook($container)
 	{
-		$conditions = array();
+		$query = $container->get('external')->getQuery(true);
+		$query->select('*');
+		$query->from($container->get('steps')->getSourceTable());
 
-		$conditions['where'] = array();
+		// @@ TODO: Fix error below
+		// SELECT list is not in GROUP BY clause and contains nonaggregated column '#__banner_tracks.track_date'
+		// which is not functionally dependent on columns in GROUP BY clause; this is incompatible
+		// with sql_mode=only_full_group_by
+		$query->group('banner_id');
 
-		$conditions['group_by'] = "banner_id";
-
-		return $conditions;
+		return $query;
 	}
 } // end class

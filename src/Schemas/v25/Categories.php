@@ -26,10 +26,10 @@ use Jupgradenext\Upgrade\UpgradeCategories;
 class Categories extends UpgradeCategories
 {
 	/**
-	 * Set the conditions hook
+	 * Setting the conditions hook
 	 *
-	 * @return	array || Joomla/Database/Query
-	 * @since	  1.0
+	 * @return	void
+	 * @since	1.0
 	 * @throws	Exception
 	 */
 	public static function getConditionsHook($container)
@@ -37,7 +37,10 @@ class Categories extends UpgradeCategories
 		$conditions = array();
 		$conditions['select'] = '*';
 
-		if ($options->get('keep_ids') == 1)
+		// Get the parameters with global settings
+		$options = $container->get('sites')->getSite();
+
+		if ($options['keep_ids'] == 1)
 		{
 			$where_or = array();
 			$where_or[] = "extension REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'";
@@ -56,28 +59,6 @@ class Categories extends UpgradeCategories
 	}
 
 	/**
-	 * The public entry point for the class.
-	 *
-	 * @return	void
-	 * @since	0.5.6
-	 * @throws	Exception
-	 */
-	public function upgrade($rows = false)
-	{
-/*
-		if (parent::upgrade()) {
-			// Rebuild the categories table
-			$table = Table::getInstance('Category', 'Table', array('dbo' => $this->_db));
-
-			if (!$table->rebuild()) {
-				throw new Exception($table->getError());
-			}
-		}
-*/
-		parent::upgrade($rows);
-	}
-
-	/**
 	 * Sets the data in the destination database.
 	 *
 	 * @return	void
@@ -86,14 +67,22 @@ class Categories extends UpgradeCategories
 	 */
 	public function dataHook($rows = null)
 	{
-		// Getting the destination table
+		// Get the database query
+		$query = $this->_db->getQuery(true);
+
+		// Get the parameters with global settings
+		$options = $this->container->get('sites')->getSite();
+
+		// Get the destination table
 		$table = $this->getDestinationTable();
 
 		// Initialize values
 		$rootidmap = 0;
+		// Content categories
+		$this->section = 'com_content';
 
 		// Table::store() run an update if id exists so we create them first
-		if ($this->options['keep_ids'] == 1)
+		if ($options['keep_ids'] == 1)
 		{
 			foreach ($rows as $category)
 			{
@@ -102,24 +91,29 @@ class Categories extends UpgradeCategories
 				$category = (array) $category;
 
 				if ($category['id'] == 1) {
-					$query = $this->_db->getQuery(true);
-					$query->select("`id` + 1");
-					$query->from("#__categories");
-					$query->where("id > 1");
+					$query->clear();
+					$query->select('id+1');
+					$query->from('#__categories');
 					$query->order('id DESC');
 					$query->limit(1);
 					$this->_db->setQuery($query);
+					$rootidmap = $this->_db->loadResult();
 
-					$object->id = $category['id'] = $rootidmap;
+					$object->id = $rootidmap;
+					$category['old_id'] = $category['id'];
+					$category['id'] = $rootidmap;
 				}else{
 					$object->id = $category['id'];
 				}
 
-				// Inserting the categories
-				try {
+				// Inserting the categories id's
+				try
+				{
 					$this->_db->insertObject($table, $object);
-				} catch (Exception $e) {
-					throw new Exception($e->getMessage());
+				}
+				catch (Exception $e)
+				{
+					throw new Exception($this->_db->getErrorMsg());
 				}
 			}
 		}
@@ -130,6 +124,12 @@ class Categories extends UpgradeCategories
 		foreach ($rows as $category)
 		{
 			$category = (array) $category;
+
+			$category['asset_id'] = null;
+			$category['parent_id'] = 1;
+			$category['lft'] = null;
+			$category['rgt'] = null;
+			$category['level'] = null;
 
 			if ($category['id'] == 1) {
 				$category['id'] = $rootidmap;
@@ -143,49 +143,5 @@ class Categories extends UpgradeCategories
 		}
 
 		return false;
-	}
-
-	/**
-	 * Run custom code after hooks
-	 *
-	 * @return	void
-	 * @since	3.0
-	 */
-	public function afterHook()
-	{
-		// Fixing the parents
-		//$this->fixParents();
-		// Insert existing categories
-		//$this->insertExisting();
-	}
-
-	/**
-	 * Update the categories parent's
-	 *
-	 * @return	void
-	 * @since	3.0
-	 */
-	protected function fixParents()
-	{
-		$change_parent = $this->getMapList('categories', false, "section != 0");
-
-		// Insert the sections
-		foreach ($change_parent as $category)
-		{
-			// Getting the category table
-			$table = Table::getInstance('Category', 'Table');
-			$table->load($category->new);
-
-			$custom = "old = {$category->section}";
-			$parent = $this->getMapListValue('categories', false, $custom);
-
-			// Setting the location of the new category
-			$table->setLocation($parent, 'last-child');
-
-			// Insert the category
-			if (!@$table->store()) {
-				throw new Exception($table->getError());
-			}
-		}
 	}
 }

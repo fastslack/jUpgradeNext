@@ -16,41 +16,60 @@ namespace Jupgradenext\Schemas\v25;
 use Jupgradenext\Upgrade\UpgradeUsers;
 
 /**
- * Upgrade class for the Usergroup Map
+ * Upgrade class for the Usergroups
  *
- * This translates the group mapping table from 1.5 to 1.0
- * Group id's up to 30 need to be mapped to the new group id's.
- * Group id's over 30 can be used as is.
- * User id's are maintained in this upgrade process.
+ * This translates the usergroups table from 2.
  *
- * @package		jUpgradeNext
- *
- * @since		1.0
+ * @package		MatWare
+ * @subpackage	com_jupgradepro
+ * @since		3.8.0
  */
-class Usergroupmap extends UpgradeUsers
+class Usergroups extends UpgradeUsers
 {
 	/**
 	 * Setting the conditions hook
 	 *
 	 * @return	array
-	 * @since	1.0
+	 * @since	  3.6.2
 	 * @throws	Exception
 	 */
 	public static function getConditionsHook($container)
 	{
-		$conditions = array();
+		$options = $container->get('sites')->getSite();
 
+		$conditions = array();
 		$conditions['where'] = array();
-		$conditions['order'] = "user_id ASC";
+
+		if ($options['keep_ids'] == 0)
+		{
+			$conditions['where'][] = "id > 9";
+		}
+
+		$conditions['order'] = "id ASC";
 
 		return $conditions;
+	}
+
+	/*
+	 * Method to truncate table
+	 *
+	 * @return	void
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function truncateTable($run = false)
+	{
+		if ($this->options['keep_ids'] == 1)
+		{
+			parent::truncateTable(true);
+		}
 	}
 
 	/**
 	 * Method to do pre-processes modifications before migrate
 	 *
 	 * @return      boolean Returns true if all is fine, false if not.
-	 * @since       1.0
+	 * @since       3.6.2
 	 * @throws      Exception
 	 */
 	public function beforeHook()
@@ -73,7 +92,7 @@ class Usergroupmap extends UpgradeUsers
 	 * Sets the data in the destination database.
 	 *
 	 * @return	void
-	 * @since	1.0
+	 * @since	  3.6.2
 	 * @throws	Exception
 	 */
 	public function &dataHook($rows)
@@ -83,13 +102,14 @@ class Usergroupmap extends UpgradeUsers
 		{
 			$row = (object) $row;
 
-			if (empty($row->user_id)) {
-				$row = false;
+			if ($this->valueExists($row, array('title')))
+			{
+				$row->title = $row->title ."-".rand(0, 99999999);
 			}
 
 			if (!empty($row->user_id) && $this->valueExists($row, array('user_id')))
 			{
-				$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
+				$row->user_id = $this->getNewId('#__users', $row->user_id);
 			}
 		}
 
