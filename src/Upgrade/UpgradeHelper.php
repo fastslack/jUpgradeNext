@@ -94,7 +94,7 @@ class UpgradeHelper
 		$query = $db->getQuery(true);
 		$query->select($site);
 		$query->from("`#__jupgradepro_version`");
-		$query->limit(1);
+		$query->setLimit(1);
 		$db->setQuery($query);
 
 		try {
@@ -141,9 +141,8 @@ class UpgradeHelper
 			$query = trim($query);
 			if ($query != '' && $query {0} != '#')
 			{
-				$db->setQuery($query);
 				try {
-					$db->query();
+					$db->setQuery($query)->execute();
 				} catch (Exception $e) {
 					throw new Exception($e->getMessage());
 				}

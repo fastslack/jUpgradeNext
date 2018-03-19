@@ -41,8 +41,6 @@ class Cleanup extends ModelBase
 		// Get the parameters with global settings
 		$options = $this->container->get('sites')->getSite();
 
-		$skips = (array) json_decode($options['skips']);
-
 		// Check if sites DB options are correct.
 		if ($options['method'] == 'database')
 		{
@@ -52,60 +50,11 @@ class Cleanup extends ModelBase
 			}
 		}
 
-		// Initialise the tables array
-		$del_tables = array();
-
 		// If REST is enable, cleanup the source #__jupgradepro_steps table
 		if ($options['method'] == 'restful') {
 			// Initialize the driver to check the RESTful connection
 			$driver = Drivers::getInstance($this->container);
 			$code = $driver->requestRest('cleanup');
-		}
-
-		// Truncate menu types if menus are enabled
-		if ($skips['skip_core_categories'] != 1 && $options['keep_ids'] != 1)
-		{
-			$del_tables[] = '#__jupgradepro_categories';
-			$del_tables[] = '#__jupgradepro_default_categories';
-		}
-
-		// Truncate menu types if menus are enabled
-		if ($skips['skip_core_menus'] != 1 && $options['keep_ids'] != 1)
-		{
-			//$del_tables[] = '#__menu_types';
-			$del_tables[] = '#__jupgradepro_menus';
-		}
-
-		// Truncate contents if are enabled
-		if ($skips['skip_core_modules'] != 1)
-			$del_tables[] = '#__jupgradepro_modules';
-
-		// Truncate tables
-		$this->truncateTables($del_tables);
-
-		$query = $this->container->get('db')->getQuery(true);
-
-		// Insert default root category
-		if ($skips['skip_core_categories'] != 1)
-		{
-			if ($options['keep_ids'] == 1)
-			{
-				$query->clear();
-				$query->delete()->from("#__categories")->where("id > 1");
-				try {
-					$this->container->get('db')->setQuery($query)->execute();
-				} catch (Exception $e) {
-					throw new Exception($e->getMessage());
-				}
-			}
-
-			$query->clear();
-			$query->insert('#__jupgradepro_categories')->columns('`old`, `new`')->values("0, 2");
-			try {
-				$this->container->get('db')->setQuery($query)->execute();
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
 		}
 
 		// Done checks
@@ -122,33 +71,6 @@ class Cleanup extends ModelBase
 
 			return json_encode($return);
 		}
-	}
-
-	/**
-	 * Truncate tables
-	 *
-	 * @param		array  $del_tables  The list of tables to truncate.
-	 *
-	 * @return	bool   True if its ok, Exception if not.
-	 *
-	 * @since	3.8
-	 */
-	public function truncateTables ($del_tables)
-	{
-		// Clean selected tables
-		for ($i=0;$i<count($del_tables);$i++)
-		{
-			$query = $this->container->get('db')->getQuery(true);
-			$query->delete()->from("{$del_tables[$i]}");
-
-			try {
-				$this->container->get('db')->setQuery($query)->execute();
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
-		}
-
-		return true;
 	}
 
 	/**

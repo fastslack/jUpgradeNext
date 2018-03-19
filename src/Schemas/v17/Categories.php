@@ -108,7 +108,7 @@ class Categories extends UpgradeCategories
 					$query->from("#__categories");
 					$query->where("id > 1");
 					$query->order('id DESC');
-					$query->limit(1);
+					$query->setLimit(1);
 					$this->_db->setQuery($query);
 
 					$object->id = $category['id'] = $rootidmap;

@@ -95,7 +95,7 @@ class Categories extends UpgradeCategories
 					$query->select('id+1');
 					$query->from('#__categories');
 					$query->order('id DESC');
-					$query->limit(1);
+					$query->setLimit(1);
 					$this->_db->setQuery($query);
 					$rootidmap = $this->_db->loadResult();
 

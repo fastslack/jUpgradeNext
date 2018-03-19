@@ -140,53 +140,12 @@ class Checks extends ModelBase
 		$this->setVersion('old', $external_version);
 		$this->setVersion('new', $origin_version);
 
-		// Checking tables
-		$tables = $this->container->get('db')->getTableList();
-
-		// Check if the tables exists if not populate install.sql
-		$tablesComp = array();
-		$tablesComp[] = 'categories';
-		$tablesComp[] = 'default_categories';
-		$tablesComp[] = 'default_menus';
-		$tablesComp[] = 'errors';
-		$tablesComp[] = 'extensions';
-		$tablesComp[] = 'extensions_tables';
-		$tablesComp[] = 'files_images';
-		$tablesComp[] = 'files_media';
-		$tablesComp[] = 'files_templates';
-		$tablesComp[] = 'menus';
-		$tablesComp[] = 'modules';
-		$tablesComp[] = 'steps';
-
-		foreach ($tablesComp as $table) {
-			if (!in_array($this->container->get('db')->getPrefix() . 'jupgradepro_' . $table, $tables)) {
-				if (UpgradeHelper::isCli()) {
-					print("\n\033[1;37m-------------------------------------------------------------------------------------------------\n");
-					print("\033[1;37m|  \033[0;34m	Installing jUpgradePro tables\n");
-				}
-
-				UpgradeHelper::populateDatabase($this->container->get('db'), JPATH_COMPONENT_ADMINISTRATOR.'/sql/install.sql');
-				break;
-			}
-		}
-
 		// Define the message array
 		$message = array();
 		$message['status'] = "ERROR";
 
 		$query = $this->container->get('db')->getQuery(true);
 
-/*
-		// Check if all jupgrade tables are there
-		$query->select('COUNT(id)');
-		$query->from("`#__jupgradepro_steps`");
-		$this->container->get('db')->setQuery($query);
-		$nine = $this->container->get('db')->loadResult();
-
-		if ($nine < 10) {
-			throw new \Exception('COM_JUPGRADEPRO_ERROR_TABLE_STEPS_NOT_VALID');
-		}
-*/
 		// Check safe_mode_gid
 		if (@ini_get('safe_mode_gid') && @ini_get('safe_mode')) {
 			throw new \Exception('COM_JUPGRADEPRO_ERROR_DISABLE_SAFE_GID');

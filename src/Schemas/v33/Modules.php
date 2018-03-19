@@ -63,7 +63,7 @@ class Modules extends Upgrade
 		$query->select('id');
 		$query->from("`#__modules`");
 		$query->order('id DESC');
-		$query->limit(1);
+		$query->setLimit(1);
 		$this->_db->setQuery($query);
 
 		try {

@@ -254,6 +254,7 @@ class Upgrade extends UpgradeBase
 			}
 		}
 
+
 		// Calling the data modificator hook
 		$dataHookFunc = 'dataHook_'.$name;
 
@@ -485,8 +486,11 @@ class Upgrade extends UpgradeBase
 		}
 
 		// Inserting the structure to new site
-		$this->_db->setQuery($structure);
-		$this->_db->query();
+		try {
+			$this->_db->setQuery($structure)->execute();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
+		}
 
 		return true;
 	}
@@ -563,7 +567,7 @@ class Upgrade extends UpgradeBase
 				$query->where("{$field} = {$cond}");
 			}
 		}
-		$query->limit(1);
+		$query->setLimit(1);
 		$query->setLimit(1);
 
 		$this->_db->setQuery( $query );
@@ -676,7 +680,7 @@ class Upgrade extends UpgradeBase
 		}
 		$query->where("alias RLIKE '^{$alias}$'", "OR")->where("alias RLIKE '^{$alias}[~]$'");
 		$query->order('alias DESC');
-		$query->limit(1);
+		$query->setLimit(1);
 		$this->_db->setQuery($query);
 
 		return (string) $this->_db->loadResult();

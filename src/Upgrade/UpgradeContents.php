@@ -78,9 +78,19 @@ class UpgradeContents extends Upgrade
 			$row['title'] = !empty($row['title']) ? $row['title'] : "###BLANK###";
 			$row['alias'] = !empty($row['alias']) ? $row['alias'] : "###BLANK###";
 
+
 			// Add tags if Joomla! is greater than 3.1
 			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.1', '>=')) {
 				$row['metadata'] = $row['metadata'] . "\ntags=";
+			}
+
+			// Get section and old id
+			$oldlist = new \stdClass();
+			$oldlist->old = (int) $row['id'];
+
+			if ($this->options['keep_ids'] == 0)
+			{
+				unset($row['id']);
 			}
 
 			// Table:store() run an update if id exists into the object so we create them first
@@ -121,6 +131,20 @@ class UpgradeContents extends Upgrade
 				$content->store();
 			} catch (Exception $e) {
 				throw new Exception($e->getMessage());
+			}
+
+			// Get new id
+			$oldlist->new = (int) $category->id;
+			$oldlist->table = '#__categories';
+
+			// Insert the row backup
+			try
+			{
+				$this->_db->insertObject('#__jupgradepro_old_ids', $oldlist);
+			}
+			catch (RuntimeException $e)
+			{
+				throw new RuntimeException($e->getMessage());
 			}
 
 			// Updating the steps table

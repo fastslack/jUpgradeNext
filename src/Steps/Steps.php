@@ -131,16 +131,14 @@ class Steps extends Registry
 		}
 
 		$query->order('e.id ASC');
-		$query->limit(1);
+		$query->setLimit(1);
 
 		$this->_db->setQuery($query);
-		$step = $this->_db->loadAssoc();
 
-		// Check for query error.
-		$error = $this->_db->getErrorMsg();
-		if (!empty($error)) {
-			print_r($error);
-			return false;
+		try {
+			$step = $this->_db->loadAssoc();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		// Check if step is an array
@@ -163,7 +161,7 @@ class Steps extends Registry
 		}
 
 		$query->order('e.id DESC');
-		$query->limit(1);
+		$query->setLimit(1);
 
 		$this->_db->setQuery($query);
 
@@ -321,13 +319,10 @@ class Steps extends Registry
 		//$query->where("version = {$this->_db->quote($old_ver)}");
 
 		// Execute the query
-		$this->_db->setQuery($query)->execute();
-
-		// Check for query error.
-		$error = $this->_db->getErrorMsg();
-
-		if ($error) {
-			throw new \Exception($error);
+		try {
+			$this->_db->setQuery($query)->execute();
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
 		}
 
 		$this->bindData($this->data, $update);
@@ -356,7 +351,7 @@ class Steps extends Registry
 		$query->set("`cid` = '{$id}'");
 		$query->where("name = {$this->_db->quote($name)}");
 		$query->where("{$external_version} BETWEEN e.from AND e.to");
-		$query->limit(1);
+		$query->setLimit(1);
 
 		// Execute the query
 		return $this->_db->setQuery($query)->execute();

@@ -85,7 +85,7 @@ class UpgradeUsers extends Upgrade
 		$query->select("u.value");
 		$query->from("#__core_acl_aro AS u");
 		$query->where("{$key} = {$aro_id}");
-		$query->limit(1);
+		$query->setLimit(1);
 
 		$this->container->get('external')->setQuery( $query );
 
@@ -163,7 +163,7 @@ class UpgradeUsers extends Upgrade
 		$query->join("LEFT", "#__user_usergroup_map AS um ON um.user_id = u.id");
 		$query->join("LEFT", "#__usergroups AS ug ON ug.id = um.group_id");
 		$query->order('u.id ASC');
-		$query->limit(1);
+		$query->setLimit(1);
 
 		$this->_db->setQuery($query);
 

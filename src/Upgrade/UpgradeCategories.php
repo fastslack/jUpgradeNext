@@ -270,11 +270,12 @@ class UpgradeCategories extends Upgrade
 
 		// Get new id
 		$oldlist->new = (int) $category->id;
+		$oldlist->table = '#__categories';
 
 		// Insert the row backup
 		try
 		{
-			$this->_db->insertObject('#__jupgradepro_categories', $oldlist);
+			$this->_db->insertObject('#__jupgradepro_old_ids', $oldlist);
 		}
 		catch (RuntimeException $e)
 		{
@@ -319,7 +320,7 @@ class UpgradeCategories extends Upgrade
 				$query->from('#__categories');
 				$query->where("path = '{$explode[0]}'");
 				$query->order('id ASC');
-				$query->limit(1);
+				$query->setLimit(1);
 
 				$db->setQuery($query);
 				$parent = $db->loadResult();
@@ -345,7 +346,7 @@ class UpgradeCategories extends Upgrade
 		$query->from("#__categories");
 		$query->where("id > 1");
 		$query->order('id DESC');
-		$query->limit(1);
+		$query->setLimit(1);
 		$this->_db->setQuery($query);
 
 		return (int) $this->_db->loadResult();
@@ -370,7 +371,7 @@ class UpgradeCategories extends Upgrade
 		$query->where("c.root_id = 1");
 		// Limit and order
 		$query->order('id DESC');
-		$query->limit(1);
+		$query->setLimit(1);
 		// Retrieve the data.
 		return $this->_db->setQuery($query)->loadAssoc();
 	}

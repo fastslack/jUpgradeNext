@@ -192,7 +192,7 @@ class UpgradeMenus extends Upgrade
 		$query->where("m.root_id = 1");
 		// Limit and order
 		$query->order('m.id DESC');
-		$query->limit(1);
+		$query->setLimit(1);
 		// Retrieve the data.
 		return $this->_db->setQuery($query)->loadAssoc();
 	}

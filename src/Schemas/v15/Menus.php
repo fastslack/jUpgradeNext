@@ -156,7 +156,7 @@ class Menus extends UpgradeMenus
 				$query->select('id + 1');
 				$query->from('#__menu');
 				$query->order('id DESC');
-				$query->limit(1);
+				$query->setLimit(1);
 				$this->_db->setQuery($query);
 				$row->id = $this->_db->loadResult();
 			}
@@ -329,7 +329,7 @@ class Menus extends UpgradeMenus
 				$query->from('#__menu');
 				$query->where("path = '{$explode[0]}'");
 				$query->order('id ASC');
-				$query->limit(1);
+				$query->setLimit(1);
 
 				$db->setQuery($query);
 				$parent = $db->loadResult();
