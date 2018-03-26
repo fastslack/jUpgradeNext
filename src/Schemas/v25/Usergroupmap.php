@@ -76,7 +76,7 @@ class Usergroupmap extends UpgradeUsers
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public function &dataHook($rows)
+	public function dataHook($rows)
 	{
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)

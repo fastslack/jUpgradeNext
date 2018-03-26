@@ -72,7 +72,7 @@ class Weblinks extends Upgrade
 	public function dataHook($rows = null)
 	{
 		// Getting the categories id's
-		$categories = $this->getMapList('categories', 'com_weblinks');
+		$categories = $this->getMapList('#__categories', 'com_weblinks');
 
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)

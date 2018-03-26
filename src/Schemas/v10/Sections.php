@@ -142,7 +142,7 @@ class Sections extends UpgradeCategories
 	 */
 	protected function fixParents()
 	{
-		$change_parent = $this->getMapList('categories', false, "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
+		$change_parent = $this->getMapList('#__categories', false, "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
 
 		// Insert the sections
 		foreach ($change_parent as $category)
@@ -153,7 +153,7 @@ class Sections extends UpgradeCategories
 
 			$custom = "old = {$category->section}";
 
-			$parent = $this->getMapListValue('categories', 'com_section', $custom);
+			$parent = $this->getMapListValue('#__categories', 'com_section', $custom);
 
 			if (!empty($parent))
 			{

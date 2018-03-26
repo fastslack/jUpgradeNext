@@ -56,7 +56,7 @@ class Users extends UpgradeUsers
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public function &dataHook($rows)
+	public function dataHook($rows)
 	{
 		// Do some custom post processing on the list.
 		if (is_array($rows))

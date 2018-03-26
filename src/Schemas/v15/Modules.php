@@ -212,9 +212,7 @@ class Modules extends Upgrade
 			$oldlist->new = $this->_db->insertid();
 
 			// Save old and new id
-			if (!$this->_db->insertObject('#__jupgradepro_modules', $oldlist)) {
-				throw new Exception($this->_db->getErrorMsg());
-			}
+			$this->saveNewId($oldlist->old, $oldlist->new);
 
 			// Updating the steps table
 			$this->steps->_nextID($total);

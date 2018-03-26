@@ -37,71 +37,6 @@ class UpgradeMenus extends Upgrade
 		// Get the parameters with global settings
 		$options = $this->container->get('sites')->getSite();
 
-		// Insert needed value
-		$query = $this->_db->getQuery(true);
-		$query->insert('#__jupgradepro_menus')->columns('`old`, `new`')->values("0, 0");
-
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		if ($options['keep_ids'] == 1)
-		{
-			// Clear the default database
-			$query->clear();
-			$query->delete()->from('#__jupgradepro_default_menus')->where('id > 100');
-
-			try {
-				$this->_db->setQuery($query)->execute();
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
-
-			// Getting the menus
-			$query->clear();
-			// 3.0 Changes
-			if (version_compare(UpgradeproHelper::getVersion($this->container, 'origin_version'), '3.0', '>=')) {
-				$query->select("`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`");
-			}else{
-				$query->select("`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `home`, `language`, `client_id`");
-			}
-
-			$query->from("#__menu");
-			$query->where("id > 100");
-			$query->where("alias != 'home'");
-			$query->order('id ASC');
-			$this->_db->setQuery($query);
-
-			try {
-				$menus = $this->_db->loadObjectList();
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
-
-			foreach ($menus as $menu)
-			{
-				// Convert the array into an object.
-				$menu = (object) $menu;
-
-				try {
-					$this->_db->insertObject('#__jupgradepro_default_menus', $menu);
-				} catch (Exception $e) {
-					throw new Exception($e->getMessage());
-				}
-			}
-
-			// Cleanup the entire menu
-			$query->clear();
-			$query->delete()->from('#__menu')->where('id > 1');
-
-			try {
-				$this->_db->setQuery($query)->execute();
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
-		}
 	}
 
 	/**
@@ -156,15 +91,15 @@ class UpgradeMenus extends Upgrade
     // Extract the id from the URL
     if (preg_match('|id=([0-9]+)|', $row->link, $tmp))
 		{
-			$id = $tmp[1];
+			$id = (int) $tmp[1];
 
 			if ( (strpos($row->link, 'layout=blog') !== false) AND
 				( (strpos($row->link, 'view=category') !== false) OR
 				(strpos($row->link, 'view=section') !== false) ) ) {
-					$catid = $this->getMapListValue('categories', 'categories', 'old = ' . $id);
+					$catid = $this->getMapListValue('#__categories', 'categories', "old_id = {$id}");
 					$row->link = "index.php?option=com_content&view=category&layout=blog&id={$catid}";
 			} elseif (strpos($row->link, 'view=section') !== false) {
-					$catid = $this->getMapListValue('categories', 'com_section', 'old = ' . $id);
+					$catid = $this->getMapListValue('#__categories', 'com_section', "old_id = {$id}");
 					$row->link = 'index.php?option=com_content&view=category&layout=blog&id='.$catid;
 			}
 		}
@@ -173,27 +108,4 @@ class UpgradeMenus extends Upgrade
 		return $row;
 	}
 
-	/**
-	 * Get the saved first menu
-	 *
-	 * @return object An object with the first menu.
-	 * @since		3.3.0
-	 * @throws	Exception
-	 */
-	public function getFirstMenu()
-	{
-		// Get the correct equipment
-		$query = $this->_db->getQuery(true);
-		// Select some values
-		$query->select("m.*");
-		// Set the from table
-		$query->from($this->_db->qn('#__jupgradepro_default_menus') . ' as m');
-		// Conditions
-		$query->where("m.root_id = 1");
-		// Limit and order
-		$query->order('m.id DESC');
-		$query->setLimit(1);
-		// Retrieve the data.
-		return $this->_db->setQuery($query)->loadAssoc();
-	}
 }

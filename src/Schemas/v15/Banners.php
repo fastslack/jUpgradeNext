@@ -57,7 +57,7 @@ class Banners extends Upgrade
 	public function databaseHook($rows = null)
 	{
 		// Getting the categories id's
-		$categories = $this->getMapList('categories', 'com_banners');
+		$categories = $this->getMapList('#__categories', 'com_banners');
 
 		// Do some custom post processing on the list.
 		foreach ($rows as $index => &$row)

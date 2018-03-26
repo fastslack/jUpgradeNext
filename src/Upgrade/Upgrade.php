@@ -568,48 +568,54 @@ class Upgrade extends UpgradeBase
 			}
 		}
 		$query->setLimit(1);
-		$query->setLimit(1);
 
 		$this->_db->setQuery( $query );
-		$exists = $this->_db->loadResult();
+
+		try
+		{
+			$exists = $this->_db->loadResult();
+		}
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
 
 		return empty($exists) ? false : true;
 	}
 
 	/**
-	 * TODO: Replace this function: get the new id directly
 	 * Internal function to get original database prefix
 	 *
 	 * @return	an original database prefix
-	 * @since	0.5.3
+	 * @since	  0.5.3
 	 * @throws	Exception
 	 */
-	public function getMapList($table = 'categories', $section = false, $custom = false)
+	public function getMapList($table = '#__categories', $section = false, $custom = false)
 	{
-		// Getting the categories id's
-		$query = "SELECT *"
-		." FROM #__jupgradepro_{$table}";
+		$query = $this->_db->getQuery(true);
+		$query->select('new_id');
+		$query->from('#__jupgradepro_old_ids');
+
+		$query->where("`table` = '{$table}'");
 
 		if ($section !== false) {
-			$query .= " WHERE section = '{$section}'";
+			$query->where("`section` = '{$section}'");
 		}
 
 		if ($custom !== false) {
-			$query .= " WHERE {$custom}";
+			$query->where($custom);
 		}
 
 		$this->_db->setQuery($query);
-		$data = $this->_db->loadObjectList('old');
 
-		// Check for query error.
-		$error = $this->_db->getErrorMsg();
-
-		if ($error) {
-			throw new Exception($error);
-			return false;
+		try
+		{
+			return $this->_db->loadObjectList('old_id');
 		}
-
-		return $data;
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
 	}
 
 	/**
@@ -619,44 +625,40 @@ class Upgrade extends UpgradeBase
 	 * @since	0.5.3
 	 * @throws	Exception
 	 */
-	public function getMapListValue($table = 'categories', $section = false, $custom = false)
+	public function getMapListValue($table = '#__categories', $section = false, $custom = false)
 	{
-		// Getting the categories id's
-		$query = "SELECT new"
-		." FROM #__jupgradepro_{$table}";
+		$query = $this->_db->getQuery(true);
+		$query->select('new_id');
+		$query->from('#__jupgradepro_old_ids');
+
+		$query->where("`table` = '{$table}'");
 
 		if ($section !== false)
 		{
 			if ($section == 'categories')
 			{
-				$query .= " WHERE (section REGEXP '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR section = 'com_section')";
+				$query->where("(section REGEXP '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR section = 'com_section')");
 			}
 			else
 			{
-				$query .= " WHERE section = '{$section}'";
+				$query->where("section = '{$section}'");
 			}
 		}
 
 		if ($custom !== false) {
-			if ($section !== false) {
-				$query .= " AND {$custom}";
-			}else{
-				$query .= " WHERE {$custom}";
-			}
+			$query->where($custom);
 		}
 
 		$this->_db->setQuery($query);
-		$data = $this->_db->loadResult();
 
-		// Check for query error.
-		$error = $this->_db->getErrorMsg();
-
-		if ($error) {
-			throw new Exception($error);
-			return false;
+		try
+		{
+			return $this->_db->loadResult();
 		}
-
-		return $data;
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
 	}
 
 	/**
@@ -683,7 +685,14 @@ class Upgrade extends UpgradeBase
 		$query->setLimit(1);
 		$this->_db->setQuery($query);
 
-		return (string) $this->_db->loadResult();
+		try
+		{
+			return (string) $this->_db->loadResult();
+		}
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
 	}
 
 	/**
@@ -799,6 +808,34 @@ class Upgrade extends UpgradeBase
 		}
 		catch (Exception $e)
 		{
+			throw new Exception($e->getMessage());
+		}
+	}
+
+	/**
+	 * Save old and new id
+	 *
+	 * @param	string	$table	The table to search.
+	 * @param	int	    $old_id	The old id to search.
+	 *
+	 * @return	int	The new_id
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function saveNewId($old_id, $new_id, $table = false, $section = false)
+	{
+		$saveObj = new \stdClass;
+
+		// Quote params
+		$saveObj->table = ($table == false) ? $this->_db->quote($this->getDestinationTable()) : $this->_db->quote($table);
+		$saveObj->section = ($section == false) ? '' : $this->_db->quote($section);
+		$saveObj->old_id = (int) $old_id;
+		$saveObj->new_id = (int) $new_id;
+
+		// Save old and new id
+		try	{
+			return $this->_db->insertObject('#__jupgradepro_old_ids', $saveObj);
+		}	catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
 	}

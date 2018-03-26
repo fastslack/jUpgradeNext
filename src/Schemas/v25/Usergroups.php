@@ -95,7 +95,7 @@ class Usergroups extends UpgradeUsers
 	 * @since	  3.6.2
 	 * @throws	Exception
 	 */
-	public function &dataHook($rows)
+	public function dataHook($rows)
 	{
 		// Do some custom post processing on the list.
 		foreach ($rows as &$row)

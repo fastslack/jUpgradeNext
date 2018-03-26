@@ -14,6 +14,7 @@
 namespace Jupgradenext\Schemas\v15;
 
 use Jupgradenext\Upgrade\UpgradeCategories;
+use Joomla\CMS\Table\Category;
 
 /**
  * Upgrade class for sections
@@ -121,18 +122,6 @@ class Sections extends UpgradeCategories
 		$this->fixParents();
 		// Insert existing categories
 		$this->insertExisting();
-
-		// Change protected to $observers object to disable it
-		// @@ Prevent Joomla! 'Application Instantiation Error' when try to call observers
-		// @@ See: https://github.com/joomla/joomla-cms/pull/1.0
-		if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '1.0', '>=')) {
-			$file = JPATH_LIBRARIES.'/joomla/observer/updater.php';
-			$read = JFile::read($file);
-			$read = str_replace("//call_user_func_array(\$eventListener, \$params)", "call_user_func_array(\$eventListener, \$params)", $read);
-			$read = JFile::write($file, $read);
-
-			require_once($file);
-		}
 	}
 
 	/**
@@ -143,18 +132,24 @@ class Sections extends UpgradeCategories
 	 */
 	protected function fixParents()
 	{
-		$change_parent = $this->getMapList('categories', false, "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
+		$change_parent = $this->getMapList('#__categories', false, "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
 
 		// Insert the sections
 		foreach ($change_parent as $category)
 		{
-			// Getting the category table
-			$table = Table::getInstance('Category', 'Table');
+			// Rebuild the categories table
+			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
+			{
+				$table = \Joomla\Table\Table::getInstance('Category', 'Table');
+			}else{
+				$table = new Category($this->_db);
+			}
+
 			$table->load($category->new);
 
 			$custom = "old = {$category->section}";
 
-			$parent = $this->getMapListValue('categories', 'com_section', $custom);
+			$parent = $this->getMapListValue('#__categories', 'com_section', $custom);
 
 			if (!empty($parent))
 			{

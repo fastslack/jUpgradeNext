@@ -16,7 +16,6 @@ namespace Jupgradenext\Schemas\v15;
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\UpgradeMenus;
 use Joomla\CMS\Table\Menu;
-use stdClass;
 
 /**
  * Upgrade class for Menus
@@ -145,10 +144,11 @@ class Menus extends UpgradeMenus
 			$row = $this->migrateLink($row);
 
 			// Get new/old id's values
-			$rowMap = new stdClass();
+			$rowMap = new \stdClass();
 
 			// Save the old id
 			$rowMap->old = $row->id;
+			$oldId = $row->id;
 
 			// Fixing id if == 1 (used by root)
 			if ($row->id == 1) {
@@ -193,17 +193,13 @@ class Menus extends UpgradeMenus
 			}
 
 			// Save the new id in rowmap and row
-			$rowMap->new 	= $table->id;
-			$row->id 		= $table->id;
+			$row->id = $table->id;
+			$rowMap->new = $table->id;
 
 			$oldnewmap[$rowMap->old] = $rowMap;
 
 			// Save old and new id
-			try	{
-				$this->_db->insertObject('#__jupgradepro_menus', $rowMap);
-			}	catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
+			$this->saveNewId($oldId, $table->id);
 
 			$table->reset();
 			$table->id = 0;
@@ -244,10 +240,8 @@ class Menus extends UpgradeMenus
 
 			$table->rebuildPath($table->id);
 
-
 			// Updating the steps table
 			$this->steps->_nextID($total);
-
 		}
 
 		// rebuild table
@@ -271,7 +265,7 @@ class Menus extends UpgradeMenus
 	{
 		if ($this->options['keep_ids'] == 1)
 		{
-			$this->insertDefaultMenus();
+			//$this->insertDefaultMenus();
 		}
 	}
 
@@ -284,8 +278,6 @@ class Menus extends UpgradeMenus
 	 */
 	public function insertDefaultMenus()
 	{
-		jimport('joomla.table.table');
-
 		// Get the database instance
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);

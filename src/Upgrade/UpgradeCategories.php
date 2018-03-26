@@ -34,12 +34,6 @@ class UpgradeCategories extends Upgrade
 	public $section = '';
 
 	/**
-	 * @var		string	The name of the destination database table.
-	 * @since	3.0.0
-	 */
-	protected $destination = '#__categories';
-
-	/**
 	 * @var		string	The key of the table
 	 * @since	3.0.0
 	 */
@@ -59,40 +53,6 @@ class UpgradeCategories extends Upgrade
 		// Get the parameters with global settings
 		$options = $this->container->get('sites')->getSite();
 
-		if ($options['keep_ids'] == 1)
-		{
-			// Getting the categories
-			$query->clear();
-			$query->select("`id`, `parent_id`, `path`, `extension`, `title`, `alias`, `note`, `description`, `published`, `checked_out`, `checked_out_time`, `access`, `metadesc`, `metakey`, `metadata`, `params`, `created_user_id`, `modified_user_id`, `modified_time`, `hits`, `language`, `version`");
-			$query->from("#__categories");
-			$query->where("id > 1");
-			$query->order('id ASC');
-			$this->_db->setQuery($query);
-
-			try {
-				$categories = $this->_db->loadObjectList();
-			} catch (RuntimeException $e) {
-				throw new RuntimeException($e->getMessage());
-			}
-
-			foreach ($categories as $category)
-			{
-				$id = $category->id;
-				unset($category->id);
-
-				$this->_db->insertObject('#__jupgradepro_default_categories', $category);
-
-				if (get_class($this) == "JUpgradeproCategories")
-				{
-					// Getting the categories table
-					$table = JTable::getInstance('Category', 'JTable');
-					// Load it before delete. Joomla bug?
-					$table->load($id);
-					// Delete
-					$table->delete($id);
-				}
-			}
-		}
 	}
 
 	/**
@@ -102,7 +62,7 @@ class UpgradeCategories extends Upgrade
 	 * @since	0.5.6
 	 * @throws	Exception
 	 */
-	public function dataHook($rows = null)
+	public function dataHook($rows)
 	{
 		foreach ($rows as $category)
 		{
@@ -172,9 +132,14 @@ class UpgradeCategories extends Upgrade
 
 		// Get section and old id
 		$oldlist = new \stdClass();
-		$oldlist->section = !empty($row['extension']) ? $row['extension'] : 0;
-		$oldlist->old = isset($row['old_id']) ? (int) $row['old_id'] : (int) $row['id'];
+		$oldlist->section = !empty($row['section']) ? $row['section'] : 0;
+		$oldlist->old_id = isset($row['old_id']) ? (int) $row['old_id'] : (int) $row['id'];
 		unset($row['old_id']);
+
+		if (!empty($row['id']) && $this->valueExists($row, array('id')))
+		{
+			$row['id'] = (int) $this->getNewId('#__categories', (int) $row['id']);
+		}
 
 		// Setting the default rules
 		$rules = array();
@@ -184,7 +149,7 @@ class UpgradeCategories extends Upgrade
 		// Fix language
 		$row['language'] = !empty($row['language']) ? $row['language'] : '*';
 
-		// Fix language
+		// Fix level
 		$row['level'] = !empty($row['level']) ? $row['level'] : 1;
 
 		// Check if path is correct
@@ -269,67 +234,14 @@ class UpgradeCategories extends Upgrade
 		}
 
 		// Get new id
-		$oldlist->new = (int) $category->id;
-		$oldlist->table = '#__categories';
+		$oldlist->new_id = (int) $category->id;
 
-		// Insert the row backup
-		try
-		{
-			$this->_db->insertObject('#__jupgradepro_old_ids', $oldlist);
-		}
-		catch (RuntimeException $e)
-		{
-			throw new RuntimeException($e->getMessage());
-		}
+		$section = (isset($oldlist->section)) ? $oldlist->section : false;
+
+		// Save old and new id
+		$this->saveNewId($oldlist->old_id, $oldlist->new_id, false, $section);
 
 	 	return true;
-	}
-
-	/**
-	 * Insert existing categories saved in cleanup step
-	 *
-	 * @return	void
-	 * @since	3.0
-	 */
-	protected function insertExisting()
-	{
-		// Getting the database instance
-		$db = JFactory::getDbo();
-
-		// Getting the data
-		$query = $db->getQuery(true);
-		$query->select('*');
-		$query->from('#__jupgradepro_default_categories');
-		$query->order('id ASC');
-		$db->setQuery($query);
-		$categories = $db->loadAssocList();
-
-		foreach ($categories as $category) {
-			// Unset id
-			$category['id'] = 0;
-
-			// Looking for parent
-			$parent = 1;
-			$explode = explode("/", $category['path']);
-
-			if (count($explode) > 1) {
-
-				// Getting the data
-				$query = $db->getQuery(true);
-				$query->select('id');
-				$query->from('#__categories');
-				$query->where("path = '{$explode[0]}'");
-				$query->order('id ASC');
-				$query->setLimit(1);
-
-				$db->setQuery($query);
-				$parent = $db->loadResult();
-			}
-
-			// Inserting the category
-			$this->insertCategory($category, $parent);
-		}
-
 	}
 
 	/**
@@ -352,27 +264,4 @@ class UpgradeCategories extends Upgrade
 		return (int) $this->_db->loadResult();
 	}
 
-	/**
-	 * Get the saved first category
-	 *
-	 * @return object An object with the first category.
-	 * @since		3.3.0
-	 * @throws	Exception
-	 */
-	public function getFirstCategory()
-	{
-		// Get the correct equipment
-		$query = $this->_db->getQuery(true);
-		// Select some values
-		$query->select("*");
-		// Set the from table
-		$query->from($this->_db->qn('#__jupgradepro_default_categories') . ' as c');
-		// Conditions
-		$query->where("c.root_id = 1");
-		// Limit and order
-		$query->order('id DESC');
-		$query->setLimit(1);
-		// Retrieve the data.
-		return $this->_db->setQuery($query)->loadAssoc();
-	}
 }

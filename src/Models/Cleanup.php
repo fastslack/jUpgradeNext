@@ -98,4 +98,31 @@ class Cleanup extends ModelBase
 		}
 	}
 
+  /**
+   * Truncate tables
+   *
+   * @param		array  $del_tables  The list of tables to truncate.
+   *
+   * @return	bool   True if its ok, Exception if not.
+   *
+   * @since	3.8
+   */
+	public function truncateTables ($del_tables)
+	{
+		// Clean selected tables
+		for ($i=0;$i<count($del_tables);$i++)
+		{
+			$query = $this->container->get('db')->getQuery(true);
+			$query->delete()->from("{$del_tables[$i]}");
+
+			try {
+				$this->container->get('db')->setQuery($query)->execute();
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
+			}
+		}
+
+		return true;
+	}
+
 } // end class

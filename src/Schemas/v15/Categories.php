@@ -36,7 +36,7 @@ class Categories extends UpgradeCategories
 	{
 		$conditions = array();
 
-		$conditions['select'] = '`id`, `id` AS sid, `title`, `alias`, `section`, `section` AS extension, `description`, `published`, `checked_out`, `checked_out_time`, `access`, `params`';
+		$conditions['select'] = '`id`, `id` AS old_id, `title`, `alias`, `section`, `section` AS extension, `description`, `published`, `checked_out`, `checked_out_time`, `access`, `params`';
 
 		$where_or = array();
 		$where_or[] = "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'";
@@ -91,7 +91,7 @@ class Categories extends UpgradeCategories
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public function dataHook($rows = null)
+	public function dataHook($rows)
 	{
 		// Getting the destination table
 		$table = $this->getDestinationTable();
@@ -102,68 +102,10 @@ class Categories extends UpgradeCategories
 		// Get the total
 		$total = count($rows);
 
-		// Table::store() run an update if id exists so we create them first
-		if ($this->options['keep_ids'] == 1)
-		{
-			$l = 1;
-
-			foreach ($rows as $category)
-			{
-				$category = (array) $category;
-
-				// Check if id = 1
-				if ($category['id'] == 1) {
-					continue;
-				}else{
-					$id = $category['id'];
-				}
-
-				$query = $this->_db->getQuery(true);
-
-				//one of the high points of joomla API - colums as array and vaues as comma separated string-...
-				// anyway - let's insert some dummy data to prevent children of itself error..
-				$columns = array('`id`','`parent_id`','`lft`','`rgt`');
-				$values = array($id,1,$l,$l+1);
-				$values = implode(',' , $values);
-
-				$query->insert('#__categories')->columns($columns)->values($values);
-
-				try {
-					$this->_db->setQuery($query)->execute();
-				} catch (Exception $e) {
-					throw new Exception($e->getMessage());
-				}
-
-				$l = $l + 2 ;
-			}
-		}
-
 		// Update the category
 		foreach ($rows as $category)
 		{
 			$category = (array) $category;
-
-			// Check if id = 1
-			if ($category['id'] == 1) {
-				// Set correct values
-				$category['root_id'] = 1;
-				unset($category['id']);
-				unset($category['sid']);
-				unset($category['section']);
-				// We need an object
-				$category = (object) $category;
-
-				try	{
-					$this->_db->insertObject('#__jupgradepro_default_categories', $category);
-				}	catch (Exception $e) {
-					throw new Exception($e->getMessage());
-				}
-
-				// Updating the steps table
-				$this->steps->_nextID($total);
-
-				continue;
-			}
 
 			// Reset some fields
 			$category['asset_id'] = $category['lft'] = $category['rgt'] = null;
@@ -176,25 +118,6 @@ class Categories extends UpgradeCategories
 
 			// Insert the category
 			$this->insertCategory($category);
-
-			// Updating the steps table
-			$this->steps->_nextID($total);
-		}
-
-		$rootcatobj = $this->getFirstCategory();
-
-		// Insert the category id = 1
-		if (is_array($rootcatobj) && $this->getTotal() == $this->steps->get('cid'))
-		{
-			// Check if path is correct
-			$rootcatobj['path'] = empty($rootcatobj['path']) ? $rootcatobj['alias'] : $rootcatobj['path'];
-			// Fix the access
-			$rootcatobj['access'] = $rootcatobj['access'] == 0 ? 1 : $rootcatobj['access'] + 1;
-			// Set the correct parent id
-			$rootcatobj['parent_id'] = $rootcatobj['level'] = 1;
-
-			// Insert the category
-			$this->insertCategory($rootcatobj);
 
 			// Updating the steps table
 			$this->steps->_nextID($total);

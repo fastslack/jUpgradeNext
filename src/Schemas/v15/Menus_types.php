@@ -51,6 +51,33 @@ class Menus_types extends Upgrade
 	 */
 	public function truncateTable($run = false)
 	{
-		parent::truncateTable(true);
+		if ($this->options['keep_ids'] == 1)
+		{
+			parent::truncateTable(true);
+		}
 	}
+
+  /**
+  * Sets the data in the destination database.
+  *
+  * @return	object
+  * @since	1.0
+  * @throws	Exception
+  */
+  public function dataHook($rows = null)
+  {
+    //
+    foreach ($rows as &$row)
+    {
+      // Convert the array into an object.
+      $row = (object) $row;
+
+      if (!empty($row->menutype) && $this->valueExists($row, array('menutype')))
+      {
+      $row->menutype = $row->menutype . "-" . rand(0, 99999);
+      }
+    }
+
+    return $rows;
+  }
 }

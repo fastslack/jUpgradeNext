@@ -169,7 +169,7 @@ class Categories extends UpgradeCategories
 	 */
 	protected function fixParents()
 	{
-		$change_parent = $this->getMapList('categories', false, "section != 0");
+		$change_parent = $this->getMapList('#__categories', false, "section != 0");
 
 		// Insert the sections
 		foreach ($change_parent as $category)
@@ -179,7 +179,7 @@ class Categories extends UpgradeCategories
 			$table->load($category->new);
 
 			$custom = "old = {$category->section}";
-			$parent = $this->getMapListValue('categories', false, $custom);
+			$parent = $this->getMapListValue("#__categories', false, $custom);
 
 			// Setting the location of the new category
 			$table->setLocation($parent, 'last-child');

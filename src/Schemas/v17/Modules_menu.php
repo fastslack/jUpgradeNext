@@ -66,13 +66,13 @@ class Modules_menu extends Upgrade
 
 			// Set the correct moduleid
 			$custom = "old = {$row->moduleid}";
-			$mapped = $this->getMapListValue("modules", false, $custom);
+			$mapped = $this->getMapListValue("#__modules", false, $custom);
 
 			$row->moduleid = isset($mapped) ? $mapped : $row->moduleid+99999;
 
 			// Set the correct menuid
 			$custom = "old = {$row->menuid}";
-			$mapped = $this->getMapListValue("menus", false, $custom);
+			$mapped = $this->getMapListValue("#__menus", false, $custom);
 
 			$row->menuid = isset($mapped) ? $mapped : $row->menuid+99999;
 		}
