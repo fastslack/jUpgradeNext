@@ -31,8 +31,7 @@ class Steps extends Registry
 	 */
 	function __construct(\Joomla\DI\Container $container)
 	{
-		//$extensions = $container->get('config')->get('extensions');
-		$extensions = false;
+		$extensions = $container->get('extensions');
 
 		// Set step table
 		if ($extensions == false) {

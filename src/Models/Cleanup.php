@@ -90,7 +90,7 @@ class Cleanup extends ModelBase
 		// Get the JQuery object
 		$query = $this->container->get('db')->getQuery(true);
 
-		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where('t.name = \''.$name.'\'');
+		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where("t.name = {$this->container->get('db')->quote($name)}");
 		try {
 			$this->container->get('db')->setQuery($query)->execute();
 		} catch (Exception $e) {

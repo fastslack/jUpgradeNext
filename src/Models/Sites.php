@@ -37,14 +37,15 @@ class Sites extends ModelBase
 			$name = $this->container->get('default_site');
 		}
 
-    $query = $this->container->get('db')->getQuery(true);
+		$db = $this->container->get('db');
+    $query = $db->getQuery(true);
 
 		$query->select('*');
-		$query->from("`#__jupgradepro_sites`");
-    $query->where("`name` = '{$name}'");
-		$this->container->get('db')->setQuery($query);
+		$query->from($db->quoteName("#__jupgradepro_sites"));
+    $query->where("{$db->quoteName('name')} = {$db->quote($name)}");
+		$db->setQuery($query);
 
-		$return = $this->container->get('db')->loadAssoc();
+		$return = $db->loadAssoc();
 
 		try {
 			return $return;

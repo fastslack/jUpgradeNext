@@ -93,7 +93,7 @@ class UpgradeHelper
 
 		$query = $db->getQuery(true);
 		$query->select($site);
-		$query->from("`#__jupgradepro_version`");
+		$query->from($db->quoteName("#__jupgradepro_version"));
 		$query->setLimit(1);
 		$db->setQuery($query);
 

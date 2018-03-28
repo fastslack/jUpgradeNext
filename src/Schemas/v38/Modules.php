@@ -61,7 +61,7 @@ class Modules extends Upgrade
 	{
 		$query = $this->_db->getQuery(true);
 		$query->select('id');
-		$query->from("`#__modules`");
+		$query->from($this->_db->quoteName("#__modules"));
 		$query->order('id DESC');
 		$query->setLimit(1);
 		$this->_db->setQuery($query);

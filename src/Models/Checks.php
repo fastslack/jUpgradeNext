@@ -154,7 +154,7 @@ class Checks extends ModelBase
 		// Checking for other migrations
 		$query->clear();
 		$query->select('cid');
-		$query->from("`#__jupgradepro_steps`");
+		$query->from($this->container->get('db')->quoteName("#__jupgradepro_steps"));
 		$query->where("cid != 0");
 		$this->container->get('db')->setQuery($query);
 		$latest_migration = $this->container->get('db')->loadObjectList();
@@ -164,13 +164,13 @@ class Checks extends ModelBase
 		}else{
 			// Set all cid, status and cache to 0
 			$query->clear();
-			$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, stop = 0, first = 0, debug = \'\'');
+			$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, first = 0, debug = \'\'');
 			$this->container->get('db')->setQuery($query)->execute();
 
 			$query->clear();
 
-			$query->select('`name`, `to`, `from`');
-			$query->from("`#__jupgradepro_steps`");
+			$query->select("{$this->container->get('db')->quoteName('name')}, {$this->container->get('db')->quoteName('to')}, {$this->container->get('db')->quoteName('from')}");
+			$query->from($this->container->get('db')->quoteName("#__jupgradepro_steps"));
 			$this->container->get('db')->setQuery($query);
 			$disableSteps = $this->container->get('db')->loadObjectList();
 
@@ -245,7 +245,7 @@ class Checks extends ModelBase
 		if ($core_skips->skip_core_contents != 1 && $this->options['keep_ids'] == 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
-			$query->from("`#__content`");
+			$query->from($this->container->get('db')->quoteName("#__content"));
 			$this->container->get('db')->setQuery($query);
 			$content_count = $this->container->get('db')->loadResult();
 
@@ -258,7 +258,7 @@ class Checks extends ModelBase
 		if ($core_skips->skip_core_users != 1 && $this->options['keep_ids'] == 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
-			$query->from("`#__users`");
+			$query->from($this->container->get('db')->quoteName("#__users"));
 			$this->container->get('db')->setQuery($query);
 			$users_count = $this->container->get('db')->loadResult();
 
@@ -271,7 +271,7 @@ class Checks extends ModelBase
 		if ($core_skips->skip_core_categories != 1 && $this->options['keep_ids'] == 1) {
 			$query->clear();
 			$query->select('COUNT(id)');
-			$query->from("`#__categories`");
+			$query->from($this->container->get('db')->quoteName("#__categories"));
 			$this->container->get('db')->setQuery($query);
 			$categories_count = $this->container->get('db')->loadResult();
 
@@ -464,7 +464,8 @@ class Checks extends ModelBase
 		// Get the JQuery object
 		$query = $this->container->get('db')->getQuery(true);
 
-		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where('t.name = \''.$name.'\'');
+		$query->update('#__jupgradepro_steps')->set('status = 2')->where("name = {$this->container->get('db')->quote($name)}");
+
 		try {
 			$this->container->get('db')->setQuery($query)->execute();
 		} catch (Exception $e) {

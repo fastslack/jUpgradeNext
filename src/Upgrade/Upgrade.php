@@ -104,23 +104,11 @@ class Upgrade extends UpgradeBase
 
 		// Set timelimit to 0
 		if(!@ini_get('safe_mode')) {
-			//if (!empty($this->options->get('timelimit'))) {
-				set_time_limit(0);
-			//}
+			set_time_limit(0);
 		}
 
 		// Get the parameters with global settings
 		$this->options = $container->get('sites')->getSite();
-
-		// MySQL grants check
-		$query = "SHOW GRANTS FOR CURRENT_USER";
-		$this->_db->setQuery( $query );
-		$list = $this->_db->loadRowList();
-		$grant = empty($list[1][0]) ? $list[0][0] : $list[1][0];
-
-		if (strpos($grant, 'DROP') == true || strpos($grant, 'ALL') == true) {
-			$this->canDrop = true;
-		}
 	}
 
 	/**
@@ -487,7 +475,7 @@ class Upgrade extends UpgradeBase
 
 		// Inserting the structure to new site
 		try {
-			$this->_db->setQuery($structure)->execute();
+			//$this->_db->setQuery($structure)->execute();
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
