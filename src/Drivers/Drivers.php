@@ -13,7 +13,6 @@
 
 namespace Jupgradenext\Drivers;
 
-use Jupgradenext\Schemas\v15;
 use Jupgradenext\Steps\Steps;
 
 /**
@@ -45,7 +44,6 @@ class Drivers
 	function __construct(\Joomla\DI\Container $container)
 	{
 		$this->container = $container;
-		$this->_steps = $container->get('steps');
 	}
 
 	/**
@@ -88,7 +86,7 @@ class Drivers
 	/**
 	 * Get table structure
 	 *
-	 * @return  int  The next id
+	 * @return  string  The table name
 	 *
 	 * @since   3.0.0
 	 */
@@ -162,7 +160,7 @@ class Drivers
 	 */
 	public function _getStepID()
 	{
-		return $this->_steps->get('cid');
+		return $this->container->get('steps')->get('cid');
 	}
 
 	/**
@@ -172,6 +170,6 @@ class Drivers
 	 */
 	public function _getStepName()
 	{
-		return $this->_steps->get('name');
+		return $this->container->get('steps')->get('name');
 	}
 }

@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v15;
+namespace Jupgradenext\Schemas\v16;
 
 use Jupgradenext\Upgrade\Upgrade;
 

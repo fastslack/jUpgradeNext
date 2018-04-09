@@ -49,13 +49,13 @@ class Migrate extends ModelBase
 		//@todo fix this in javascript, this is just a workaround
 		if ($table == 'undefined') $table = null;
 
-		//$extensions = (bool) ($extensions != false) ? $extensions : $this->container->get('input')->get('extensions', false);
+		$extensions = $this->container->get('extensions');
 
 		// Get the database structure
 		if ($steps->get('first') == true
-			//&& $extensions == 'tables'
+			&& $extensions == 'tables'
 			&& $steps->get('cid') == 0) {
-			$structure = $jupgrade->getTableStructure();
+			$structure = $jupgrade->cloneTableStructure();
 		}
 
 		// Run the upgrade
@@ -106,11 +106,7 @@ class Migrate extends ModelBase
 
 		$steps->updateStep($update);
 
-		if (UpgradeHelper::isCli()) {
-			echo $steps->getParameters();
-		}else{
-			echo $steps->getParameters();
-		}
+		echo $steps->getParameters();
 	}
 
 	/**

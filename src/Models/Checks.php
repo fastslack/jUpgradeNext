@@ -24,7 +24,7 @@ use Jupgradenext\Models\Sites;
 /**
  * JUpgradeproModelChecks Model
  *
- * @package		jUpgradePro
+ * @package		jUpgradeNext
  */
 class Checks extends ModelBase
 {
@@ -50,7 +50,7 @@ class Checks extends ModelBase
 	}
 
 	/**
-	 * Initial checks in jUpgradePro
+	 * Initial checks in jUpgradeNext
 	 *
 	 * @return	string  A JSON object with code and message
 	 * @since	  1.2.0

@@ -28,10 +28,9 @@ use Jupgradenext\Models\Checks;
 use Jupgradenext\Models\Cleanup;
 
 /**
- * jUpgradePro utility class for migrations
+ * jUpgradeNext utility class for migrations
  *
- * @package		Matware
- * @subpackage	com_jupgradepro
+ * @package		jUpgradeNext
  */
 class Upgrade extends UpgradeBase
 {
@@ -70,12 +69,6 @@ class Upgrade extends UpgradeBase
 	 * @since  3.0
 	 */
 	public $driver = null;
-
-	/**
-	 * @var    array  List of extensions steps
-	 * @since  12.1
-	 */
-	private $extensions_steps = array('extensions', 'ext_components', 'ext_modules', 'ext_plugins');
 
 	/**
 	 * @var bool Can drop
@@ -138,6 +131,11 @@ class Upgrade extends UpgradeBase
 				// Derive the class name from the driver.
 				$class_name = ucfirst(strtolower($name));
 				$class = "\\Jupgradenext\\Schemas\\v{$version}\\{$class_name}";
+
+				if (!class_exists($class))
+				{
+					$class = "\\Jupgradenext\\Schemas\\v{$version}\\Common";
+				}
 
 				$xmlpath = !empty($steps->get('xmlpath')) ? $steps->get('xmlpath') : '';
 			}
@@ -213,13 +211,14 @@ class Upgrade extends UpgradeBase
 			}
 		}
 
+
 		// Get the source data.
 		if ($rows === false) {
 			$rows = $this->driver->getSourceData();
 		}
 
 		// Call to database method hook
-		if ( $method == 'database' OR $method == 'database_all') {
+		if ( $method == 'database') {
 			if (method_exists($this, 'databaseHook')) {
 				$rows = $this->databaseHook($rows);
 			}
@@ -241,7 +240,6 @@ class Upgrade extends UpgradeBase
 				}
 			}
 		}
-
 
 		// Calling the data modificator hook
 		$dataHookFunc = 'dataHook_'.$name;
@@ -449,10 +447,14 @@ class Upgrade extends UpgradeBase
 		return $run;
 	}
 
-	/**
- 	* Get the table structure
-	*/
-	public function getTableStructure() {
+	/*
+	 * Clone table structure from source table to destination table
+	 *
+	 * @return	bool  True if success.
+	 * @since		3.0.0
+	 * @throws	Exception
+	 */
+	public function cloneTableStructure() {
 
 		// Get the source table
 		$table = $this->getSourceTable();
@@ -475,7 +477,7 @@ class Upgrade extends UpgradeBase
 
 		// Inserting the structure to new site
 		try {
-			//$this->_db->setQuery($structure)->execute();
+			$this->_db->setQuery($structure)->execute();
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
@@ -518,8 +520,8 @@ class Upgrade extends UpgradeBase
 			$table = $this->getDestinationTable();
 
 			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
-			$this->_db->setQuery( $query );
-			$keys = $this->_db->loadObjectList();
+			$this->container->get('external')->setQuery( $query );
+			$keys = $this->container->get('external')->loadObjectList();
 			$return = !empty($keys) ? $keys[0]->Column_name : '';
 		}
 
@@ -537,6 +539,7 @@ class Upgrade extends UpgradeBase
 
 		$table = $this->getSourceTable();
 		$key = $this->getDestKeyName();
+		$key = (!empty($key)) ? $key : 'id';
 
 		// Query
 		$query->select($key);

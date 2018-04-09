@@ -93,11 +93,9 @@ class DriversRestful extends Drivers
 		$data['table'] = ($table !== false) ? $table : '';
 		$data['chunk'] = ($chunk !== false) ? $chunk : '';
 		$data['keepid'] = $options['keep_ids'] ? $options['keep_ids'] : 0;
-//echo '<pre>',print_r($data,1),'</pre>';
+
 		$request = $http->get($optionsRest['rest_hostname'].'/index.php', $data);
 
-
-//echo '<pre>',print_r($request,1),'</pre>';
 		$code = $request->code;
 
 		if ($code == 500) {

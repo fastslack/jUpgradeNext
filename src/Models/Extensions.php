@@ -17,14 +17,12 @@ defined('_JEXEC') or die;
 
 use Joomla\Model\AbstractModel;
 
-use Jupgradenext\Drivers\Drivers;
 use Jupgradenext\Steps\Steps;
-use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeExtensions;
 use Jupgradenext\Upgrade\UpgradeHelper;
-use Jupgradenext\Models\Checks;
 
 /**
- * jUpgradeNext Model
+ * jUpgradeNext Extensions Model
  *
  * @package		jUpgradeNext
  */
@@ -36,39 +34,44 @@ class Extensions extends ModelBase
 	 * @return	none
 	 * @since	2.5.0
 	 */
-	function extensions() {
-
+	function extensions()
+	{
 		// Get the step
-		$steps = new Steps('extensions', true);
+		$steps = new Steps($this->container);
 
-		// Get jUpgradeExtensions instance
-		$extensions = new Upgrade($this->container);
-		$success = $extensions->upgrade();
+		// Get jUpgradeNext Extensions instance
+		$extensions = UpgradeExtensions::loadInstance($this->container);
 
-		if ($success === true) {
-			$step->status = 2;
-			$step->_updateStep();
+		try
+		{
+			$success = $extensions->upgrade();
+		}
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
 
-			if (!UpgradeHelper::isCli()) {
-				print(1);
-			}else{
-				return true;
+		if ($success['code'] == 200)
+		{
+			$success['message'] = \JText::_('COM_JUPGRADEPRO_CHECK_EXTENSIONS_DONE');
+		}
+
+		if ($success['count'] > 0)
+		{
+			foreach ($success['extensions'] as $key => $value) {
+				$n = "{$value['name']} ({$value['element']})";
+				$success['message'] = $success['message'] . \JText::sprintf('COM_JUPGRADEPRO_EXTENSION_FOUND', $n);
 			}
 		}
-	}
 
-	/**
-	 * returnError
-	 *
-	 * @return	none
-	 * @since	2.5.0
-	 */
-	public function returnError ($number, $text)
-	{
-		$message['number'] = $number;
-		$message['text'] = JText::_($text);
-		print(json_encode($message));
-		exit;
+		if (!empty($success))
+		{
+			$update = new \stdClass;
+			$update->status = 2;
+			//$steps->updateStep($update);
+
+			print(json_encode($success));
+		}
 	}
 
 } // end class

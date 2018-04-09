@@ -20,14 +20,14 @@ use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
- * jUpgradePro Model
+ * jUpgradeNext Model
  *
- * @package		jUpgradePro
+ * @package		jUpgradeNext
  */
 class Step extends ModelBase
 {
 	/**
-	 * Initial checks in jUpgradePro
+	 * Initial checks in jUpgradeNext
 	 *
 	 * @return	none
 	 * @since	1.2.0

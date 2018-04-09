@@ -40,6 +40,12 @@ class Cleanup extends ModelBase
 	{
 		// Get the parameters with global settings
 		$options = $this->container->get('sites')->getSite();
+		$siteName = $this->container->get('default_site');
+
+		if (!$this->checkSite($siteName))
+		{
+			$this->returnError(500, 'COM_JUPGRADEPRO_CONFIG_SITE_NOT_FOUND1');
+		}
 
 		// Check if sites DB options are correct.
 		if ($options['method'] == 'database')
@@ -51,10 +57,16 @@ class Cleanup extends ModelBase
 		}
 
 		// If REST is enable, cleanup the source #__jupgradepro_steps table
-		if ($options['method'] == 'restful') {
+		if ($options['method'] == 'restful')
+		{
 			// Initialize the driver to check the RESTful connection
 			$driver = Drivers::getInstance($this->container);
 			$code = $driver->requestRest('cleanup');
+
+			if (empty($code = $driver->requestRest('cleanup')))
+			{
+				$this->returnError(500, 'COM_JUPGRADEPRO_ERROR_CANNOT_CONNECT_TO_RESTFUL');
+			}
 		}
 
 		// Done checks
@@ -91,12 +103,50 @@ class Cleanup extends ModelBase
 		$query = $this->container->get('db')->getQuery(true);
 
 		$query->update('#__jupgradepro_steps AS t')->set('t.status = 2')->where("t.name = {$this->container->get('db')->quote($name)}");
+
 		try {
 			$this->container->get('db')->setQuery($query)->execute();
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
 	}
+
+	/**
+	 * Check if site exists
+	 *
+	 * @param	string	$siteName	The site name to check.
+	 *
+	 * @return	bool	True if site exists.
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	public function checkSite($siteName)
+	{
+		// Get query instance
+		$query = $this->container->get('db')->getQuery(true);
+
+		// Quote params
+		$siteName = $this->container->get('db')->quote($siteName);
+
+		// Query
+		$query->select("id");
+		$query->from("#__jupgradepro_sites AS s");
+		$query->where("`name` = {$siteName}");
+		$query->order("`id` DESC");
+		$query->setLimit(1);
+
+		$this->container->get('db')->setQuery($query);
+
+		try
+		{
+			return (bool) $this->container->get('db')->loadResult();
+		}
+		catch (Exception $e)
+		{
+			throw new Exception($e->getMessage());
+		}
+	}
+
 
   /**
    * Truncate tables

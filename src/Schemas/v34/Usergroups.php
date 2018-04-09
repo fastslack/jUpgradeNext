@@ -21,7 +21,7 @@ use Jupgradenext\Upgrade\UpgradeUsers;
  * This translates the usergroups table from 3.3.
  *
  * @package		MatWare
- * @subpackage	com_jupgradepro
+ * @subpackage	jUpgradeNext
  * @since		3.8.0
  */
 class Usergroups extends UpgradeUsers
@@ -63,6 +63,18 @@ class Usergroups extends UpgradeUsers
 		{
 			parent::truncateTable(true);
 		}
+	}
+
+	/**
+	 * Get the raw data for this part of the upgrade.
+	 *
+	 * @return	array	Returns a reference to the source data array.
+	 * @since	1.0
+	 * @throws	Exception
+	 */
+	public function &databaseHook($rows)
+	{
+		return $rows;
 	}
 
 	/**

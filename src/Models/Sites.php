@@ -20,12 +20,12 @@ use Joomla\Database\DatabaseDriver;
 /**
  * jUpgradeNext Model
  *
- * @package		jUpgradePro
+ * @package		jUpgradeNext
  */
 class Sites extends ModelBase
 {
 	/**
-	 * Initial checks in jUpgradePro
+	 * Initial checks in jUpgradeNext
 	 *
 	 * @return	none
 	 * @since	3.8
@@ -55,7 +55,7 @@ class Sites extends ModelBase
 	}
 
 	/**
-	 * Initial checks in jUpgradePro
+	 * Initial checks in jUpgradeNext
 	 *
 	 * @return	none
 	 * @since	3.8
@@ -85,7 +85,7 @@ class Sites extends ModelBase
     $config = (array) json_decode($array['database']);
 
 		$configDbo = array();
-		$configDbo['driver'] = 'mysqli';
+		$configDbo['driver'] = $config['db_type'];
 		$configDbo['host'] = $config['db_hostname'];
 		$configDbo['user'] = $config['db_username'];
 		$configDbo['password'] = $config['db_password'];

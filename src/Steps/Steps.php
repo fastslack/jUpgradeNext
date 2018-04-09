@@ -31,6 +31,7 @@ class Steps extends Registry
 	 */
 	function __construct(\Joomla\DI\Container $container)
 	{
+		// Get extensions parameter
 		$extensions = $container->get('extensions');
 
 		// Set step table
@@ -38,28 +39,23 @@ class Steps extends Registry
 			$this->_table = '#__jupgradepro_steps';
 		}else if($extensions === 'tables') {
 			$this->_table = '#__jupgradepro_extensions_tables';
-		}else if($extensions == true) {
+		}else if($extensions == 'check') {
 			$this->_table = '#__jupgradepro_extensions';
 		}
 
+		// Set container
 		$this->container = $container;
 
 		// Get site params
 		$site = $container->get('sites')->getSite();
 
+		// Load origin database
 		$this->_db = $this->container->get('db');
 
+		// Load step from db
 		$data = $this->loadFromDb();
 
-		if ($site['method'] == 'database')
-		{
-			//$data = $this->loadFromDb();
-		}
-		else if ($site['method'] == 'restful')
-		{
-			//$data = $this->load();
-		}
-
+		// Set data to registry
 		parent::__construct($data);
 	}
 
@@ -74,7 +70,7 @@ class Steps extends Registry
 	static function loadInstance(\Joomla\DI\Container $container)
 	{
 
-		// Create our new jUpgradeNext connector based on the options given.
+		// Create our new jUpgradeNext steps connector based on the options given.
 		try
 		{
 			$instance = new Steps($container);

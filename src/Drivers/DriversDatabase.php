@@ -19,9 +19,9 @@ use Jupgradenext\Upgrade\Upgrade;
 use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
- * jUpgradePro database utility class
+ * jUpgradeNext database utility class
  *
- * @package		jUpgradePro
+ * @package		jUpgradeNext
  */
 class DriversDatabase extends Drivers
 {
@@ -40,17 +40,19 @@ class DriversDatabase extends Drivers
 	 * @var    array  List of extensions steps
 	 * @since  12.1
 	 */
-	private $extensions_steps = array('extensions', 'ext_components', 'ext_modules', 'ext_plugins');
+	private $extensions_steps = array('extensions', 'extensions_components', 'extensions_modules', 'extensions_plugins');
 
 	function __construct(\Joomla\DI\Container $container)
 	{
 		parent::__construct($container);
 
-		if (null !== $this->_steps)
-		{
-			$var = $this->_steps->loadFromDb();
+		$steps = $container->get('steps');
 
-			$name = !empty($this->_steps->get('name')) ? $this->_steps->get('name') : '';
+		if (null !== $steps)
+		{
+			$var = $steps->loadFromDb();
+
+			$name = !empty($steps->get('name')) ? $steps->get('name') : '';
 
 			// Derive the class name from the driver.
 			$class_name = ucfirst(strtolower($name));
@@ -60,14 +62,19 @@ class DriversDatabase extends Drivers
 			$version = str_replace(".", "", $version);
 
 			$class = "\\Jupgradenext\\Schemas\\v{$version}\\{$class_name}";
+
+			if (!class_exists($class))
+			{
+				$class = "\\Jupgradenext\\Schemas\\v{$version}\\Common";
+			}
+
 			$this->getConditionsCallback($class);
 
-			$xmlpath = !empty($this->_steps->get('xmlpath')) ? $this->_steps->get('xmlpath') : '';
+			$xmlpath = !empty($steps->get('xmlpath')) ? $steps->get('xmlpath') : '';
 		}
 
 		// Creating dabatase instance for this installation
 		$this->_db = $container->get('db');
-		$this->_db_old = $container->get('external');
 	}
 
 	/**
@@ -107,13 +114,13 @@ class DriversDatabase extends Drivers
 		// Setting the query
 		$cid = (int) $this->_getStepID();
 		$query->setLimit($chunk_limit, $cid);
-		$this->_db_old->setQuery( $query, $cid, $chunk_limit );
+		$this->container->get('external')->setQuery( $query, $cid, $chunk_limit );
 
 		//echo "\nQUERY: {$query->__toString()}\n";
 
 		try
 		{
-			$rows = $this->_db_old->loadAssocList();
+			$rows = $this->container->get('external')->loadAssocList();
 		}
 		catch (Exception $e)
 		{
@@ -139,23 +146,24 @@ class DriversDatabase extends Drivers
 		{
 			$query = $conditions;
 		} else {
+			$conditions['select'] = 'COUNT(*)';
 			$query = $this->_processQuery($conditions);
 		}
 
 		// Set query to db instance
-		$this->_db_old->setQuery( $query );
+		$this->container->get('external')->setQuery( $query );
 
 		// Get the total
 		try
 		{
-			$total = $this->_db_old->loadAssocList();
+			$total = $this->container->get('external')->loadResult();
 		}
 		catch (Exception $e)
 		{
 			throw new Exception($e->getMessage());
 		}
 
-		$return = (int) count($total);
+		$return = (int) $total;
 
 		return $return;
 	}
@@ -218,7 +226,7 @@ class DriversDatabase extends Drivers
 		// Process the ORDER clause
 		$key = $this->getKeyName();
 
-		if (!empty($key)) {
+		if (!empty($key) && $key != false) {
 			$order = isset($conditions['order']) ? $conditions['order'] : "{$key} ASC";
 			$query->order($order);
 		}
@@ -243,9 +251,9 @@ class DriversDatabase extends Drivers
 	*/
 	function tableExists ($table) {
 		$tables = array();
-		$tables = $this->_db_old->getTableList();
+		$tables = $this->container->get('external')->getTableList();
 
-		$table = $this->_db_old->getPrefix().$table;
+		$table = $this->container->get('external')->getPrefix().$table;
 
 		return (in_array($table, $tables)) ? 'YES' : 'NO';
 	}
@@ -257,7 +265,7 @@ class DriversDatabase extends Drivers
 	 */
 	public function getSourceTable()
 	{
-		return '#__'.$this->_steps->get('source');
+		return '#__'.$this->container->get('steps')->get('source');
 	}
 
 	/**
@@ -267,7 +275,7 @@ class DriversDatabase extends Drivers
 	 */
 	public function getDestinationTable()
 	{
-		return '#__'.$this->_steps->get('destination');
+		return '#__'.$this->container->get('steps')->get('destination');
 	}
 
 	/**
@@ -280,9 +288,14 @@ class DriversDatabase extends Drivers
 		if (empty($this->_table)) {
 			$table = $this->getSourceTable();
 
+			if ($table == '#__')
+			{
+				return false;
+			}
+
 			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
-			$this->_db_old->setQuery( $query );
-			$keys = $this->_db_old->loadObjectList();
+			$this->container->get('external')->setQuery( $query );
+			$keys = $this->container->get('external')->loadObjectList();
 
 			return !empty($keys) ? $keys[0]->Column_name : '';
 		}else{

@@ -21,7 +21,7 @@ use Jupgradenext\Upgrade\UpgradeUsers;
  * This translates the usergroups table from 3.3.
  *
  * @package		MatWare
- * @subpackage	com_jupgradepro
+ * @subpackage	jUpgradeNext
  * @since		3.8.0
  */
 class Usergroups extends UpgradeUsers
