@@ -32,7 +32,6 @@ class Migrate extends ModelBase
 	 * @return	none
 	 * @since	3.0.3
 	 */
-	//function migrate($table = false, $json = true, $extensions = false) {
 	function migrate(\Jupgradenext\Steps\Steps $steps = null) {
 
 		// Init the jUpgradepro instance
@@ -55,7 +54,7 @@ class Migrate extends ModelBase
 		if ($steps->get('first') == true
 			&& $extensions == 'tables'
 			&& $steps->get('cid') == 0) {
-			$structure = $jupgrade->cloneTableStructure();
+			$structure = $jupgrade->driver->cloneTableStructure();
 		}
 
 		// Run the upgrade

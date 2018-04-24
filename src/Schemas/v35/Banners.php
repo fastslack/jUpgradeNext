@@ -47,6 +47,10 @@ class Banners extends Upgrade
 				unset($row['modified_by']);
 				unset($row['version']);
 			}
+
+			// Fix incorrect dates
+			$names = array('created', 'checked_out_time', 'modified', 'publish_up', 'publish_down');
+			$row = $this->fixIncorrectDate($row, $names);
 		}
 
 		return $rows;

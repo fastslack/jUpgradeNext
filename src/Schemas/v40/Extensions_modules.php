@@ -37,7 +37,7 @@ class Extensions_modules extends Upgrade
 
 		$conditions['as'] = "m";
 
-		$conditions['select'] = '`name`, `element`, `type`, `folder`, `client_id`, `ordering`, `params`';
+		$conditions['select'] = '`extension_id` AS eid, `name`, `element`, `type`, `folder`, `client_id`, `ordering`, `params`';
 
 		$where = array();
 		$where[] = "m.type = 'module'";

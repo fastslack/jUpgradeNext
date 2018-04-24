@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v38;
+namespace Jupgradenext\Schemas\v39;
 
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\UpgradeCategories;
@@ -121,22 +121,26 @@ class Categories extends UpgradeCategories
 		$total = count($rows);
 
 		// Update the category
-		foreach ($rows as $category)
+		foreach ($rows as $row)
 		{
-			$category = (array) $category;
+			$row = (array) $row;
 
-			$category['asset_id'] = null;
-			$category['parent_id'] = 1;
-			$category['lft'] = null;
-			$category['rgt'] = null;
-			$category['level'] = null;
+			$row['asset_id'] = null;
+			$row['parent_id'] = 1;
+			$row['lft'] = null;
+			$row['rgt'] = null;
+			$row['level'] = null;
 
-			if ($category['id'] == 1) {
-				$category['id'] = $rootidmap;
+			if ($row['id'] == 1) {
+				$row['id'] = $rootidmap;
 			}
 
+			// Fix incorrect dates
+			$names = array('created_time', 'checked_out_time', 'modified_time');
+			$row = $this->fixIncorrectDate($row, $names);
+
 			// Update the category data
-			$this->insertCategory($category);
+			$this->insertCategory($row);
 
 			// Updating the steps table
 			$this->steps->_nextID($total);

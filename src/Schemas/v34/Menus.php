@@ -18,7 +18,6 @@ use Joomla\Event\Dispatcher;
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\UpgradeMenus;
 use Joomla\Table\Table;
-use stdClass;
 
 /**
  * Upgrade class for Menus
@@ -45,7 +44,8 @@ class Menus extends UpgradeMenus
 		$conditions['select'] = 'm.*';
 
 		$conditions['where'] = array();
-		$conditions['where'][] = "m.alias != 'root'";
+		$root = $container->get('db')->q('root');
+		$conditions['where'][] = "m.alias != {$root}";
 		$conditions['where'][] = "m.id > 101";
 
 		$conditions['order'] = "m.id ASC";
@@ -73,8 +73,15 @@ class Menus extends UpgradeMenus
 
 		$total = count($rows);
 
-		foreach ($rows as $row)
+		foreach ($rows as &$row)
 		{
+			// Convert the array into an object.
+			$row = (array) $row;
+
+			// Fix incorrect dates
+			$names = array('checked_out_time');
+			$row = $this->fixIncorrectDate($row, $names);
+
 			// Convert the array into an object.
 			$row = (object) $row;
 
@@ -86,39 +93,38 @@ class Menus extends UpgradeMenus
 			$row->alias = (!empty($alias)) ? $alias."~" : $row->alias;
 
 			// Get new/old id's values
-			$menuMap = new stdClass();
+			$menuMap = new \stdClass();
 
-			// Save the old id
-			$menuMap->old = $row->id;
+			// Check if it exists
+			$menuMap->old_id = $row->id;
+			if (isset($row->id) && $this->valueExists($row, array('id')))
+			{
+				unset($row->id);
+			}
+
+			if (empty($row->language))
+			{
+				$row->language = "*";
+			}
 
 			// Not needed
-			unset($row->id);
+			//unset($row->id);
 			unset($row->name);
 			unset($row->option);
 			unset($row->componentid);
 			unset($row->ordering);
 
-			// Inserting the menu
-			try	{
-				$this->_db->insertObject($table, $row);
-			}	catch (Exception $e) {
-				throw new Exception($e->getMessage());
+			if ($row->link == 'index.php?option=com_postinstall')
+			{
+				$row = false;
 			}
 
-			// Save the new id
-			$menuMap->new = $this->_db->insertid();
-
-			// Save old and new id
-			try	{
-				$this->_db->insertObject('#__jupgradepro_menus', $menuMap);
-			}	catch (Exception $e) {
-				throw new Exception($e->getMessage());
+			if ($this->valueExists($row, array('client_id', 'parent_id', 'alias', 'language')))
+			{
+				$row = false;
 			}
-
-			// Updating the steps table
-			$this->steps->_nextID($total);
 		}
 
-		return false;
+		return $rows;
 	}
 }

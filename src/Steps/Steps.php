@@ -110,19 +110,32 @@ class Steps extends Registry
 		$query->select('e.*');
 		$query->from($this->_table.' AS e');
 
-		if ($this->_table == '#__jupgradepro_extensions_tables') {
-			$query->leftJoin('`#__jupgradepro_extensions` AS ext ON ext.name = e.element');
+		if ($this->_table == '#__jupgradepro_extensions_tables')
+		{
+			$qExtTable = $this->_db->quoteName('#__jupgradepro_extensions');
+			$qExtName = $this->_db->quoteName('ext.name');
+			$qExtElement = $this->_db->quoteName('e.element');
+
+			$query->leftJoin("{$qExtTable} AS ext ON {$qExtName} = {$qExtElement}");
 			$query->select('ext.xmlpath');
 		}
 
 		$external_version = str_replace(".", "", $external_version);
 		$origin_version = str_replace(".", "", $origin_version);
-		$query->where("{$external_version} BETWEEN e.from AND e.to");
 
-		if (!empty($name)) {
-			$query->andWhere("e.name = '{$name}'");
-		}else{
-			$query->andWhere("e.status != 2");
+		$qFrom = $this->_db->quoteName('e.from');
+		$qTo = $this->_db->quoteName('e.to');
+		$query->where("{$external_version} BETWEEN {$qFrom} AND {$qTo}");
+
+		if (!empty($name))
+		{
+			$nameQ = $this->_db->quoteName('e.name');
+			$query->andWhere("{$nameQ} = {$this->_db->quote($name)}");
+		}
+		else
+		{
+			$statusQ = $this->_db->quoteName('e.status');
+			$query->andWhere("{$statusQ} != 2");
 		}
 
 		$query->order('e.id ASC');
@@ -148,11 +161,15 @@ class Steps extends Registry
 		$query->select('e.name');
 		$query->from($this->_table . ' AS e');
 
-		$query->where("{$external_version} BETWEEN e.from AND e.to");
+		$query->where("{$external_version} BETWEEN {$qFrom} AND {$qTo}");
 
 		$query->where("e.status = 0");
-		if ($this->_table == '#__jupgradepro_extensions_tables') {
-			$query->where("element = '{$step['element']}'");
+
+		if ($this->_table == '#__jupgradepro_extensions_tables')
+		{
+			$elementQ = $this->_db->quoteName('element');
+			$stepElement = $this->_db->quote($step['element']);
+			$query->where("{$elementQ} = {$stepElement}");
 		}
 
 		$query->order('e.id DESC');
@@ -300,13 +317,21 @@ class Steps extends Registry
 
 		foreach ($columns as $column)
 		{
-			if (!empty($update->$column)) {
-				$query->set("{$column} = '{$update->$column}'");
+			if (!empty($update->$column))
+			{
+				$v = $update->$column;
+				$value = $this->_db->q($v);
+
+				$query->set("{$column} = {$value}");
 			}
 			elseif (!empty($this->get($column)))
 			{
 				$value = $this->get($column);
-				$query->set("{$column} = '{$value}'");
+
+				$column = $this->_db->qn($column);
+				$value = $this->_db->q($value);
+
+				$query->set("{$column} = {$value}");
 			}
 		}
 
@@ -339,14 +364,21 @@ class Steps extends Registry
 		$external_version = UpgradeHelper::getVersionFromDB('old');
 		$external_version = str_replace(".", "", $external_version);
 
-		$name = $this->_getStepName();
+		$name = $this->_db->quote($this->_getStepName());
+
+		$cid = $this->_db->quoteName('cid');
+		$nameQ = $this->_db->quoteName('name');
+		$id = (int) $id;
 
 		$query = $this->_db->getQuery(true);
 		$query->update($this->_table . ' AS e');
-		$query->set("`cid` = '{$id}'");
-		$query->where("name = {$this->_db->quote($name)}");
-		$query->where("{$external_version} BETWEEN e.from AND e.to");
-		$query->setLimit(1);
+		$query->set("{$cid} = {$id}");
+		$query->where("{$nameQ} = {$name}");
+
+		$qFrom = $this->_db->quoteName('e.from');
+		$qTo = $this->_db->quoteName('e.to');
+		$query->where("{$external_version} BETWEEN {$qFrom} AND {$qTo}");
+		//$query->setLimit(1);
 
 		// Execute the query
 		return $this->_db->setQuery($query)->execute();

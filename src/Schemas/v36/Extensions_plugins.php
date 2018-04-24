@@ -37,7 +37,7 @@ class Extensions_plugins extends Upgrade
 
 		$conditions['as'] = "p";
 
-		$conditions['select'] = '`name`, `element`, `type`, `folder`, `client_id`, `ordering`, `params`';
+		$conditions['select'] = '`extension_id` AS eid, `name`, `element`, `type`, `folder`, `client_id`, `ordering`, `params`';
 
 		$where = array();
 		$where[] = "`type` = 'plugin'";

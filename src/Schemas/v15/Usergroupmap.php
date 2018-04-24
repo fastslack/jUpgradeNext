@@ -116,7 +116,7 @@ class Usergroupmap extends UpgradeUsers
 				$row = false;
 			}
 
-			if (!empty($row->user_id) && $this->valueExists($row, array('aro_id')))
+			if (!empty($row->user_id) && $this->valueExists($row, array('user_id'), true))
 			{
 				$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
 			}

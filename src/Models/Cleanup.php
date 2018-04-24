@@ -127,12 +127,13 @@ class Cleanup extends ModelBase
 
 		// Quote params
 		$siteName = $this->container->get('db')->quote($siteName);
+		$sanitizeName = $this->container->get('db')->quoteName('name');
 
 		// Query
 		$query->select("id");
 		$query->from("#__jupgradepro_sites AS s");
-		$query->where("`name` = {$siteName}");
-		$query->order("`id` DESC");
+		$query->where("{$sanitizeName} = {$siteName}");
+		$query->order("id DESC");
 		$query->setLimit(1);
 
 		$this->container->get('db')->setQuery($query);

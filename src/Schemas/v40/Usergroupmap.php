@@ -30,6 +30,12 @@ use Jupgradenext\Upgrade\UpgradeUsers;
 class Usergroupmap extends UpgradeUsers
 {
 	/**
+	 * @var	array
+	 * @since  3.8
+	 */
+	protected $relation = false;
+
+	/**
 	 * Setting the conditions hook
 	 *
 	 * @return	array
@@ -58,6 +64,47 @@ class Usergroupmap extends UpgradeUsers
 	}
 
 	/**
+	 * Get the raw data for this part of the upgrade.
+	 *
+	 * @return	array
+	 * @since	1.0
+	 * @throws	Exception
+	 */
+	public function &databaseHook($rows)
+	{
+		$remove = array();
+/*
+		// Set up the mapping table for the old groups to the new groups.
+		$groupMap = $this->getUsergroupIdMap();
+
+		// Do some custom post processing on the list.
+		// The schema for old group map is: group_id, section_value, aro_id
+		// The schema for new groups is: user_id, group_id
+
+		$count = count($rows);
+
+		for ($i=0;$i<$count;$i++)
+		{
+			$row = (array) $rows[$i];
+
+			$row['user_id'] = $this->getUserIdAroMap($row['aro_id']);
+
+			// Note, if we are here, these are custom groups we didn't know about.
+			if ($row['group_id'] <= 30) {
+				$row['group_id'] = $groupMap[$row['group_id']];
+			}
+
+			// Remove unused fields.
+			unset($row['section_value']);
+			unset($row['aro_id']);
+
+			$rows[$i] = $row;
+		}
+*/
+		return $rows;
+	}
+
+	/**
 	 * Sets the data in the destination database.
 	 *
 	 * @return	void
@@ -67,17 +114,22 @@ class Usergroupmap extends UpgradeUsers
 	public function dataHook($rows)
 	{
 		// Do some custom post processing on the list.
-		foreach ($rows as &$row)
+		foreach ($rows as $key => &$row)
 		{
 			$row = (object) $row;
 
-			if (empty($row->user_id)) {
+			if (!empty($row->user_id) && $this->valueExists($row, array('user_id')))
+			{
+				//$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
+			}
+
+			if ($this->valueExists($row, array('user_id')) && $this->valueExists($row, array('group_id')))
+			{
 				$row = false;
 			}
 
-			if (!empty($row->user_id) && $this->valueExists($row, array('user_id')))
-			{
-				$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
+			if (!isset($row->user_id) || empty($row->user_id) || $row->user_id == 0) {
+				$row = false;
 			}
 		}
 

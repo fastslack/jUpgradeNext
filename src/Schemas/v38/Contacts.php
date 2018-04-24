@@ -11,7 +11,7 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v40;
+namespace Jupgradenext\Schemas\v38;
 
 use Jupgradenext\Upgrade\Upgrade;
 
@@ -24,4 +24,30 @@ use Jupgradenext\Upgrade\Upgrade;
  */
 class Contacts extends Upgrade
 {
+  /**
+   * Get the raw data for this part of the upgrade.
+   *
+   * @return	array	Returns a reference to the source data array.
+   * @since		1.0
+   * @throws	Exception
+   */
+  public function dataHook($rows)
+  {
+    // Do some custom post processing on the list.
+    foreach ($rows as &$row)
+    {
+      $row = (array) $row;
+
+      if (empty($row->language))
+      {
+        $row['language'] = "*";
+      }
+
+      // Fix incorrect dates
+      $names = array('created', 'checked_out_time', 'modified', 'publish_up', 'publish_down');
+      $row = $this->fixIncorrectDate($row, $names);
+    }
+
+    return $rows;
+  }
 }

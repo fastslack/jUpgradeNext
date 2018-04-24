@@ -111,12 +111,10 @@ class DriversDatabase extends Drivers
 			$query = $this->_processQuery($conditions, true);
 		}
 
-		// Setting the query
+		// Setting query
 		$cid = (int) $this->_getStepID();
 		$query->setLimit($chunk_limit, $cid);
 		$this->container->get('external')->setQuery( $query, $cid, $chunk_limit );
-
-		//echo "\nQUERY: {$query->__toString()}\n";
 
 		try
 		{
@@ -146,8 +144,7 @@ class DriversDatabase extends Drivers
 		{
 			$query = $conditions;
 		} else {
-			$conditions['select'] = 'COUNT(*)';
-			$query = $this->_processQuery($conditions);
+			$query = $this->_processQuery($conditions, false, true);
 		}
 
 		// Set query to db instance
@@ -175,10 +172,10 @@ class DriversDatabase extends Drivers
 	 * @return	array	The conditions ready to be added to query
 	 * @since  3.1.0
 	 */
-	public function _processQuery( $conditions, $pagination = false )
+	public function _processQuery( $conditions, $pagination = false, $total = false )
 	{
 		// Create a new query object.
-		$query = $this->_db->getQuery(true);
+		$query = $this->container->get('external')->getQuery(true);
 
 		// Get the SELECT clause
 		$select = isset($conditions['select']) ? $conditions['select'] : '*';
@@ -188,7 +185,13 @@ class DriversDatabase extends Drivers
 		$table = isset($conditions['as']) ? "{$this->getSourceTable()} AS {$conditions['as']}" : $this->getSourceTable();
 
 		// Build the query
-		$query->select($select);
+		if ($total == true)
+		{
+			$query->select('COUNT(*)');
+		}	else {
+			$query->select($select);
+		}
+
 		$query->from(trim($table));
 
 		// Set the join[s] into the query
@@ -226,9 +229,19 @@ class DriversDatabase extends Drivers
 		// Process the ORDER clause
 		$key = $this->getKeyName();
 
-		if (!empty($key) && $key != false) {
+		if (!empty($key) && $key != false && $total == false) {
 			$order = isset($conditions['order']) ? $conditions['order'] : "{$key} ASC";
 			$query->order($order);
+		}
+
+		// If total is true and group is set, count rows returned
+		if ($total == true && isset($conditions['group_by']))
+		{
+			$q2 = $this->container->get('external')->getQuery(true);
+			$q2->select('COUNT(*)');
+			$q2->from($query, 'countGroup');
+
+			$query = $q2;
 		}
 
 		return $query;

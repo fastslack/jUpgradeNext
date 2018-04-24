@@ -13,8 +13,8 @@
 
 namespace Jupgradenext\Schemas\v32;
 
-use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\Upgrade;
+use Jupgradenext\Upgrade\UpgradeHelper;
 
 /**
  * Upgrade class for Banners
@@ -47,6 +47,10 @@ class Banners extends Upgrade
 				unset($row['modified_by']);
 				unset($row['version']);
 			}
+
+			// Fix incorrect dates
+			$names = array('created', 'checked_out_time', 'modified', 'publish_up', 'publish_down');
+			$row = $this->fixIncorrectDate($row, $names);
 		}
 
 		return $rows;

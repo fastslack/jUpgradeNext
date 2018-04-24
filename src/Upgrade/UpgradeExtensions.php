@@ -81,22 +81,17 @@ class UpgradeExtensions extends Upgrade
 			}
 
 			// Migrate
-			$this->ready = parent::upgrade();
+			$return = parent::upgrade();
 
-			if ($this->ready)
-			{
-				$this->ready = $this->migrateExtensionCustom();
-			}
+			$this->migrateExtensionCustom();
 
 		}
 		catch (Exception $e)
 		{
-			echo JError::raiseError(500, $e->getMessage());
-
-			return false;
+			throw new Exception($e->getMessage());
 		}
 
-		return true;
+		return $return;
 	}
 
 	/**
@@ -152,18 +147,22 @@ class UpgradeExtensions extends Upgrade
 			$this->state->folders = $this->getCopyFolders();
 		}
 
-		while(($value = array_shift($this->state->folders)) !== null) {
+		while(($value = array_shift($this->state->folders)) !== null)
+		{
 			//$this->output("{$this->name} {$value}");
 			$src = $params->path.DS.$value;
 			$dest = JPATH_SITE.DS.$value;
 			$copyFolderFunc = 'copyFolder_'.preg_replace('/[^\w\d]/', '_', $value);
-			if (method_exists($this, $copyFolderFunc)) {
+			if (method_exists($this, $copyFolderFunc))
+			{
 				// Use function called like copyFolder_media_kunena (for media/kunena)
 				$ready = $this->$copyTableFunc($value);
 				if (!$ready) {
 					array_unshift($this->state->folders, $value);
 				}
-			} else {
+			}
+			else
+			{
 				if (JFolder::exists($src) && !JFolder::exists($dest) ) {
 					JFolder::copy($src, $dest);
 				}
@@ -255,9 +254,12 @@ class UpgradeExtensions extends Upgrade
   {
 		$folders = !empty($this->xml->folders->folder) ? $this->xml->folders->folder : array();
 		$results = array();
-		foreach ($folders as $folder) {
+
+		foreach ($folders as $folder)
+		{
 			$results[] = (string) $folder;
 		}
+
 		return $results;
 	}
 
@@ -271,9 +273,12 @@ class UpgradeExtensions extends Upgrade
   {
 		$tables = !empty($this->xml->tables->table) ? $this->xml->tables->table : array();
 		$results = array();
-		foreach ($tables as $table) {
+
+		foreach ($tables as $table)
+		{
 			$results[] = (string) $table;
 		}
+
 		return $results;
 	}
 
@@ -486,12 +491,20 @@ class UpgradeExtensions extends Upgrade
 
 					$element = File::stripExt(basename($xmlfile));
 
-					if (array_key_exists($element, $this->extensions)) {
+					// Read xml definition file
+					$xml = simplexml_load_file($xmlfile);
 
+					$alternative = (string)$xml->alternative;
+
+					if (array_key_exists($alternative, $this->extensions))
+					{
+						$original = $element;
+						$element = $alternative;
+					}
+
+					if (array_key_exists($element, $this->extensions))
+					{
 						$extension = $this->extensions[$element];
-
-						// Read xml definition file
-						$xml = simplexml_load_file($xmlfile);
 
 						// Getting the php file
 						if (!empty($xml->installer->file[0])) {
@@ -521,10 +534,11 @@ class UpgradeExtensions extends Upgrade
 
 							// Checking if other migration exists
 							$query = $this->_db->getQuery(true);
-							$query->select('e.*');
+							$query->select('e.id');
 							$query->from('#__jupgradepro_extensions AS e');
 							$query->where('e.name = ' . $this->_db->quote($element));
-							$query->limit(1);
+							$query->order("e.id DESC");
+							$query->setLimit(1);
 							$this->_db->setQuery($query);
 							$exists = $this->_db->loadResult();
 
@@ -532,8 +546,10 @@ class UpgradeExtensions extends Upgrade
 							{
 								// Inserting the step to #__jupgradepro_extensions table
                 $query->clear();
-								$query->insert('#__jupgradepro_extensions')->columns('`from`, `to`, `name`, `title`, `xmlpath`');
-                $query->values("'{$external_version}', '99', '{$element}', '{$xml->name}', '{$xmlpath}'");
+								$columns = "{$this->_db->qn('from')}, {$this->_db->qn('to')}, {$this->_db->qn('name')}, {$this->_db->qn('title')}, {$this->_db->qn('xmlpath')}";
+								$query->insert('#__jupgradepro_extensions')->columns($columns);
+                $query->values("{$this->_db->q($external_version)}, '99', {$this->_db->q($element)}, {$this->_db->q($xml->name)}, {$this->_db->q($xmlpath)}");
+
 								$this->_db->setQuery($query);
 								$this->_db->execute();
 							}
@@ -542,8 +558,9 @@ class UpgradeExtensions extends Upgrade
 							if (isset($xml->name) && isset($xml->collection))
               {
                 $query->clear();
-								$query->insert('#__update_sites')->columns('name, type, location, enabled')
-									->values("'{$xml->name}', 'collection',  '{$xml->collection}, 1");
+								$columns = "{$this->_db->qn('name')}, {$this->_db->qn('type')}, {$this->_db->qn('location')}, {$this->_db->qn('enabled')}";
+								$query->insert('#__update_sites')->columns($columns)
+									->values("{$this->_db->q($xml->name)}, 'collection',  {$this->_db->q($xml->collection)}, 1");
 								$this->_db->setQuery($query);
 								$this->_db->execute();
 							}
@@ -561,28 +578,38 @@ class UpgradeExtensions extends Upgrade
 								$main_replace = (string) $xml->tables->attributes()->replace;
 
 								$count = count($xml->tables[0]->table);
+								$tableExists = false;
 
 								for($i=0;$i<$count;$i++)
                 {
 									$table = new \stdClass();
 									$table->name = $table->source = $table->destination = (string) $xml->tables->table[$i];
-									$table->eid = $extension->extension_id;
-									$table->element = $element;
+									$table->eid = $extension->eid;
+									$table->element = isset($original) ? $original : $element;
 									$table->from = $external_version;
 									$table->to = 99;
 									$table->replace = (string) $xml->tables->table[$i]->attributes()->replace;
 									$table->replace = !empty($table->replace) ? $table->replace : $main_replace;
 
 									$table_name = $old_prefix.$table->name;
+									//echo '<pre>',@print_r($table,1),'</pre>';exit;
 
 									if (in_array($table_name, $old_tables))
                   {
-										if (!$this->_db->insertObject('#__jupgradepro_extensions_tables', $table))
+										$tableExists = true;
+
+										if (!$this->_db->insertObject('#__jupgradepro_extensions_tables', $table, 'id'))
                     {
 											throw new Exception($this->_db->getErrorMsg());
 										}
 									}
 								}
+
+								if ($tableExists == false)
+						    {
+						      $return['message'] = "No tables found trying to migrate [[gbi;orange;]{$extension->name}] extension";
+						      $return['code'] = 500;
+						    }
 							}
 
 							// Add other extensions from the package
@@ -609,6 +636,10 @@ class UpgradeExtensions extends Upgrade
 
 						} //end if
 
+					} else {
+						$plgname = (string)$xml->name;
+						$return['message'] = "[[g;white;]|] [[gb;orange;]✘] Extension [[gbi;orange;]{$element}] not found. Plugin: [[gbi;orange;]{$plgname}]";
+						$return['code'] = 500;
 					} // end if
 
 				} // end if

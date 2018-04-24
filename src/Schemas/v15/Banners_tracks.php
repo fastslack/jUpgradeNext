@@ -37,7 +37,7 @@ class Banners_tracks extends Upgrade
 
 		$conditions['where'] = array();
 
-		$conditions['group_by'] = "banner_id";
+		$conditions['group_by'] = "track_date";
 
 		return $conditions;
 	}

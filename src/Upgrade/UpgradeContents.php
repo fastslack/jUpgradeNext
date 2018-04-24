@@ -74,6 +74,10 @@ class UpgradeContents extends Upgrade
 		{
 			$row = (array) $row;
 
+			// Fix incorrect dates
+			$names = array('created', 'checked_out_time', 'modified', 'publish_up', 'publish_down');
+			$row = $this->fixIncorrectDate($row, $names);
+
 			// Check if title and alias isn't blank
 			$row['title'] = !empty($row['title']) ? $row['title'] : "###BLANK###";
 			$row['alias'] = !empty($row['alias']) ? $row['alias'] : "###BLANK###";
@@ -86,13 +90,14 @@ class UpgradeContents extends Upgrade
 
 			// Get section and old id
 			$oldlist = new \stdClass();
-			$oldlist->old = (int) $row['id'];
+			$oldlist->old_id = (int) $row['id'];
 
 			if ($this->options['keep_ids'] == 0)
 			{
-				unset($row['id']);
+				//unset($row['id']);
 			}
 
+/*
 			// Table:store() run an update if id exists into the object so we create them first
 			$object = new stdClass();
 			$object->id = $row['id'];
@@ -103,7 +108,7 @@ class UpgradeContents extends Upgrade
 			} catch (Exception $e) {
 				throw new Exception($e->getMessage());
 			}
-
+*/
 			// Get the content table
 			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
 			{
@@ -134,8 +139,8 @@ class UpgradeContents extends Upgrade
 			}
 
 			// Get new id
-			$oldlist->new = (int) $category->id;
-			$oldlist->table = '#__categories';
+			$oldlist->new_id = (int) $content->id;
+			$oldlist->table = '#__content';
 
 			// Insert the row backup
 			try

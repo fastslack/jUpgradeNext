@@ -13,7 +13,6 @@
 
 namespace Jupgradenext\Schemas\v40;
 
-use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\UpgradeUsers;
 
 /**
@@ -25,53 +24,30 @@ use Jupgradenext\Upgrade\UpgradeUsers;
  */
 class Users extends UpgradeUsers
 {
-	/**
-	 * Get the raw data for this part of the upgrade.
-	 *
-	 * @return	array	Returns a reference to the source data array.
-	 * @since	1.0
-	 * @throws	Exception
-	 */
-	public function &databaseHook($rows)
-	{
-		$superuser = $this->container->get('origin_super_admin');
+  /**
+   * Get the raw data for this part of the upgrade.
+   *
+   * @return	array	Returns a reference to the source data array.
+   * @since	1.0
+   * @throws	Exception
+   */
+  public function dataHook($rows)
+  {
+    // Do some custom post processing on the list.
+    foreach ($rows as &$row)
+    {
+      $row = (array) $row;
 
-		// Do some custom post processing on the list.
-		foreach ($rows as &$row)
-		{
-			$row = (array) $row;
+      // Fix incorrect dates
+      $names = array('lastResetTime', 'lastvisitDate', 'registerDate');
+      $row = $this->fixIncorrectDate($row, $names);
 
-      // Chaging admin username and email
-      if ($row['username'] == 'admin') {
-        $row['username'] = $row['username'].'-old';
-        $row['email'] = $row['email'].'-old';
-      }
-		}
+      // Remove unused fields.
+      unset($row['otpKey']);
+      unset($row['otep']);
+      unset($row['gid']);
+    }
 
-		return $rows;
-	}
-
-	/**
-	 * Get the raw data for this part of the upgrade.
-	 *
-	 * @return	array	Returns a reference to the source data array.
-	 * @since	1.0
-	 * @throws	Exception
-	 */
-	public function dataHook($rows)
-	{
-		// Do some custom post processing on the list.
-		foreach ($rows as &$row)
-		{
-			$row = (array) $row;
-
-			// Remove unused fields.
-			unset($row['otpKey']);
-			unset($row['otep']);
-			unset($row['gid']);
-		}
-
-		return $rows;
-	}
-
+    return $rows;
+  }
 }

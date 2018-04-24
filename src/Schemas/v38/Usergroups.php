@@ -66,6 +66,18 @@ class Usergroups extends UpgradeUsers
 	}
 
 	/**
+	 * Get the raw data for this part of the upgrade.
+	 *
+	 * @return	array	Returns a reference to the source data array.
+	 * @since	1.0
+	 * @throws	Exception
+	 */
+	public function &databaseHook($rows)
+	{
+		return $rows;
+	}
+
+	/**
 	 * Method to do pre-processes modifications before migrate
 	 *
 	 * @return      boolean Returns true if all is fine, false if not.

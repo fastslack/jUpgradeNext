@@ -11,14 +11,12 @@
  * @license GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Jupgradenext\Schemas\v40;
+namespace Jupgradenext\Schemas\v39;
 
 use Joomla\Registry\Registry;
 
 use Jupgradenext\Upgrade\UpgradeHelper;
 use Jupgradenext\Upgrade\Upgrade;
-
-use stdClass;
 
 /**
  * Upgrade class for modules
@@ -72,7 +70,8 @@ class Modules extends Upgrade
 			throw new Exception($e->getMessage());
 		}
 
-		if ($modules_id > 86) {
+		if ($modules_id > 86)
+		{
 			// Update the modules step
 			$this->updateStep('modules');
 
@@ -129,33 +128,18 @@ class Modules extends Upgrade
 		$total = count($rows);
 
 		//
-		foreach ($rows as $row)
+		foreach ($rows as &$row)
 		{
-			// Convert the array into an object.
-			$row = (object) $row;
+			// Fix incorrect dates
+			$names = array('checked_out_time');
+			$row = $this->fixIncorrectDate((array)$row, $names);
 
-			// Get old id
-			$oldlist = new stdClass();
-			$oldlist->old = $row->id;
-			unset($row->id);
-
-			// Insert module
-			if (!$this->_db->insertObject($table, $row)) {
-				throw new Exception($this->_db->getErrorMsg());
+			if (empty($row->language))
+			{
+				$row['language'] = "*";
 			}
-
-			// Get new id
-			$oldlist->new = $this->_db->insertid();
-
-			// Save old and new id
-			if (!$this->_db->insertObject('#__jupgradepro_modules', $oldlist)) {
-				throw new Exception($this->_db->getErrorMsg());
-			}
-
-			// Updating the steps table
-			$this->steps->_nextID($total);
 		}
 
-		return false;
+		return $rows;
 	}
 }

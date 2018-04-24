@@ -24,4 +24,30 @@ use Jupgradenext\Upgrade\UpgradeUsers;
  */
 class Users extends UpgradeUsers
 {
+  /**
+   * Get the raw data for this part of the upgrade.
+   *
+   * @return	array	Returns a reference to the source data array.
+   * @since	1.0
+   * @throws	Exception
+   */
+  public function dataHook($rows)
+  {
+    // Do some custom post processing on the list.
+    foreach ($rows as &$row)
+    {
+      $row = (array) $row;
+
+      // Fix incorrect dates
+      $names = array('lastResetTime', 'lastvisitDate', 'registerDate');
+      $row = $this->fixIncorrectDate($row, $names);
+
+      // Remove unused fields.
+      unset($row['otpKey']);
+      unset($row['otep']);
+      unset($row['gid']);
+    }
+
+    return $rows;
+  }
 }

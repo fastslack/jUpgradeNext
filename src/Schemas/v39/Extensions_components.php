@@ -37,7 +37,7 @@ class Extensions_components extends Upgrade
 
 			$conditions['as'] = "c";
 
-			$conditions['select'] = '`name`, `element`, `type`, `folder`, `client_id`, `ordering`, `params`';
+			$conditions['select'] = '`extension_id` AS eid, `name`, `element`, `type`, `folder`, `client_id`, `ordering`, `params`';
 
 			$where = array();
 			$where[] = "c.type = 'component'";

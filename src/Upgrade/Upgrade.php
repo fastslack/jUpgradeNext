@@ -76,6 +76,12 @@ class Upgrade extends UpgradeBase
 	 */
 	public $canDrop = false;
 
+	/**
+	 * @var	array
+	 * @since  3.0
+	 */
+	protected $relation = true;
+
 	function __construct(\Joomla\DI\Container $container)
 	{
 		// Set the current step
@@ -83,7 +89,8 @@ class Upgrade extends UpgradeBase
 		$this->steps = $container->get('steps');
 		$this->_db = $container->get('db');
 
-		if ($this->steps instanceof Steps) {
+		if ($this->steps instanceof Steps)
+		{
 			$this->steps->set('table', $this->getSourceTable());
 		}
 
@@ -93,11 +100,6 @@ class Upgrade extends UpgradeBase
 		// Get the total
 		if (!empty($step->source)) {
 			$this->_total = UpgradeHelper::getTotal($container);
-		}
-
-		// Set timelimit to 0
-		if(!@ini_get('safe_mode')) {
-			set_time_limit(0);
 		}
 
 		// Get the parameters with global settings
@@ -179,13 +181,14 @@ class Upgrade extends UpgradeBase
 	 */
 	public function upgrade($rows = false)
 	{
+		$return = '';
 		$name = $this->steps->_getStepName();
 		$site = $this->container->get('sites')->getSite();
 		$method = $site['method'];
 
 		// Before migrate hook
-		if ($this->steps->get('first') == true && $this->steps->get('cid') == 0) {
-
+		if ($this->steps->get('first') == true && $this->steps->get('cid') == 0)
+		{
 			// Call to truncate table if needed
 			try
 			{
@@ -210,7 +213,6 @@ class Upgrade extends UpgradeBase
 				throw new Exception($e->getMessage());
 			}
 		}
-
 
 		// Get the source data.
 		if ($rows === false) {
@@ -273,7 +275,7 @@ class Upgrade extends UpgradeBase
 
 			try
 			{
-				$this->ready = $this->insertData($rows);
+				$return = $this->insertData($rows);
 			}
 			catch (Exception $e)
 			{
@@ -286,7 +288,7 @@ class Upgrade extends UpgradeBase
 
 		// Call after migration hook
 		if ($this->getTotal() == $this->steps->get('cid')) {
-			$this->ready = $this->afterHook($rows);
+			$return = $this->afterHook($rows);
 		}
 
 		// Call after all steps hook
@@ -294,10 +296,10 @@ class Upgrade extends UpgradeBase
 		  && $this->steps->get('cache') == 0
 			&& $this->getTotal() == $this->steps->get('cid'))
 		{
-			$this->ready = $this->afterAllStepsHook();
+			$return = $this->afterAllStepsHook();
 		}
 
-		return $this->ready;
+		return $return;
 	}
 
 	/**
@@ -309,41 +311,55 @@ class Upgrade extends UpgradeBase
 	 */
 	protected function insertData($rows)
 	{
+		$dbType = $this->container->get('config')->get('dbtype');
+
+		// Get destination table and key
 		$table = $this->getDestinationTable();
 		$key = $this->getDestKeyName();
 
 		// Replacing the table name if xml exists
-		$table = $this->replaceTable($table);
+		$table = $this->driver->replaceTable($table);
 
-		if (is_array($rows)) {
-
+		// Only if array exists
+		if (is_array($rows))
+		{
+			// Get total
 			$total = count($rows);
 
 			foreach ($rows as $row)
 			{
-				if ($row != false) {
+				if ($row == false)
+				{
+					$this->steps->_nextID($total);
+				}
+				else
+				{
 					// Convert the array into an object.
 					$row = (object) $row;
 
+					$saveId = new \stdClass();
+					$saveId->table = $table;
+
+					// Check if it exists
+					if (($this->relation == true) && (isset($row->$key) && $this->valueExists($row, array($key))))
+					{
+						$saveId->old_id = isset($row->$key) ? (int) $row->$key : 0;
+						unset($row->$key);
+					}
+
 					try	{
 
-						$saveId = new \stdClass();
-						$saveId->table = $table;
-
-						// Check if it exists
-						if (isset($row->id) && $this->valueExists($row, array($key)))
+						if ($dbType == 'postgresql')
 						{
-							$saveId->old_id = isset($row->$key) ? (int) $row->$key : 0;
-							unset($row->$key);
+							$saveId->new_id = (int) $this->_db->insertObject($table, $row, $key);
+						} else {
+							$this->_db->insertObject($table, $row, $key);
+							$saveId->new_id = (int) $this->_db->insertid();
 						}
-
-						$this->_db->insertObject($table, $row);
-
-						$saveId->new_id = (int) $this->_db->insertid();
 
 						if (!empty($saveId->old_id) && $saveId->old_id != $saveId->new_id)
 						{
-							$this->_db->insertObject('#__jupgradepro_old_ids', $saveId);
+							$this->_db->insertObject('#__jupgradepro_old_ids', $saveId, 'id');
 						}
 
 						$this->steps->_nextID($total);
@@ -357,6 +373,7 @@ class Upgrade extends UpgradeBase
 					}
 				}
 			}
+
 		}else if (is_object($rows)) {
 
 			if ($rows != false) {
@@ -447,65 +464,6 @@ class Upgrade extends UpgradeBase
 		return $run;
 	}
 
-	/*
-	 * Clone table structure from source table to destination table
-	 *
-	 * @return	bool  True if success.
-	 * @since		3.0.0
-	 * @throws	Exception
-	 */
-	public function cloneTableStructure() {
-
-		// Get the source table
-		$table = $this->getSourceTable();
-
-		// Get site params
-		$site = $this->container->get('sites')->getSite();
-
-		// Get table structure;
-		$structure = $this->driver->getStructure($table);
-
-		// Create only if not exists
-		$structure = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $structure);
-
-		// Replacing the table name from xml
-		$replaced_table = $this->replaceTable($table);
-
-		if ($replaced_table != $table) {
-			$structure = str_replace($table, $replaced_table, $structure);
-		}
-
-		// Inserting the structure to new site
-		try {
-			$this->_db->setQuery($structure)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		return true;
-	}
-
-	/**
-	 * Replace table name
-	 *
-	 * @return	string The replaced table
-	 * @since 3.0.3
-	 * @throws	Exception
-	 */
-	protected function replaceTable($table, $structure = null) {
-
-		$replaced_table = $table;
-
-		// Replace table name from xml
-		$replace = explode("|", $this->steps->get('replace'));
-
-		if (count($replace) > 1) {
-			$replaced_table = str_replace($replace[0], $replace[1], $table);
-		}
-
-		return $replaced_table;
-	}
-
 	/**
 	 * @return  string	The destination table key name
 	 *
@@ -513,7 +471,7 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getDestKeyName()
 	{
-		$return = $this->steps->get('tbl_key');
+		$return = $this->steps->get('dest_tbl_key');
 
 		if (empty($return))
 		{
@@ -522,6 +480,30 @@ class Upgrade extends UpgradeBase
 			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
 			$this->container->get('external')->setQuery( $query );
 			$keys = $this->container->get('external')->loadObjectList();
+
+			$return = !empty($keys) ? $keys[0]->Column_name : '';
+		}
+
+		return $return;
+	}
+
+	/**
+	 * @return  string	The destination table key name
+	 *
+	 * @since   3.0
+	 */
+	public function getSourceKeyName()
+	{
+		$return = $this->steps->get('tbl_key');
+
+		if (empty($return))
+		{
+			$table = $this->getSourceTable();
+
+			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
+			$this->container->get('db')->setQuery( $query );
+			$keys = $this->container->get('db')->loadObjectList();
+
 			$return = !empty($keys) ? $keys[0]->Column_name : '';
 		}
 
@@ -533,20 +515,42 @@ class Upgrade extends UpgradeBase
 	 *
 	 * @since   3.0
 	 */
-	public function valueExists($row, $fields)
+	public function valueExists($row, $fields, $destination = true)
 	{
-		$query = $this->_db->getQuery(true);
+		if ($destination == true)
+		{
+			$db = $this->_db;
+			$key = $this->getDestKeyName();
+			$table = $this->getDestinationTable();
+		} else {
+			$db = $this->container->get('external');
+			$key = $this->getSourceKeyName();
+			$table = $this->getSourceTable();
+		}
 
-		$table = $this->getSourceTable();
-		$key = $this->getDestKeyName();
+		$extensions = $this->container->get('extensions');
+
+		if (isset($extensions) && $this->container->get('extensions') != false)
+		{
+			// Replacing the table name from xml
+			$replaced_table = $this->driver->replaceTable($table);
+
+			if ($replaced_table != $table) {
+				$table = str_replace($table, $replaced_table, $table);
+			}
+		}
+
 		$key = (!empty($key)) ? $key : 'id';
 
 		// Query
+		$query = $db->getQuery(true);
 		$query->select($key);
 		$query->from($table);
 
 		$conditions = array();
-		foreach ($fields as $field) {
+
+		foreach ($fields as $field)
+		{
 			if (!empty($row->$field))
 			{
 				if (is_string($row->$field))
@@ -558,13 +562,14 @@ class Upgrade extends UpgradeBase
 				$query->where("{$field} = {$cond}");
 			}
 		}
+
 		$query->setLimit(1);
 
-		$this->_db->setQuery( $query );
+		$db->setQuery( $query );
 
 		try
 		{
-			$exists = $this->_db->loadResult();
+			$exists = $db->loadResult();
 		}
 		catch (Exception $e)
 		{
@@ -587,10 +592,10 @@ class Upgrade extends UpgradeBase
 		$query->select('new_id');
 		$query->from('#__jupgradepro_old_ids');
 
-		$query->where("`table` = '{$table}'");
+		$query->where("{$this->_db->qn('table')} = {$this->_db->q($table)}");
 
 		if ($section !== false) {
-			$query->where("`section` = '{$section}'");
+			$query->where("{$this->_db->qn('section')} = {$this->_db->q($section)}");
 		}
 
 		if ($custom !== false) {
@@ -622,17 +627,17 @@ class Upgrade extends UpgradeBase
 		$query->select('new_id');
 		$query->from('#__jupgradepro_old_ids');
 
-		$query->where("`table` = '{$table}'");
+		$query->where("{$this->_db->qn('table')} = {$this->_db->q($table)}");
 
 		if ($section !== false)
 		{
 			if ($section == 'categories')
 			{
-				$query->where("(section REGEXP '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR section = 'com_section')");
+				$query->where("({$this->_db->qn('section')} REGEXP '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR {$this->_db->qn('section')} = {$this->_db->q('com_section')})");
 			}
 			else
 			{
-				$query->where("section = '{$section}'");
+				$query->where("{$this->_db->qn('section')} = {$this->_db->q($section)}");
 			}
 		}
 
@@ -665,13 +670,26 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getAlias($table, $alias, $extension = false)
 	{
+		$dbType = $this->container->get('config')->get('dbtype');
+
 		$query = $this->_db->getQuery(true);
 		$query->select('alias');
 		$query->from($table);
-		if ($extension !== false) {
-			$query->where("extension = '{$extension}'");
+
+		if ($extension !== false)
+		{
+			$query->where("extension = {$this->_db->q($extension)}");
 		}
-		$query->where("alias RLIKE '^{$alias}$'", "OR")->where("alias RLIKE '^{$alias}[~]$'");
+
+		$sqlAlias = $this->_db->q("^{$alias}$");
+
+		if ($dbType == 'postgresql')
+		{
+			$query->where("alias LIKE {$sqlAlias}", "OR")->where("alias LIKE '^{$alias}[~]$'");
+		} else {
+			$query->where("alias RLIKE {$sqlAlias}", "OR")->where("alias RLIKE '^{$alias}[~]$'");
+		}
+
 		$query->order('alias DESC');
 		$query->setLimit(1);
 		$this->_db->setQuery($query);
@@ -751,7 +769,9 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getSourceTable()
 	{
-		return $this->steps->getSourceTable();
+		$table = $this->steps->getSourceTable();
+
+		return $table;
 	}
 
 	/**
@@ -786,9 +806,9 @@ class Upgrade extends UpgradeBase
 		// Query
 		$query->select("new_id");
 		$query->from("#__jupgradepro_old_ids AS ids");
-		$query->where("`table` = {$table}");
-		$query->where("`old_id` = {$old_id}");
-		$query->order("`id` DESC");
+		$query->where("{$this->_db->qn('table')} = {$table}");
+		$query->where("{$this->_db->qn('old_id')} = {$old_id}");
+		$query->order("{$this->_db->qn('id')} DESC");
 		$query->setLimit(1);
 
 		$this->_db->setQuery($query);
@@ -840,12 +860,36 @@ class Upgrade extends UpgradeBase
 	{
 		$query = $this->_db->getQuery(true);
 		$query->insert('#__jupgradepro_errors')
-			->columns('`message`')
-			->values("'{$this->_db->escape($error)}'");
+			->columns("{$this->_db->qn('message')}")
+			->values("{$this->_db->q($this->_db->escape($error))}");
 		$this->_db->setQuery($query);
 		$this->_db->execute();
 
 		return true;
+	}
+
+	/**
+	 * Fix the incorrect date to PostgreSQL save
+	 *
+	 * @param	array   $row	  The row to fix.
+	 * @param	array	  $names	The name list to fix.
+	 *
+	 * @return	array  Return the fixed row.
+	 * @since		3.8.0
+	 * @throws	Exception
+	 */
+	protected function fixIncorrectDate($row, $names)
+	{
+
+		foreach ($names as $key => &$value)
+		{
+			if ($row[$value] == '0000-00-00 00:00:00')
+			{
+				$row[$value] = '1970-01-01 00:00:00';
+			}
+		}
+
+		return $row;
 	}
 
 } // end class

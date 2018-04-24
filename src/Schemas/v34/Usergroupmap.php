@@ -30,6 +30,12 @@ use Jupgradenext\Upgrade\UpgradeUsers;
 class Usergroupmap extends UpgradeUsers
 {
 	/**
+	 * @var	array
+	 * @since  3.8
+	 */
+	protected $relation = false;
+
+	/**
 	 * Setting the conditions hook
 	 *
 	 * @return	array
@@ -64,7 +70,7 @@ class Usergroupmap extends UpgradeUsers
 	 * @since	1.0
 	 * @throws	Exception
 	 */
-	public function databaseHook($rows)
+	public function &databaseHook($rows)
 	{
 		$remove = array();
 /*
@@ -108,17 +114,22 @@ class Usergroupmap extends UpgradeUsers
 	public function dataHook($rows)
 	{
 		// Do some custom post processing on the list.
-		foreach ($rows as &$row)
+		foreach ($rows as $key => &$row)
 		{
 			$row = (object) $row;
 
-			if (empty($row->user_id)) {
+			if (!empty($row->user_id) && $this->valueExists($row, array('user_id')))
+			{
+				//$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
+			}
+
+			if ($this->valueExists($row, array('user_id')) && $this->valueExists($row, array('group_id')))
+			{
 				$row = false;
 			}
 
-			if (!empty($row->user_id) && $this->valueExists($row, array('user_id')))
-			{
-				$row->user_id = (int) $this->getNewId('#__users', (int) $row->user_id);
+			if (!isset($row->user_id) || empty($row->user_id) || $row->user_id == 0) {
+				$row = false;
 			}
 		}
 
