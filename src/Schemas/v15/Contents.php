@@ -118,9 +118,9 @@ class Contents extends Upgrade
 		$table	= $this->getDestinationTable();
 
 		// Get category mapping
-		$query = "SELECT * FROM #__jupgradepro_categories WHERE section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old > 0";
+		$query = "SELECT * FROM #__jupgradepro_old_ids WHERE section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old_id > 0";
 		$this->_db->setQuery($query);
-		$catidmap = $this->_db->loadObjectList('old');
+		$catidmap = $this->_db->loadObjectList('old_id');
 
 		// Find uncategorised category id
 		$query = "SELECT id FROM #__categories WHERE extension='com_content' AND path='uncategorised' LIMIT 1";
@@ -143,7 +143,7 @@ class Contents extends Upgrade
 			$row['title'] = !empty($row['title']) ? $row['title'] : "###BLANK###";
 
 			// Map catid
-			$row['catid'] = isset($catidmap[$row['catid']]) ? $catidmap[$row['catid']]->new : $defaultId;
+			$row['catid'] = isset($catidmap[$row['catid']]) ? $catidmap[$row['catid']]->new_id : $defaultId;
 
 			// Setting the default rules
 			$rules = array();

@@ -475,7 +475,7 @@ class UpgradeExtensions extends Upgrade
 
     if (empty($plugins))
     {
-      $return['message'] = 'No 3rd party extensions';
+      $return['message'] = '[[g;white;]|] [[gb;red;]✘] No 3rd party extensions plugin installed.';
       $return['code'] = 500;
     }
 

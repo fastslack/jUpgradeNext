@@ -343,6 +343,11 @@ class Checks extends ModelBase
 			$this->old_prefix = $this->external->getPrefix();
 		}
 
+		if (empty($this->old_tables))
+		{
+			return false;
+		}
+
 		// Trim the prefix value
 		$prefix = trim($this->old_prefix);
 

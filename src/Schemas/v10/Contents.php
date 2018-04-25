@@ -119,7 +119,7 @@ class Contents extends Upgrade
 		$table	= $this->getDestinationTable();
 
 		// Get category mapping
-		$query = "SELECT * FROM #__jupgradepro_categories WHERE section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old > 0";
+		$query = "SELECT * FROM #__jupgradepro_old_ids WHERE section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old > 0";
 		$this->_db->setQuery($query);
 		$catidmap = $this->_db->loadObjectList('old');
 
