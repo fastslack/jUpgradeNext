@@ -41,9 +41,15 @@ class TableBase extends Model
   {
     $config = Factory::getConfig();
     $capsule = new Capsule;
+    $driver = $config->get('dbtype');
+
+    if ($driver == 'postgresql')
+    {
+      $driver = 'pgsql';
+    }
 
     $capsule->addConnection(array(
-        'driver'    => 'mysql',
+        'driver'    => $driver,
         'host'      => $config->get('host'),
         'database'  => $config->get('db'),
         'username'  => $config->get('user'),
