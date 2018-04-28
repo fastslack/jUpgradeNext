@@ -16,17 +16,13 @@
         "joomla/uri": "~1.0",
 				"joomla/di": "~1.3",
 				"joomla/database": "~1.0",
-        "monolog/monolog": "1.*@stable",
         "joomla/event": "2.0.*@dev",
         "joomla/language": "~1.0",
         "joomla/model": "~1.0",
         "joomla/filesystem": "~1.0",
         "joomla/date": "2.0.*@dev",
         "joomla/string": "~1.0",
-        "matware-lab/access": "~1.0",
-        "matware-lab/table": "~1.0",
-        "ghostff/dump5": "^1.0",
-        "illuminate/database": "*"
+        "matware-lab/access": "~1.0"
     },
     "autoload": {
         "psr-4": {
