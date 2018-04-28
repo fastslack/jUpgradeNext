@@ -14,6 +14,7 @@
 namespace Jupgradenext\Schemas\v15;
 
 use Jupgradenext\Upgrade\UpgradeCategories;
+use Jupgradenext\Upgrade\UpgradeHelper;
 use Joomla\CMS\Table\Category;
 
 /**
@@ -96,12 +97,16 @@ class Sections extends UpgradeCategories
 		$total = count($rows);
 
 		// Insert the sections
-		foreach ($rows as $section)
+		foreach ($rows as $row)
 		{
-			$section = (array) $section;
+			$row = (array) $row;
+
+			// Fix incorrect dates
+			$names = array('checked_out_time');
+			$row = $this->fixIncorrectDate($row, $names);
 
 			// Inserting the category
-			$this->insertCategory($section);
+			$this->insertCategory($row);
 
 			// Updating the steps table
 			$this->steps->_nextID($total);
@@ -121,7 +126,7 @@ class Sections extends UpgradeCategories
 		// Fixing the parents
 		$this->fixParents();
 		// Insert existing categories
-		$this->insertExisting();
+		//$this->insertExisting();
 	}
 
 	/**
@@ -132,7 +137,16 @@ class Sections extends UpgradeCategories
 	 */
 	protected function fixParents()
 	{
-		$change_parent = $this->getMapList('#__categories', false, "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
+		$dbType = $this->container->get('config')->get('dbtype');
+
+		if ($dbType == 'postgresql')
+		{
+			$change_parent = $this->getMapList('#__categories', false, "section ~ '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
+		}
+		else
+		{
+			$change_parent = $this->getMapList('#__categories', false, "section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
+		}
 
 		// Insert the sections
 		foreach ($change_parent as $category)
@@ -145,11 +159,11 @@ class Sections extends UpgradeCategories
 				$table = new Category($this->_db);
 			}
 
-			$table->load($category->new);
+			$table->load($category->new_id);
 
-			$custom = "old = {$category->section}";
+			$custom = "old_id = {$category->section}";
 
-			$parent = $this->getMapListValue('#__categories', 'com_section', $custom);
+			$parent = (int) $this->getMapListValue('#__categories', '', $custom);
 
 			if (!empty($parent))
 			{

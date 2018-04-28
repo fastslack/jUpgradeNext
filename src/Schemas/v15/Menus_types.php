@@ -74,7 +74,7 @@ class Menus_types extends Upgrade
 
       if (!empty($row->menutype) && $this->valueExists($row, array('menutype')))
       {
-      $row->menutype = $row->menutype . "-" . rand(0, 99999);
+        $row->menutype = $row->menutype . "-" . rand(0, 99999);
       }
     }
 

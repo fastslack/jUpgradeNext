@@ -51,47 +51,6 @@ class Modules extends Upgrade
 	}
 
 	/**
-	 * Method to do pre-processes modifications before migrate
-	 *
-	 * @return	boolean	Returns true if all is fine, false if not.
-	 * @since	1.0
-	 * @throws	Exception
-	 */
-	public function beforeHook()
-	{
-		$query = $this->_db->getQuery(true);
-		$query->select('id');
-		$query->from($this->_db->quoteName("#__modules"));
-		$query->order('id DESC');
-		$query->setLimit(1);
-		$this->_db->setQuery($query);
-
-		try {
-			$modules_id = $this->_db->loadResult();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-
-		if ($modules_id > 86) {
-			// Update the modules step
-			$this->updateStep('modules');
-
-			// Update the modules_menu step
-			$this->updateStep('modules_menu');
-		}
-
-		// Cleanup the modules for 'site' unused modules
-		$query->clear();
-		$query->delete()->from('#__modules')->where('client_id = 0');
-
-		try {
-			$this->_db->setQuery($query)->execute();
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
-		}
-	}
-
-	/**
 	 * Update the status of one step
 	 *
 	 * @param		string  $name  The name of the table to update
@@ -202,23 +161,9 @@ class Modules extends Upgrade
 				unset($row->iscore);
 				unset($row->control);
 			}
-
-			// Insert module
-			if (!$this->_db->insertObject($table, $row)) {
-				throw new Exception($this->_db->getErrorMsg());
-			}
-
-			// Get new id
-			$oldlist->new = $this->_db->insertid();
-
-			// Save old and new id
-			$this->saveNewId($oldlist->old, $oldlist->new);
-
-			// Updating the steps table
-			$this->steps->_nextID($total);
 		}
 
-		return false;
+		return $rows;
 	}
 
 	/**

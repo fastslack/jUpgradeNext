@@ -116,9 +116,16 @@ class Contents extends Upgrade
 	{
 
 		$table	= $this->getDestinationTable();
+		$dbType = $this->container->get('config')->get('dbtype');
 
 		// Get category mapping
-		$query = "SELECT * FROM #__jupgradepro_old_ids WHERE section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old_id > 0";
+		if ($dbType == 'postgresql')
+		{
+			$query = "SELECT * FROM #__jupgradepro_old_ids WHERE section ~ '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old_id > 0";
+		}else{
+			$query = "SELECT * FROM #__jupgradepro_old_ids WHERE section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND old_id > 0";
+		}
+
 		$this->_db->setQuery($query);
 		$catidmap = $this->_db->loadObjectList('old_id');
 
@@ -138,6 +145,10 @@ class Contents extends Upgrade
 		foreach ($rows as $row)
 		{
 			$row = (array) $row;
+
+			// Fix incorrect dates
+			$names = array('created', 'checked_out_time', 'modified', 'publish_up', 'publish_down');
+			$row = $this->fixIncorrectDate($row, $names);
 
 			// Check if title isn't blank
 			$row['title'] = !empty($row['title']) ? $row['title'] : "###BLANK###";

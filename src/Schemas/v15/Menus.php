@@ -135,6 +135,12 @@ class Menus extends UpgradeMenus
 				$row->level = $row->sublevel++;
 			}
 
+			// Fix incorrect dates
+			$names = array('checked_out_time');
+			$row = (object)$this->fixIncorrectDate( (array) $row, $names);
+
+			$row->parent_id = isset($row->parent) ? (int) $row->parent : 0;
+
 			// Prevent MySQL duplicate error
 			// @@ Duplicate entry for key 'idx_client_id_parent_id_alias_language'
 			$alias = $this->getAlias('#__menu', $row->alias);

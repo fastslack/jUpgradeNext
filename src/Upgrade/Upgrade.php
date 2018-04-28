@@ -287,7 +287,8 @@ class Upgrade extends UpgradeBase
 		$data = $this->steps->load($this->steps->get('name'));
 
 		// Call after migration hook
-		if ($this->getTotal() == $this->steps->get('cid')) {
+		if ($this->getTotal() == (int) $this->steps->get('cid'))
+		{
 			$return = $this->afterHook($rows);
 		}
 
@@ -353,6 +354,7 @@ class Upgrade extends UpgradeBase
 						{
 							$saveId->new_id = (int) $this->_db->insertObject($table, $row, $key);
 						} else {
+
 							$this->_db->insertObject($table, $row, $key);
 							$saveId->new_id = (int) $this->_db->insertid();
 						}
@@ -471,7 +473,7 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getDestKeyName()
 	{
-		$return = $this->steps->get('dest_tbl_key');
+		$return = $this->container->get('steps')->get('dest_tbl_key');
 
 		if (empty($return))
 		{
@@ -557,7 +559,7 @@ class Upgrade extends UpgradeBase
 				{
 					$cond = $this->_db->quote($row->$field);
 				} else {
-					$cond = $row->$field;
+					$cond = (int)$row->$field;
 				}
 				$query->where("{$field} = {$cond}");
 			}
@@ -589,7 +591,7 @@ class Upgrade extends UpgradeBase
 	public function getMapList($table = '#__categories', $section = false, $custom = false)
 	{
 		$query = $this->_db->getQuery(true);
-		$query->select('new_id');
+		$query->select('new_id, old_id, section');
 		$query->from('#__jupgradepro_old_ids');
 
 		$query->where("{$this->_db->qn('table')} = {$this->_db->q($table)}");
@@ -633,7 +635,15 @@ class Upgrade extends UpgradeBase
 		{
 			if ($section == 'categories')
 			{
-				$query->where("({$this->_db->qn('section')} REGEXP '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR {$this->_db->qn('section')} = {$this->_db->q('com_section')})");
+				$dbType = $this->container->get('config')->get('dbtype');
+
+				if ($dbType == 'postgresql')
+				{
+					$query->where("({$this->_db->qn('section')} ~ '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR {$this->_db->qn('section')} = {$this->_db->q('com_section')})");
+
+				}else{
+					$query->where("({$this->_db->qn('section')} REGEXP '^[\-\+]?[[:digit:]]*\.?[[:digit:]]*$' OR {$this->_db->qn('section')} = {$this->_db->q('com_section')})");
+				}
 			}
 			else
 			{
@@ -759,7 +769,7 @@ class Upgrade extends UpgradeBase
 	 */
 	public function getTotal()
 	{
-		return $this->_total;
+		return (int) $this->steps->get('total');
 	}
 
 	/**
@@ -838,8 +848,8 @@ class Upgrade extends UpgradeBase
 		$saveObj = new \stdClass;
 
 		// Quote params
-		$saveObj->table = ($table == false) ? $this->_db->quote($this->getDestinationTable()) : $this->_db->quote($table);
-		$saveObj->section = ($section == false) ? '' : $this->_db->quote($section);
+		$saveObj->table = ($table == false) ? $this->getDestinationTable() : $table;
+		$saveObj->section = ($section == false) ? '' : $section;
 		$saveObj->old_id = (int) $old_id;
 		$saveObj->new_id = (int) $new_id;
 

@@ -25,6 +25,12 @@ use Jupgradenext\Upgrade\Upgrade;
 class Modules_menu extends Upgrade
 {
 	/**
+	 * @var	array
+	 * @since  3.8
+	 */
+	protected $relation = false;
+
+	/**
 	 * Set the conditions hook
 	 *
 	 * @return	void
@@ -65,16 +71,21 @@ class Modules_menu extends Upgrade
 			$row = (object) $row;
 
 			// Set the correct moduleid
-			$custom = "old = {$row->moduleid}";
+			$custom = "old_id = {$row->moduleid}";
 			$mapped = $this->getMapListValue("#__modules", false, $custom);
 
-			$row->moduleid = isset($mapped) ? $mapped : $row->moduleid+99999;
+			$row->moduleid = isset($mapped) ? $mapped : $row->moduleid;
 
 			// Set the correct menuid
-			$custom = "old = {$row->menuid}";
+			$custom = "old_id = {$row->menuid}";
 			$mapped = $this->getMapListValue("#__menus", false, $custom);
 
-			$row->menuid = isset($mapped) ? $mapped : $row->menuid+99999;
+			$row->menuid = isset($mapped) ? $mapped : $row->menuid;
+
+			if ($this->valueExists($row, array('moduleid', 'menuid')))
+			{
+				$row = false;
+			}
 		}
 
 		return $rows;

@@ -48,6 +48,11 @@ class TableBase extends Model
       $driver = 'pgsql';
     }
 
+    if ($driver == 'mysqli')
+    {
+      $driver = 'mysql';
+    }
+
     $capsule->addConnection(array(
         'driver'    => $driver,
         'host'      => $config->get('host'),

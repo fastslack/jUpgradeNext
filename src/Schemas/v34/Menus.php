@@ -76,14 +76,11 @@ class Menus extends UpgradeMenus
 		foreach ($rows as &$row)
 		{
 			// Convert the array into an object.
-			$row = (array) $row;
+			$row = (object) $row;
 
 			// Fix incorrect dates
 			$names = array('checked_out_time');
-			$row = $this->fixIncorrectDate($row, $names);
-
-			// Convert the array into an object.
-			$row = (object) $row;
+			$row = (object)$this->fixIncorrectDate((array)$row, $names);
 
 			// Getting the duplicated alias
 			$alias = $this->getAlias('#__menu', $row->alias);

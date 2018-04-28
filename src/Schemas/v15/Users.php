@@ -76,6 +76,10 @@ class Users extends UpgradeUsers
 		{
 			$row = (array) $row;
 
+			// Fix incorrect dates
+			$names = array('lastvisitDate', 'registerDate');
+			$row = $this->fixIncorrectDate($row, $names);
+
 			if (version_compare($origin_version, '1.0', '>=')) {
 				unset($row['usertype']);
 				if (isset($row['uid'])) {
