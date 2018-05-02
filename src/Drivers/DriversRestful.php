@@ -98,8 +98,10 @@ class DriversRestful extends Drivers
 
 		$code = $request->code;
 
-		if ($code == 500) {
-			throw new \Exception($request->body);
+		if ($code > 500)
+		{
+			$msg = \JText::_('COM_JUPGRADEPRO_ERROR_REST_' . $code);
+			return array('code' => $code, 'message' => $msg);
 		} else {
 			return ($code == 200 || $code == 301) ? $request->body : $code;
 		}

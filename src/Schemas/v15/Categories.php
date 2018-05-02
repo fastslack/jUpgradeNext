@@ -107,6 +107,10 @@ class Categories extends UpgradeCategories
 		{
 			$category = (array) $category;
 
+			// Fix incorrect dates
+			$names = array('created_time', 'checked_out_time', 'modified_time');
+			$category = $this->fixIncorrectDate($category, $names);
+
 			// Reset some fields
 			$category['asset_id'] = $category['lft'] = $category['rgt'] = null;
 			// Check if path is correct

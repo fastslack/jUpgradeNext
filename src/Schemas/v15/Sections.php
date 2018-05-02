@@ -141,7 +141,7 @@ class Sections extends UpgradeCategories
 
 		if ($dbType == 'postgresql')
 		{
-			$change_parent = $this->getMapList('#__categories', false, "section ~ '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$' AND section != 0");
+			$change_parent = $this->getMapList('#__categories', 0, "section ~ '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'");
 		}
 		else
 		{
@@ -161,7 +161,7 @@ class Sections extends UpgradeCategories
 
 			$table->load($category->new_id);
 
-			$custom = "old_id = {$category->section}";
+			$custom = "{$this->_db->qn('old_id')} = {$this->_db->q($category->section)}";
 
 			$parent = (int) $this->getMapListValue('#__categories', '', $custom);
 

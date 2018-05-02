@@ -81,32 +81,21 @@ class Checks extends ModelBase
 			$code = $this->driver->requestRest('check');
 
 			switch ($code) {
-				case 401:
+				case 501:
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_501');
-				case 402:
+				case 502:
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_502');
-				case 403:
+				case 503:
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_503');
-				case 405:
+				case 505:
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_505');
-				case 406:
+				case 506:
 					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_506');
 			}
 
 			// Get the database parameters
 			$this->old_tables = json_decode($this->driver->requestRest('tableslist'));
 			$this->old_prefix = substr($this->old_tables[10], 0, strpos($this->old_tables[10], '_')+1);
-
-/*
-			// Get component version
-			$ext_version = $this->container->get('version');
-
-			// Compare the versions
-			if (trim($code) != $ext_version)
-			{
-				throw new Exception('COM_JUPGRADEPRO_ERROR_VERSION_NOT_MATCH');
-			}
-*/
 		}
 
 		// Check for bad configurations
@@ -159,9 +148,12 @@ class Checks extends ModelBase
 		$this->container->get('db')->setQuery($query);
 		$latest_migration = $this->container->get('db')->loadObjectList();
 
-		if (count($latest_migration) != 0) {
+		if (count($latest_migration) != 0)
+		{
 			$this->returnError (409, 'COM_JUPGRADEPRO_ERROR_LATEST_MIGRATION');
-		}else{
+		}
+		else
+		{
 			// Set all cid, status and cache to 0
 			$query->clear();
 			$query->update('#__jupgradepro_steps')->set('cid = 0, status = 0, cache = 0, total = 0, stop = 0, start = 0, first = 0, debug = \'\'');
@@ -330,7 +322,15 @@ class Checks extends ModelBase
 
 		if (empty($this->old_tables) && $this->options['method'] == 'restful')
 		{
-			$this->old_tables = json_decode($this->driver->requestRest('tableslist'));
+			$tableslist = $this->driver->requestRest('tableslist');
+
+			if (isset($tableslist['code']) && $tableslist['code'] > 500)
+			{
+				echo $tableslist['message'];
+				exit;
+			}
+
+			$this->old_tables = json_decode($tableslist);
 			$this->old_prefix = substr($this->old_tables[10], 0, strpos($this->old_tables[10], '_')+1);
 		}
 		else if (empty($this->old_tables) && $this->options['method'] == 'database')
