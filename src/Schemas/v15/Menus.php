@@ -120,6 +120,12 @@ class Menus extends UpgradeMenus
 			// Convert the array into an object.
 			$row = (object) $row;
 
+			if ($row->alias == 'root' && $row->client_id == 0)
+			{
+				$row = false;
+				continue;
+			}
+
 			// Converting params to JSON
 			$row->params = $this->convertParams($row->params);
 
