@@ -1,5 +1,10 @@
 # jUpgradeNext
 
+[![Latest Stable Version](https://poser.pugx.org/matware-lab/jupgradenext/v/stable)](https://packagist.org/packages/matware-lab/jupgradenext)
+[![Total Downloads](https://poser.pugx.org/matware-lab/jupgradenext/downloads)](https://packagist.org/packages/matware-lab/jupgradenext)
+[![Latest Unstable Version](https://poser.pugx.org/matware-lab/jupgradenext/v/unstable)](https://packagist.org/packages/matware-lab/jupgradenext)
+[![License](https://poser.pugx.org/matware-lab/jupgradenext/license)](https://packagist.org/packages/matware-lab/jupgradenext)
+
 Next generation for Joomla! migrations.
 
 **jUpgradeNext** uses two methods to migrate:
