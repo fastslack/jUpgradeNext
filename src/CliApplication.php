@@ -138,6 +138,7 @@ class CliApplication extends AbstractCliApplication
 		$container->registerServiceProvider(new \Providers\DatabaseServiceProvider);
 		$container->registerServiceProvider(new \Providers\ExternalDatabaseServiceProvider);
 		$container->registerServiceProvider(new \Providers\StepsServiceProvider);
+		$container->registerServiceProvider(new \Providers\SitesServiceProvider);
 
 		// Made container accesible
 		$this->container = $container;

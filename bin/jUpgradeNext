@@ -25,7 +25,7 @@ require realpath(__DIR__ . '/../vendor/autoload.php');
 try
 {
 	define('APPLICATION_CONFIG', realpath(__DIR__ . '/../etc/config.json'));
-	$app = new jUpgradeNext\CliApplication;
+	$app = new Jupgradenext\CliApplication;
 	$app->execute();
 }
 catch (Exception $e)
