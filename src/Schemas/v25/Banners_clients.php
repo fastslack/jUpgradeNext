@@ -28,17 +28,19 @@ class Banners_clients extends Upgrade
 	 * Setting the conditions hook
 	 *
 	 * @return	void
-	 * @since	1.00
+	 * @since	  1.6
 	 * @throws	Exception
 	 */
 	public static function getConditionsHook($container)
 	{
-		$conditions = array();
+		// Get table
+		$table = $container->get('steps')->get('source');
 
-		$conditions['select'] = 'id, `name`, `state`, `contact`, `email`, `extrainfo`, `checked_out`, `checked_out_time`';
+		// Create query
+		$query = $container->get('db')->getQuery(true);
+		$query->select('id, `name`, `state`, `contact`, `email`, `extrainfo`, `checked_out`, `checked_out_time`');
+		$query->from($table);
 
-		$conditions['where'] = array();
-
-		return $conditions;
+		return $query;
 	}
 }

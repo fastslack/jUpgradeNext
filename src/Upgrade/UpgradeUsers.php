@@ -89,12 +89,11 @@ class UpgradeUsers extends Upgrade
 
 		$this->container->get('external')->setQuery( $query );
 
-		$return	= $this->container->get('external')->loadResult();
-		$error	= $this->container->get('external')->getErrorMsg();
-
-		// Check for query error.
-		if ($error) {
-			throw new Exception($error);
+		// Execute the query
+		try {
+			$return = $this->container->get('external')->loadResult();
+		} catch (RuntimeException $e) {
+			throw new RuntimeException($e->getMessage());
 		}
 
 		return $return;

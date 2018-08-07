@@ -104,7 +104,10 @@ class DriversDatabase extends Drivers
 		$conditions = $this->getConditionsHook();
 
 		// Process the conditions if needed
-		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery)
+		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery
+			|| $conditions instanceof \Joomla\Database\Mysql\MysqlQuery
+			|| $conditions instanceof \JDatabaseQueryMysqli
+			|| $conditions instanceof \JDatabaseQueryMysql)
 		{
 			$query = $conditions;
 		} else {
@@ -140,7 +143,10 @@ class DriversDatabase extends Drivers
 		$conditions = $this->getConditionsHook();
 
 		// Process the conditions if needed
-		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery)
+		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery
+			|| $conditions instanceof \Joomla\Database\Mysql\MysqlQuery
+			|| $conditions instanceof \JDatabaseQueryMysqli
+			|| $conditions instanceof \JDatabaseQueryMysql)
 		{
 			$query = $conditions;
 		} else {
