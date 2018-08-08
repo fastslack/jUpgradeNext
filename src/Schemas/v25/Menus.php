@@ -108,11 +108,7 @@ class Menus extends UpgradeMenus
 			$menuMap->new = $this->_db->insertid();
 
 			// Save old and new id
-			try	{
-				$this->_db->insertObject('#__jupgradepro_menus', $menuMap);
-			}	catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
+			$this->saveNewId($menuMap->old, $menuMap->new);
 
 			// Updating the steps table
 			$this->steps->_nextID($total);
