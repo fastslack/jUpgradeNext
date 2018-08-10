@@ -156,7 +156,7 @@ class UpgradeContents extends Upgrade
 			$this->steps->_nextID($total);
 		}
 
-		return false;
+		return $rows;
 	}
 
 	/**

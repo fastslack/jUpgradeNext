@@ -104,17 +104,13 @@ class DriversDatabase extends Drivers
 		$conditions = $this->getConditionsHook();
 
 		// Process the conditions if needed
-		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery
-			|| $conditions instanceof \Joomla\Database\Mysql\MysqlQuery
-			|| $conditions instanceof \JDatabaseQueryMysqli
-			|| $conditions instanceof \JDatabaseQueryMysql)
-		{
-			$query = $conditions;
-		} else {
+		if (is_array($conditions)) {
 			$query = $this->_processQuery($conditions, true);
+		} else {
+			$query = $conditions;
 		}
 
-		// Setting query
+		// Set query and limit
 		$cid = (int) $this->_getStepID();
 		$query->setLimit($chunk_limit, $cid);
 		$this->container->get('external')->setQuery( $query, $cid, $chunk_limit );
@@ -143,14 +139,10 @@ class DriversDatabase extends Drivers
 		$conditions = $this->getConditionsHook();
 
 		// Process the conditions if needed
-		if ($conditions instanceof \Joomla\Database\Mysqli\MysqliQuery
-			|| $conditions instanceof \Joomla\Database\Mysql\MysqlQuery
-			|| $conditions instanceof \JDatabaseQueryMysqli
-			|| $conditions instanceof \JDatabaseQueryMysql)
-		{
-			$query = $conditions;
-		} else {
+		if (is_array($conditions)) {
 			$query = $this->_processQuery($conditions, false, true);
+		} else {
+			$query = $conditions;
 		}
 
 		// Set query to db instance

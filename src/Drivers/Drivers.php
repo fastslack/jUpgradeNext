@@ -158,8 +158,8 @@ class Drivers
 	 * @since		3.0.0
 	 * @throws	Exception
 	 */
-	public function cloneTableStructure() {
-
+	public function cloneTableStructure()
+	{
 		$dbType = $this->container->get('config')->get('dbtype');
 
 		// Get the source table
