@@ -69,12 +69,12 @@ class Checks extends ModelBase
 			$this->optionsRest = (array) json_decode($this->options['restful']);
 
 			if (empty($this->optionsRest['rest_hostname']) || empty($this->optionsRest['rest_username']) || empty($this->optionsRest['rest_password']) || empty($this->optionsRest['rest_key']) ) {
-				throw new Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
 			if ($this->optionsRest['rest_hostname']== 'http://www.example.org/' || $this->optionsRest['rest_hostname']== '' ||
 					$this->optionsRest['rest_username']== '' || $this->optionsRest['rest_password']== '' || $this->optionsRest['rest_key']== '') {
-				throw new Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_CONFIG');
 			}
 
 			// Check if Restful and plugin are fine
@@ -82,15 +82,15 @@ class Checks extends ModelBase
 
 			switch ($code) {
 				case 501:
-					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_501');
+					throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_501');
 				case 502:
-					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_502');
+					throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_502');
 				case 503:
-					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_503');
+					throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_503');
 				case 505:
-					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_505');
+					throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_505');
 				case 506:
-					throw new Exception('COM_JUPGRADEPRO_ERROR_REST_506');
+					throw new \Exception('COM_JUPGRADEPRO_ERROR_REST_506');
 			}
 
 			// Get the database parameters
@@ -106,7 +106,7 @@ class Checks extends ModelBase
 			if ($this->optionsDb['db_hostname']== '' || $this->optionsDb['db_username']== ''
 			  || $this->optionsDb['db_name']== '' || $this->optionsDb['db_prefix']== '' )
 			{
-				throw new Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
+				throw new \Exception('COM_JUPGRADEPRO_ERROR_DATABASE_CONFIG');
 			}
 
 			// Get external driver
@@ -122,7 +122,7 @@ class Checks extends ModelBase
 
 		// Check if the version is fine
 		if (empty($external_version) || empty($origin_version)) {
-			throw new Exception('COM_JUPGRADEPRO_ERROR_NO_VERSION');
+			throw new \Exception('COM_JUPGRADEPRO_ERROR_NO_VERSION');
 		}
 
 		// Save the versions to database
@@ -474,7 +474,7 @@ class Checks extends ModelBase
 		try {
 			$this->container->get('db')->setQuery($query)->execute();
 		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 	}
 
