@@ -41,18 +41,11 @@ class UpgradeContents extends Upgrade
 	public function dataHook($rows = null)
 	{
 		$table	= $this->getDestinationTable();
+
+		// Get categories map
+		$catmapid = $this->getMapList();
+
 /*
-		// Get category mapping
-		$query = $this->_db->getQuery(true);
-		$query->select('e.*');
-		$query->from('#__jupgradepro_old_ids AS e');
-		//$query->where("section REGEXP '^[\\-\\+]?[[:digit:]]*\\.?[[:digit:]]*$'");
-		$query->andWhere("table = '#__categories'");
-		//$query->andWhere("old > 0");
-
-		$this->_db->setQuery($query);
-		$catidmap = $this->_db->loadObjectList('old');
-
 		// Find uncategorised category id
 		$query = $this->_db->getQuery(true);
 		$query->select('e.id');
@@ -64,13 +57,11 @@ class UpgradeContents extends Upgrade
 		$this->_db->setQuery($query);
 		$defaultId = $this->_db->loadResult();
 */
-		// Initialize values
-		//$aliases = array();
 
 		$total = count($rows);
 
 		// Insert content data
-		foreach ($rows as $row)
+		foreach ($rows as &$row)
 		{
 			$row = (array) $row;
 
@@ -82,10 +73,22 @@ class UpgradeContents extends Upgrade
 			$row['title'] = !empty($row['title']) ? $row['title'] : "###BLANK###";
 			$row['alias'] = !empty($row['alias']) ? $row['alias'] : "###BLANK###";
 
+			// Remove title_alias
+			if (isset($row['title_alias']))
+			{
+				$row['alias'] = empty($row['title_alias']) ? $row['alias'] : $row['title_alias'];
+				unset($row['title_alias']);
+			}
+
+			// Fix category
+			if (is_object($catmapid[$row['catid']]))
+			{
+				$row['catid'] = $catmapid[$row['catid']]->new_id;
+			}
 
 			// Add tags if Joomla! is greater than 3.1
 			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.1', '>=')) {
-				$row['metadata'] = $row['metadata'] . "\ntags=";
+				//$row['metadata'] = $row['metadata'] . "\ntags=";
 			}
 
 			// Get section and old id
@@ -97,24 +100,21 @@ class UpgradeContents extends Upgrade
 				//unset($row['id']);
 			}
 
-/*
-			// Table:store() run an update if id exists into the object so we create them first
-			$object = new stdClass();
-			$object->id = $row['id'];
-
-			// Inserting the content
-			try {
-				$this->_db->insertObject($table, $object);
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage());
-			}
-*/
 			// Get the content table
 			if (version_compare(UpgradeHelper::getVersion($this->container, 'origin_version'), '3.8', '<'))
 			{
 				$content = Table::getInstance('Content', 'Table', array('dbo' => $this->_db));
 			}else{
 				$content = new Content($this->_db);
+			}
+
+			// Remove unused
+			$unset = array('sectionid', 'mask', 'parentid');
+			foreach ($unset as $key => $value) {
+				if (isset($row[$value]))
+				{
+					unset($row[$value]);
+				}
 			}
 
 			// Bind data to save content
@@ -147,9 +147,9 @@ class UpgradeContents extends Upgrade
 			{
 				$this->_db->insertObject('#__jupgradepro_old_ids', $oldlist);
 			}
-			catch (RuntimeException $e)
+			catch (\RuntimeException $e)
 			{
-				throw new RuntimeException($e->getMessage());
+				throw new \RuntimeException($e->getMessage());
 			}
 
 			// Updating the steps table
@@ -208,7 +208,7 @@ class UpgradeContents extends Upgrade
 		$error = $this->driver->_db->getErrorMsg();
 
 		if ($error) {
-			throw new Exception($error);
+			throw new \Exception($error);
 		}
 	}
 }
