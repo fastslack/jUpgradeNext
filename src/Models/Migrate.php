@@ -51,9 +51,8 @@ class Migrate extends ModelBase
 		$extensions = $this->container->get('extensions');
 
 		// Get the database structure
-		if ($steps->get('first') == true
-			&& $extensions == 'tables'
-			&& $steps->get('cid') == 0) {
+		if ($extensions == 'tables' && $steps->get('cid') == 0)
+		{
 			$structure = $jupgrade->driver->cloneTableStructure();
 		}
 
