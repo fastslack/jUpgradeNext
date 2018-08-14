@@ -524,7 +524,7 @@ class UpgradeExtensions extends Upgrade
               $return['code'] = 200;
               $return['extensions'][$c] = array();
               $return['extensions'][$c]['element'] = $element;
-              $return['extensions'][$c]['type'] = $extension->type;
+              $return['extensions'][$c]['type'] = isset($extension->type) ? $extension->type : '';
               $return['extensions'][$c]['name'] = $extension->name;
 
 							// Reset the $query object
@@ -584,7 +584,7 @@ class UpgradeExtensions extends Upgrade
                 {
 									$table = new \stdClass();
 									$table->name = $table->source = $table->destination = (string) $xml->tables->table[$i];
-									$table->eid = $extension->eid;
+									$table->eid = isset($extension->eid) ? $extension->eid : 0;
 									$table->element = isset($original) ? $original : $element;
 									$table->from = $external_version;
 									$table->to = 99;

@@ -160,18 +160,8 @@ class Steps extends Registry
 		// Select last step
 		$query->select('e.name');
 		$query->from($this->_table . ' AS e');
-
 		$query->where("{$external_version} BETWEEN {$qFrom} AND {$qTo}");
-
 		$query->where("e.status = 0");
-
-		if ($this->_table == '#__jupgradepro_extensions_tables')
-		{
-			$elementQ = $this->_db->quoteName('element');
-			$stepElement = $this->_db->quote($step['element']);
-			$query->where("{$elementQ} = {$stepElement}");
-		}
-
 		$query->order('e.id DESC');
 		$query->setLimit(1);
 
@@ -214,6 +204,7 @@ class Steps extends Registry
 		$update->debug = '';
 
 		$site = $this->container->get('sites')->getSite();
+		$extension = $this->container->get('extensions');
 
 		$limit = $update->chunk = $site['chunk_limit'];
 		$source = $this->get('source');
@@ -336,7 +327,14 @@ class Steps extends Registry
 		}
 
 		$query->where("name = {$this->_db->quote($this->get('name'))}");
-		//$query->where("version = {$this->_db->quote($old_ver)}");
+
+		// Version filter
+		$external_version = UpgradeHelper::getVersionFromDB('old');
+		$external_version = str_replace(".", "", $external_version);
+
+		$qFrom = $this->_db->quoteName('from');
+		$qTo = $this->_db->quoteName('to');
+		$query->where("{$external_version} BETWEEN {$qFrom} AND {$qTo}");
 
 		// Execute the query
 		try {

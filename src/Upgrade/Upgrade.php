@@ -144,9 +144,9 @@ class Upgrade extends UpgradeBase
 
 			$instance = new $class($container);
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception(sprintf('Unable to load Steps object: %s', $e->getMessage()));
+			throw new \Exception(sprintf('Unable to load Steps object: %s', $e->getMessage()));
 		}
 
 		return $instance;
@@ -164,9 +164,9 @@ class Upgrade extends UpgradeBase
 		{
 			$this->upgrade();
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 
 		return true;
@@ -196,9 +196,9 @@ class Upgrade extends UpgradeBase
 					$this->truncateTable();
 				}
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new \Exception($e->getMessage());
 			}
 
 			// Call to hook before migrate
@@ -208,27 +208,44 @@ class Upgrade extends UpgradeBase
 					$this->beforeHook();
 				}
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new \Exception($e->getMessage());
 			}
 		}
 
 		// Get the source data.
-		if ($rows === false) {
-			$rows = $this->driver->getSourceData();
+		if ($rows === false)
+		{
+			try
+			{
+				$rows = $this->driver->getSourceData();
+			}
+			catch (\Exception $e)
+			{
+				throw new \Exception($e->getMessage());
+			}
 		}
 
 		// Call to database method hook
-		if ( $method == 'database') {
-			if (method_exists($this, 'databaseHook')) {
-				$rows = $this->databaseHook($rows);
+		if ( $method == 'database')
+		{
+			if (method_exists($this, 'databaseHook'))
+			{
+				try
+				{
+					$rows = $this->databaseHook($rows);
+				}
+				catch (\Exception $e)
+				{
+					throw new \Exception($e->getMessage());
+				}
 			}
 		}
 
 		// Call structure hook to create the db table
-		if ($this->steps->get('first') == true && $this->steps->get('cid') == 0) {
-
+		if ($this->steps->get('first') == true && $this->steps->get('cid') == 0)
+		{
 			$structureHook = 'structureHook_'.$name;
 
 			if (method_exists($this, $structureHook)) {
@@ -236,9 +253,9 @@ class Upgrade extends UpgradeBase
 				{
 					$this->$structureHook();
 				}
-				catch (Exception $e)
+				catch (\Exception $e)
 				{
-					throw new Exception($e->getMessage());
+					throw new \Exception($e->getMessage());
 				}
 			}
 		}
@@ -253,9 +270,9 @@ class Upgrade extends UpgradeBase
 			{
 				$rows = $this->$dataHookFunc($rows);
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new \Exception($e->getMessage());
 			}
 		// If method not exists call the default dataHook
 		}else{
@@ -264,9 +281,9 @@ class Upgrade extends UpgradeBase
 			{
 				$rows = $this->dataHook($rows);
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new \Exception($e->getMessage());
 			}
 		}
 
@@ -277,9 +294,9 @@ class Upgrade extends UpgradeBase
 			{
 				$return = $this->insertData($rows);
 			}
-			catch (Exception $e)
+			catch (\Exception $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new \Exception($e->getMessage());
 			}
 		}
 
@@ -366,7 +383,7 @@ class Upgrade extends UpgradeBase
 
 						$this->steps->_nextID($total);
 
-					}	catch (Exception $e) {
+					}	catch (\Exception $e) {
 
 						$this->steps->_nextID($total);
 						$this->saveError($e->getMessage());
@@ -383,9 +400,9 @@ class Upgrade extends UpgradeBase
 				{
 					$this->_db->insertObject($table, $rows);
 				}
-				catch (Exception $e)
+				catch (\Exception $e)
 				{
-					throw new Exception($e->getMessage());
+					throw new \Exception($e->getMessage());
 				}
 			}
 
@@ -480,8 +497,8 @@ class Upgrade extends UpgradeBase
 			$table = $this->getDestinationTable();
 
 			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
-			$this->container->get('external')->setQuery( $query );
-			$keys = $this->container->get('external')->loadObjectList();
+			$this->container->get('db')->setQuery( $query );
+			$keys = $this->container->get('db')->loadObjectList();
 
 			$return = !empty($keys) ? $keys[0]->Column_name : '';
 		}
@@ -503,8 +520,8 @@ class Upgrade extends UpgradeBase
 			$table = $this->getSourceTable();
 
 			$query = "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'";
-			$this->container->get('db')->setQuery( $query );
-			$keys = $this->container->get('db')->loadObjectList();
+			$this->container->get('external')->setQuery( $query );
+			$keys = $this->container->get('external')->loadObjectList();
 
 			$return = !empty($keys) ? $keys[0]->Column_name : '';
 		}
@@ -573,9 +590,9 @@ class Upgrade extends UpgradeBase
 		{
 			$exists = $db->loadResult();
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 
 		return empty($exists) ? false : true;
@@ -610,9 +627,9 @@ class Upgrade extends UpgradeBase
 		{
 			return $this->_db->loadObjectList('old_id');
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 	}
 
@@ -661,9 +678,9 @@ class Upgrade extends UpgradeBase
 		{
 			return $this->_db->loadResult();
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 	}
 
@@ -708,9 +725,9 @@ class Upgrade extends UpgradeBase
 		{
 			return (string) $this->_db->loadResult();
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 	}
 
@@ -827,9 +844,9 @@ class Upgrade extends UpgradeBase
 		{
 			return (int) $this->_db->loadResult();
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 	}
 
@@ -856,8 +873,8 @@ class Upgrade extends UpgradeBase
 		// Save old and new id
 		try	{
 			return $this->_db->insertObject('#__jupgradepro_old_ids', $saveObj);
-		}	catch (Exception $e) {
-			throw new Exception($e->getMessage());
+		}	catch (\Exception $e) {
+			throw new \Exception($e->getMessage());
 		}
 	}
 
@@ -873,7 +890,12 @@ class Upgrade extends UpgradeBase
 			->columns("{$this->_db->qn('message')}")
 			->values("{$this->_db->q($this->_db->escape($error))}");
 		$this->_db->setQuery($query);
-		$this->_db->execute();
+
+		try	{
+			$this->_db->execute();
+		}	catch (\Exception $e) {
+			throw new \Exception($e->getMessage());
+		}
 
 		return true;
 	}
