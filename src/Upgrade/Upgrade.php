@@ -698,6 +698,7 @@ class Upgrade extends UpgradeBase
 	public function getAlias($table, $alias, $extension = false)
 	{
 		$dbType = $this->container->get('config')->get('dbtype');
+		$alias = \JFilterOutput::stringURLSafe($alias);
 
 		$query = $this->_db->getQuery(true);
 		$query->select('alias');

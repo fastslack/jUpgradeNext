@@ -65,14 +65,13 @@ class Menus extends UpgradeMenus
 		$table	= $this->getDestinationTable();
 
 		// Getting the extensions id's of the new Joomla installation
-		$query = "SELECT extension_id, element"
-		." FROM #__extensions";
+		$query = "SELECT extension_id, element FROM #__extensions";
 		$this->_db->setQuery($query);
 		$extensions_ids = $this->_db->loadObjectList('element');
 
 		$total = count($rows);
 
-		foreach ($rows as $row)
+		foreach ($rows as &$row)
 		{
 			// Convert the array into an object.
 			$row = (object) $row;
@@ -114,6 +113,6 @@ class Menus extends UpgradeMenus
 			$this->steps->_nextID($total);
 		}
 
-		return false;
+		return $rows;
 	}
 }
