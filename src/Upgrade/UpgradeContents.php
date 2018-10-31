@@ -81,7 +81,7 @@ class UpgradeContents extends Upgrade
 			}
 
 			// Fix category
-			if (is_object($catmapid[$row['catid']]))
+			if (isset($catmapid[$row['catid']]) && is_object($catmapid[$row['catid']]))
 			{
 				$row['catid'] = $catmapid[$row['catid']]->new_id;
 			}

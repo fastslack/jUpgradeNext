@@ -157,7 +157,7 @@ class UpgradeCategories extends Upgrade
 
 		// Get alias from title if its empty
 		if ($row['alias'] == "") {
-			$row['alias'] = JFilterOutput::stringURLSafe($row['title']);
+			$row['alias'] = \JFilterOutput::stringURLSafe($row['title']);
 		}
 
 		// Check if has duplicated aliases

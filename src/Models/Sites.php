@@ -84,6 +84,11 @@ class Sites extends ModelBase
 
     $config = (array) json_decode($array['database']);
 
+		if (empty($config['db_username']) && empty($config['db_password']))
+		{
+			return false;
+		}
+
 		$configDbo = array();
 		$configDbo['driver'] = $config['db_type'];
 		$configDbo['host'] = $config['db_hostname'];
